@@ -4,13 +4,19 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 /*     */ import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Chest;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 /*     */ import org.bukkit.event.Listener;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 /*     */ import org.bukkit.plugin.Plugin;
 /*     */ import org.bukkit.plugin.java.JavaPlugin;
 
@@ -30,6 +36,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 	 private EventManager2 eventmanager2;
 
+	    private final int chestItemMinAmount = 2;
+	    private final int chestItemMaxAmount = 6;
 	 private EventManager3 eventmanager3;
 	 /*     */ /*     */   public static Plugin plugin;
 /*     */   public static Main instance;
@@ -62,7 +70,120 @@ public EventManager2 getEventManager2() {
 public EventManager3 getEventManager3() {
     return this.eventmanager3;
   }
+public void CarregarBaus2() {
+	   Random random = new Random();
+	   int itemsAmount = random.nextInt(chestItemMaxAmount + 1 - chestItemMinAmount) + chestItemMaxAmount;
+	   for(Chunk c2 : Bukkit.getWorld("sw2").getLoadedChunks()){
+	          for(BlockState b2 : c2.getTileEntities()){
+	              if(b2 instanceof Chest){            	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
+	              
+	              
+	              Chest chest = (Chest) b2;
+	              
+	              for (int i2 = 0; i2 < itemsAmount; i2++) {
+	                  int slot = random.nextInt(inventory.getSize());
 
+	                  int randomItemIndex = random.nextInt(Jaulas.items.size());
+	                  ItemStack randomItem = Jaulas.items.get(randomItemIndex);
+	                  
+
+	chest.getInventory().setItem( slot, randomItem);
+	}                                           
+	              }
+
+Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #2 CARREGADOS");
+	  }
+	   }
+}
+public void CarregarBaus3() {
+
+	   Random random = new Random();
+	   int itemsAmount = random.nextInt(chestItemMaxAmount + 1 - chestItemMinAmount) + chestItemMaxAmount;
+    for(Chunk c3 : Bukkit.getWorld("sw3").getLoadedChunks()){
+        for(BlockState b3 : c3.getTileEntities()){
+            if(b3 instanceof Chest){
+         	   Inventory inventory = ((Chest)b3.getBlock().getState()).getInventory();
+              
+              
+              Chest chest = (Chest) b3;
+              
+              for (int i2 = 0; i2 < itemsAmount; i2++) {
+                  int slot = random.nextInt(inventory.getSize());
+
+                  int randomItemIndex = random.nextInt(Jaulas.items.size());
+                  ItemStack randomItem = Jaulas.items.get(randomItemIndex);
+                  
+
+chest.getInventory().setItem( slot, randomItem);
+}
+
+            }
+
+Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #3 CARREGADOS");}
+    }
+}
+public void CarregarBaus() {
+	   Random random = new Random();
+	   int itemsAmount = random.nextInt(chestItemMaxAmount + 1 - chestItemMinAmount) + chestItemMaxAmount;
+    
+	 for(Chunk c : Bukkit.getWorld("sw1").getLoadedChunks()){
+      for(BlockState b : c.getTileEntities()){
+          if(b instanceof Chest){
+         	   Inventory inventory = ((Chest)b.getBlock().getState()).getInventory();
+                
+          
+                                    Chest chest = (Chest) b;
+                                    
+                                    for (int i2 = 0; i2 < itemsAmount; i2++) {
+                                        int slot = random.nextInt(inventory.getSize());
+
+                                        int randomItemIndex = random.nextInt(Jaulas.items.size());
+                                        ItemStack randomItem = Jaulas.items.get(randomItemIndex);
+                                        
+                
+    chest.getInventory().setItem( slot, randomItem);
+          }
+      }   
+
+Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #1 CARREGADOS");
+      }}
+
+
+                  
+}
+public void onDisable()
+/*     */   {
+
+    for(Chunk c2 : Bukkit.getWorld("sw1").getLoadedChunks()){
+            for(BlockState b2 : c2.getTileEntities()){
+                if(b2 instanceof Chest){            	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
+                inventory.clear();
+                }
+            }
+    }
+
+Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #1 DESCARREGADOS");
+    for(Chunk c2 : Bukkit.getWorld("sw3").getLoadedChunks()){
+        for(BlockState b2 : c2.getTileEntities()){
+            if(b2 instanceof Chest){            	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
+            inventory.clear();
+            }
+        }
+        
+}
+
+Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #2 DESCARREGADOS");
+    for(Chunk c2 : Bukkit.getWorld("sw3").getLoadedChunks()){
+        for(BlockState b2 : c2.getTileEntities()){
+            if(b2 instanceof Chest){            	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
+            inventory.clear();
+            }
+        }
+}  
+
+Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #3 DESCARREGADOS");
+    Bukkit.getConsoleSender().sendMessage("TODOS OS BAUS DAS PARTIDAS LIMPADOS!");
+}
 /*     */   public void onEnable()
 /*     */   {
 	  
@@ -93,7 +214,16 @@ public EventManager3 getEventManager3() {
 			return map;
 		}));
 	 Bukkit.getPluginManager().registerEvents(new Automatic(), this);
+
+	 Bukkit.getPluginManager().registerEvents(new Automatic2(), this);
+
+	 Bukkit.getPluginManager().registerEvents(new Automatic3(), this);
 	 ;
+
+
+                 
+                 
+         
 	getCommand("setswlobby").setExecutor(new SetRounds());
 	/*     */     
 /* 121 */     instance = this;
@@ -105,13 +235,13 @@ public EventManager3 getEventManager3() {
    plugin = this;
 	ConsoleCommandSender cmd = Bukkit.getConsoleSender();
 	if (!Coins.setupPermissions()) {
-		cmd.sendMessage("AulerSkywars - Disabled due to no Vault dependency found! PvPRounds VERSION" + getDescription().getVersion());
+		cmd.sendMessage("AulerSkywars - Disabled due to no Vault dependency found! AulerSkywars VERSION" + getDescription().getVersion());
         cmd.sendMessage("Install vault to PvPRounds work!");
         getServer().getPluginManager().disablePlugin(this);
         return;
     }
 	if (!Coins.setupEconomy()) {
-		cmd.sendMessage("AulerSkywars - Disabled due to no Vault dependency found! PvPRounds VERSION" + getDescription().getVersion());
+		cmd.sendMessage("AulerSkywars - Disabled due to no Vault dependency found! AulerSkywars VERSION" + getDescription().getVersion());
         cmd.sendMessage("Install vault to PvPRounds work!");
         getServer().getPluginManager().disablePlugin(this);
         return;
@@ -132,5 +262,18 @@ public EventManager3 getEventManager3() {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
-	Bukkit.getConsoleSender().sendMessage("AULERSKYWARS HAS BEEN ENABLED!");
-}}
+	CarregarBaus();
+	CarregarBaus2();
+	CarregarBaus3();
+ 	Bukkit.getConsoleSender().sendMessage("AULERSKYWARS HAS BEEN ENABLED!");
+
+}
+
+              }
+
+
+
+
+
+	 
+

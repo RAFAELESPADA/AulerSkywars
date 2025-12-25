@@ -133,27 +133,7 @@ if (args[0].equalsIgnoreCase("stop"))
 /* 185 */           game.add(p.getName());
 /*     */ 
 /*     */ 
-/*     */ 
-/*     */  ItemJoinAPI itemAPI = new ItemJoinAPI();
-new BukkitRunnable() {
-    
-    public void run() {
 
- 	   if (Bukkit.getPluginManager().getPlugin("ItemJoin") != null) {
- 	   p.getInventory().clear();
-     itemAPI.getItems(p);
- 	   }}}.runTaskLater(Main.plugin, 5l);
-}
-/*     */ 
-/*     */ 
-/*     */ 
-
-}
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ Player p = (Player)sender;
 /*     */ 
 ;
 org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.spawn.world"));
@@ -167,7 +147,27 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 		/*     */           savelevel.put(p.getName(), p.getLevel());
 		savehunger.put(p.getName(), p.getFoodLevel());
 		saveair.put(p.getName(), p.getRemainingAir());
-/*     */           
+/*     */        /*     */ 
+		/*     */  ItemJoinAPI itemAPI = new ItemJoinAPI();
+		new BukkitRunnable() {
+		    
+		    public void run() {
+
+		 	   if (Bukkit.getPluginManager().getPlugin("ItemJoin") != null) {
+		 	   p.getInventory().clear();
+		     itemAPI.getItems(p);
+		 	   }}}.runTaskLater(Main.plugin, 5l);
+		}
+		/*     */ 
+		/*     */ 
+		/*     */ 
+
+		}
+		/*     */ 
+		/*     */ 
+		/*     */ 
+		/*     */ 
+		/*     */ Player p = (Player)sender;   
 /*     */ 
 /* 219 */           p.getInventory().clear();
 p.getInventory().setArmorContents(null);

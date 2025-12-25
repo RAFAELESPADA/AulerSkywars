@@ -96,7 +96,7 @@ if (!playersInPvp.contains(p2)) {
                   
               }
               for (Player p : new ArrayList<>(players)) {
-            	  if (p.getWorld() != Bukkit.getServer().getWorld("sw2")) {
+            	  if (p.getWorld() != Bukkit.getServer().getWorld("swlobby") || p.getWorld() != Bukkit.getServer().getWorld("sw2")) {
             		  p.performCommand("sw leave");
             	  }
               }
@@ -396,9 +396,9 @@ players.forEach(p -> p.teleport(Jaulas2.getLocations2()));
       playersInPvp.clear();
       getPlayers().clear();
     HandlerList.unregisterAll(this.listener);
-	Bukkit.getServer().unloadWorld("sw3", false);
-	Bukkit.getWorld("sw3").getWorldFolder().delete();
-	Bukkit.getServer().createWorld(new WorldCreator(Main.getInstance().getDataFolder().getPath() + "\\Maps\\sw3"));
+	Bukkit.getServer().unloadWorld("sw2", false);
+	Bukkit.getWorld("sw2").getWorldFolder().delete();
+	Bukkit.getServer().createWorld(new WorldCreator(Main.getInstance().getDataFolder().getPath() + "\\Maps\\sw2"));
 
    Main.getInstance().getEventManager2().setRdmAutomatic(null);
   }

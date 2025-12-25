@@ -13,29 +13,14 @@ import lombok.Getter;
 @Getter
 public enum Jaulas3 {
 
-    ONE(new Location(Bukkit.getWorld("sw3"), 151, 64, 54)),
+    ONE(new Location(Bukkit.getWorld("sw3"), 8.343, 98.000000, 78.066)),
 
-    TWO(new Location(Bukkit.getWorld("sw3"), 151, 64, 54)),
+    TWO(new Location(Bukkit.getWorld("sw3"), 78.082, 98.000000, 8.199)),
 
-    THREE(new Location(Bukkit.getWorld("sw3"), 151, 64, 54)),
+    THREE(new Location(Bukkit.getWorld("sw3"), 6.505, 98.000000, -61.381)),
 
-    FOUR(new Location(Bukkit.getWorld("sw3"), 151, 64, 54)),
+    FOUR(new Location(Bukkit.getWorld("sw3"), -61.351, 98.000000, 7.664));
 
-    FIVE(new Location(Bukkit.getWorld("sw3"), 151, 64, 54)),
-
-    SIX(new Location(Bukkit.getWorld("sw3"), 151, 64, 54)),
-
-    SEVEN(new Location(Bukkit.getWorld("sw3"), 151, 64, 54)),
-
-    EIGHT(new Location(Bukkit.getWorld("sw3"), 151, 64, 54)),
-
-    NINE(new Location(Bukkit.getWorld("sw3"), 151, 64, 54)),
-
-    TEN(new Location(Bukkit.getWorld("sw3"), 151, 64, 54)),
-
-    ELEVEN(new Location(Bukkit.getWorld("sw3"), 151, 64, 54)),
-
-    TWELVE(new Location(Bukkit.getWorld("sw3"), 151, 64, 54));
     private final Location location;
     Jaulas3(Location location) {
         this.location = location;

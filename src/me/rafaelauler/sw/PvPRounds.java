@@ -111,15 +111,15 @@ static Main plugin;
 
     if (indentifier.equals("players_room_1")) {
 
-      return String.valueOf(Automatic.players.size());
+        return (Automatic.players == null ? "0" : String.valueOf(Automatic.players.size()));
     }
     if (indentifier.equals("players_room_2")) {
 
-        return String.valueOf(Automatic2.players.size());
+        return (Automatic2.players == null ? "0" : String.valueOf(Automatic2.players.size()));
       }
     if (indentifier.equals("players_room_3")) {
 
-        return String.valueOf(Automatic3.players.size());
+        return (Automatic3.players == null ? "0" : String.valueOf(Automatic3.players.size()));
       }
 
     if (indentifier.equals("players_total")) {

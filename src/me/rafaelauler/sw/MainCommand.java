@@ -192,7 +192,10 @@ if (args[0].equalsIgnoreCase("leave"))
 	}
 	
 	/*     */       
-	/*     */ 
+
+	/*     */ Automatic3.players.remove(p);
+	/*     */ Automatic2.players.remove(p);
+	/*     */ Automatic.players.remove(p);
 	/*     */ 
 	/* 283 */       game.remove(p.getName());
 	/* 284 */       game.remove(p.getName());

@@ -337,8 +337,9 @@ players.forEach(p -> p.teleport(Jaulas.getLocations2()));
   		    	destroy();
   			  firstPlayer.chat("/sw leave");
   			Bukkit.broadcastMessage(Main.getInstance().getConfig().getString("EventWinner").replaceAll("&", "§").replace("%player%", firstPlayer.getName()));
-    		Bukkit.getServer().unloadWorld("sw1", false);
-    		Bukkit.getWorld("sw1").getWorldFolder().delete();
+    		Bukkit.getServer().unloadWorld("sw1", false);	
+    		World w = Bukkit.getWorld("sw1");
+    		w.getWorldFolder().delete();
     		Bukkit.getServer().createWorld(new WorldCreator(Main.getInstance().getDataFolder().getPath() + "\\Maps\\sw1"));
     				  	   }}.runTaskLater(Main.plugin, 100l);
       	

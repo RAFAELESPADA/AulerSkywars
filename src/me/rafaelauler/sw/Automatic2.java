@@ -404,7 +404,8 @@ players.forEach(p -> p.teleport(Jaulas.getLocations2()));
       getPlayers().clear();
     HandlerList.unregisterAll(this.listener);
 	Bukkit.getServer().unloadWorld("sw2", false);
-	Bukkit.getWorld("sw2").getWorldFolder().delete();
+	World w = Bukkit.getWorld("sw2");
+	w.getWorldFolder().delete();
 	Bukkit.getServer().createWorld(new WorldCreator(Main.getInstance().getDataFolder().getPath() + "\\Maps\\sw2"));
 
    Main.getInstance().getEventManager2().setRdmAutomatic(null);

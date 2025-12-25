@@ -75,10 +75,11 @@ public class Automatic implements Listener {
             	iniciou = true;
             }
             for (Player hide : Bukkit.getOnlinePlayers()) {
-         	   if (!players.contains(hide)) {
+         	   if (!players.contains(hide)) {       		  
          		   players.forEach(p -> p.hidePlayer(hide));
          	   }
             }
+            
             if (players.size() == 1 && !iniciou) {
             	iniciou = false;
             	time = 34;
@@ -93,7 +94,7 @@ public class Automatic implements Listener {
 
 for (Player p2 : players) {
 
-if (!playersInPvp.contains(p2)) {
+if (!playersInPvp.contains(p2) && !star) {
 	HelixActionBar.send(p2,  Main.getInstance().getConfig().getString("TournamentStart").replaceAll("&", "§").replace("%time%", String.valueOf(time)));
 	}
 }
@@ -103,7 +104,7 @@ if (time == 34 && !star) {
 		HelixActionBar.send(p2, ChatColor.YELLOW + "Aguardando mais 1 jogador...");
 }
 }
-              if (time == 30 && !star) {
+              if (time == 30 && !star && iniciou) {
             	  broadcast(Main.getInstance().getConfig().getString("TournamentStart").replaceAll("&", "§").replace("%time%", "30"));
             	  TextComponent textComponent4 = new TextComponent(Main.getInstance().getConfig().getString("TournamentStartGlobal").replaceAll("&", "§").replace("%time%", "30"));
                   textComponent4.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(Main.getInstance().getConfig().getString("ClickToJoin").replaceAll("&", "§")).create()));
@@ -317,7 +318,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
     
     pvp = true;
     for (Player players12 : players) {
-players.forEach(o -> playersInPvp.add(o));
+    	playersInPvp.add(players12);
 
 players12.teleport(Jaulas.getRandomLocation());
         Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + players12.getName());
@@ -416,15 +417,19 @@ players12.teleport(Jaulas.getRandomLocation());
     	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
     	  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
       }
+      for (Player hide : Bukkit.getOnlinePlayers()) {
+     	   if (!players.contains(hide)) {
+     		   players.forEach(p -> p.showPlayer(hide));
+     	   }
+        }
       players.clear();
       time = 32;
       pvp = false;
       playersInPvp.clear();
       getPlayers().clear();
     HandlerList.unregisterAll(this.listener);
+    
    Main.getInstance().getEventManager().setRdmAutomatic(null);
-	Bukkit.getWorld("sw1").getWorldFolder().delete();
-
 	Bukkit.getServer().unloadWorld("sw1", false);
 	Bukkit.getServer().createWorld(new WorldCreator(Main.getInstance().getDataFolder().getPath() + "\\Maps\\sw1"));
 

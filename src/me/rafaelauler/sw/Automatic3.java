@@ -93,7 +93,7 @@ public class Automatic3 implements Listener {
 
 for (Player p2 : players) {
 
-if (!playersInPvp.contains(p2)) {
+if (!playersInPvp.contains(p2) && !star) {
 	HelixActionBar.send(p2,  Main.getInstance().getConfig().getString("TournamentStart").replaceAll("&", "§").replace("%time%", String.valueOf(time)));
 	}
 }
@@ -102,7 +102,7 @@ if (time == 34 && !star) {
 	HelixActionBar.send(p2, ChatColor.YELLOW + "Aguardando mais 1 jogador...");
 }
 }
-              if (time == 30 && !star) {
+              if (time == 30 && !star  && iniciou) {
             	  broadcast(Main.getInstance().getConfig().getString("TournamentStart").replaceAll("&", "§").replace("%time%", "30"));
             	  TextComponent textComponent4 = new TextComponent(Main.getInstance().getConfig().getString("TournamentStartGlobal").replaceAll("&", "§").replace("%time%", "30"));
                   textComponent4.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(Main.getInstance().getConfig().getString("ClickToJoin").replaceAll("&", "§")).create()));
@@ -316,7 +316,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
     pvp = true;
     for (Player players12 : players) {
 
-players.forEach(o -> playersInPvp.add(o));
+playersInPvp.add(players12);
 players12.teleport(Jaulas3.getRandomLocation());
         Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + players12.getName());
       if (!MainCommand.game.contains(players12.getName())) {
@@ -414,13 +414,18 @@ players.forEach(p -> p.teleport(Jaulas.getLocations2()));
     	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
     	  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
       }
+      for (Player hide : Bukkit.getOnlinePlayers()) {
+    	   if (!players.contains(hide)) {
+    		   players.forEach(p -> p.showPlayer(hide));
+    	   }
+       }
       players.clear();
       time = 32;
       pvp = false;
       playersInPvp.clear();
       getPlayers().clear();	
       World w = Bukkit.getWorld("sw3");
-  	w.getWorldFolder().delete();
+      Bukkit.getServer().unloadWorld(w, false);
 		Bukkit.getServer().createWorld(new WorldCreator(Main.getInstance().getDataFolder().getPath() + "\\Maps\\sw3"));
     HandlerList.unregisterAll(this.listener);
    Main.getInstance().getEventManager3().setRdmAutomatic(null);

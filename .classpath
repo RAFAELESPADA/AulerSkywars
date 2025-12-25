@@ -27,5 +27,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry exported="true" kind="lib" path="C:/Users/Home/Desktop/SKYZERMC BACKUP GERAL/LOBBY/plugins/PlaceholderAPI-2.11.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Home/Downloads/lombok.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

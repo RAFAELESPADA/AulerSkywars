@@ -1,5 +1,5 @@
-name: PvPRounds
-version: 3.0.5
+name: AulerSkywars
+version: 1.0.0
 author: Rafael Auler
 main: me.rafaelauler.Main
 description: PvPRounds plugin
@@ -7,12 +7,11 @@ depend: [Vault]
 softdepend: [ItemJoin, PlaceholderAPI]
 
 commands:
-   pvprounds:
-   pvr:
-   pvprounds2:
-   pvr2:
-   setrounds:
-   setrounds2:
+   sw:
+   setswlobby:
+   sw1:
+   sw2:
+   sw3: 
    
    
    

@@ -93,7 +93,9 @@ if (!playersInPvp.contains(p2)) {
 	}
 }
 if (time == 34 && !star) {
-	  broadcast(ChatColor.YELLOW + "Aguardando mais 1 jogador...");
+	for (Player p2 : players) {
+	HelixActionBar.send(p2, ChatColor.YELLOW + "Aguardando mais 1 jogador...");
+}
 }
               if (time == 30 && !star) {
             	  broadcast(Main.getInstance().getConfig().getString("TournamentStart").replaceAll("&", "§").replace("%time%", "30"));

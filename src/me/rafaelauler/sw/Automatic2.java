@@ -92,6 +92,9 @@ if (!playersInPvp.contains(p2)) {
 	HelixActionBar.send(p2,  Main.getInstance().getConfig().getString("TournamentStart").replaceAll("&", "§").replace("%time%", String.valueOf(time)));
 	}
 }
+if (time == 34 && !star) {
+	  broadcast(ChatColor.YELLOW + "Aguardando mais 1 jogador...");
+}
               if (time == 30 && !star) {
             	  broadcast(Main.getInstance().getConfig().getString("TournamentStart").replaceAll("&", "§").replace("%time%", "30"));
             	  TextComponent textComponent4 = new TextComponent(Main.getInstance().getConfig().getString("TournamentStartGlobal").replaceAll("&", "§").replace("%time%", "30"));

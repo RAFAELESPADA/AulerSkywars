@@ -75,7 +75,7 @@ public class Automatic implements Listener {
             }
             if (players.size() == 1 && !iniciou) {
             	iniciou = false;
-            	time = 30;
+            	time = 34;
             }
             else if (!iniciou) {
             	time = 30;
@@ -90,6 +90,9 @@ for (Player p2 : players) {
 if (!playersInPvp.contains(p2)) {
 	HelixActionBar.send(p2,  Main.getInstance().getConfig().getString("TournamentStart").replaceAll("&", "§").replace("%time%", String.valueOf(time)));
 	}
+}
+if (time == 34 && !star) {
+	  broadcast(ChatColor.YELLOW + "Aguardando mais 1 jogador...");
 }
               if (time == 30 && !star) {
             	  broadcast(Main.getInstance().getConfig().getString("TournamentStart").replaceAll("&", "§").replace("%time%", "30"));

@@ -8,6 +8,7 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
@@ -296,7 +297,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
   public void queuedPlayers() {
 	  new BukkitRunnable() {
 		    public void run() {
-    Player firstPlayer = null;
+    final Player firstPlayer = players.get(0);
     
     pvp = true;
     for (Player players12 : players) {
@@ -309,8 +310,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
     }
     
       
-    
-    firstPlayer = null;
+  
   
     	if (!players.isEmpty()) {
 players.forEach(p -> p.teleport(Jaulas.getLocations2()));
@@ -324,17 +324,24 @@ players.forEach(p -> p.teleport(Jaulas.getLocations2()));
     	}
     {
     	  {
+    		  
     		  if (players.size() == 1 && iniciou) {
-    			  firstPlayer = players.get(0);
-    			  Bukkit.getConsoleSender().sendMessage("[EVENT] PLAYER: " + firstPlayer.getName() + " IS THE SKYWARS ROOM #1 WINNER");
-    	      
-    			  destroy();
-    			  firstPlayer.chat("/sw leave");
-      		Bukkit.broadcastMessage(Main.getInstance().getConfig().getString("EventWinner").replaceAll("&", "§").replace("%player%", firstPlayer.getName()));
-	            	    		Bukkit.getServer().unloadWorld("sw1", false);
-	            	    		Bukkit.getWorld("sw1").getWorldFolder().delete();
-	            	    		Bukkit.getServer().createWorld(new WorldCreator(Main.getInstance().getDataFolder().getPath() + "\\Maps\\sw1"));
+                    
+      			    TitleAPI.sendTitle(firstPlayer, 50, 50, 50, "§6§lVITÓRIA!");
+      			  for (Player oo : Bukkit.getOnlinePlayers()) {
+    			    	oo.playSound(oo.getLocation(), Sound.valueOf("NOTE_PLING"), 10f, 10f);
+    			    }
+    			  new BukkitRunnable() {
+    				    public void run() {
 
+  		    	destroy();
+  			  firstPlayer.chat("/sw leave");
+  			Bukkit.broadcastMessage(Main.getInstance().getConfig().getString("EventWinner").replaceAll("&", "§").replace("%player%", firstPlayer.getName()));
+    		Bukkit.getServer().unloadWorld("sw1", false);
+    		Bukkit.getWorld("sw1").getWorldFolder().delete();
+    		Bukkit.getServer().createWorld(new WorldCreator(Main.getInstance().getDataFolder().getPath() + "\\Maps\\sw1"));
+    				  	   }}.runTaskLater(Main.plugin, 100l);
+      	
     			  return;
     		  }
     	  }

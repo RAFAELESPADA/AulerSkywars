@@ -224,7 +224,7 @@ if (time == 34 && !star) {
               p.spigot().respawn();
               e.getDrops().clear();
 
-              p.chat("/pvr leave");
+              p.chat("/sw leave");
               pvp = false;
               p.sendMessage(Main.getInstance().getConfig().getString("PlayerKilledMessage").replaceAll("&", "§").replace("%player%", p.getName()));
               Automatic3.this.broadcast(Main.getInstance().getConfig().getString("PlayerKilledBroadcast").replaceAll("&", "§").replace("%player%", p.getName()).replace("%killer%", d.getName()));
@@ -311,9 +311,13 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
   public void queuedPlayers() {
 	  new BukkitRunnable() {
 		    public void run() {
-    final Player firstPlayer = players.get(0);
     
     pvp = true;
+    if (players == null || players.size() == 0) {
+    	destroy();
+    }
+
+    final Player firstPlayer = players.get(0);
     for (Player players12 : players) {
 
 playersInPvp.add(players12);

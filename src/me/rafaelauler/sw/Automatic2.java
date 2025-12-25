@@ -194,7 +194,6 @@ if (time == 34 && !star) {
               	  broadcast(Main.getInstance().getConfig().getString("PlayerLeaveServerDeath").replaceAll("&", "§").replace("%player%", e.getPlayer().getName())); 
                   e.getPlayer().damage(9999.0D);
                   playersInPvp.remove(e.getPlayer());
-                  pvp = false;
         	  Bukkit.dispatchCommand(e.getPlayer(), "sw leave");
               queuedPlayers();
             } 
@@ -224,7 +223,6 @@ if (time == 34 && !star) {
               e.getDrops().clear();
 
               p.chat("/sw leave");
-              pvp = false;
               p.sendMessage(Main.getInstance().getConfig().getString("PlayerKilledMessage").replaceAll("&", "§").replace("%player%", p.getName()));
               Automatic2.this.broadcast(Main.getInstance().getConfig().getString("PlayerKilledBroadcast").replaceAll("&", "§").replace("%player%", p.getName()).replace("%killer%", d.getName()));
               Automatic2.this.broadcast(Main.getInstance().getConfig().getString("PlayersLeft").replaceAll("&", "§").replace("%left%", String.valueOf(players.size())));
@@ -310,11 +308,14 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
   public void queuedPlayers() {
 	  new BukkitRunnable() {
 		    public void run() {
-    final Player firstPlayer = players.get(0);
     
     pvp = true;
-    for (Player players12 : players) {
+    if (players == null || players.size() == 0) {
+    	destroy();
+    }
 
+    final Player firstPlayer = players.get(0);
+    for (Player players12 : players) {
         Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + players12.getName());
 players12.teleport(Jaulas2.getRandomLocation());
 playersInPvp.add(players12);

@@ -95,7 +95,7 @@ if (!playersInPvp.contains(p2)) {
                   
               }
               for (Player p : new ArrayList<>(players)) {
-            	  if (p.getWorld() != Bukkit.getServer().getWorld("swlobby") || p.getWorld() != Bukkit.getServer().getWorld("sw1")) {
+            	  if (p.getWorld() != Bukkit.getServer().getWorld("swlobby") && p.getWorld() != Bukkit.getServer().getWorld("sw1")) {
             		  p.performCommand("sw leave");
             	  }
               }

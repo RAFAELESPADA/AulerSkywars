@@ -4,6 +4,7 @@ package me.rafaelauler.sw;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -72,6 +73,11 @@ public class Automatic implements Listener {
             
             if (players.size() >= 2 && !iniciou) {
             	iniciou = true;
+            }
+            for (Player hide : Bukkit.getOnlinePlayers()) {
+         	   if (!players.contains(hide)) {
+         		   players.forEach(p -> p.hidePlayer(hide));
+         	   }
             }
             if (players.size() == 1 && !iniciou) {
             	iniciou = false;
@@ -311,7 +317,9 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
     
     pvp = true;
     for (Player players12 : players) {
+players.forEach(o -> playersInPvp.add(o));
 
+players12.teleport(Jaulas.getRandomLocation());
         Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + players12.getName());
       if (!MainCommand.game.contains(players12.getName())) {
 
@@ -323,7 +331,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
   
   
     	if (!players.isEmpty()) {
-players.forEach(p -> p.teleport(Jaulas.getLocations2()));
+    		Random r = new Random();
     		playersInPvp.clear();
     	    players.forEach(p-> p.sendMessage(ChatColor.GREEN + Main.getInstace().getConfig().getString("MatchStart")));
 

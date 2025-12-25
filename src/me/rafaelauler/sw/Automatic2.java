@@ -70,7 +70,11 @@ public class Automatic2 implements Listener {
             if (e.getType() != UpdateEvent.UpdateType.SEGUNDO) {
               return; 
             }
-            
+           for (Player hide : Bukkit.getOnlinePlayers()) {
+        	   if (!players.contains(hide)) {
+        		   players.forEach(p -> p.hidePlayer(hide));
+        	   }
+           }
             if (players.size() >= 2 && !iniciou) {
             	iniciou = true;
             }
@@ -312,6 +316,8 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
     for (Player players12 : players) {
 
         Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + players12.getName());
+players12.teleport(Jaulas2.getRandomLocation());
+players.forEach(o -> playersInPvp.add(o));
       if (!MainCommand.game.contains(players12.getName())) {
 
     	    players.remove(players12);
@@ -322,7 +328,6 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
   
   
     	if (!players.isEmpty()) {
-players.forEach(p -> p.teleport(Jaulas.getLocations2()));
     		playersInPvp.clear();
     	    players.forEach(p-> p.sendMessage(ChatColor.GREEN + Main.getInstace().getConfig().getString("MatchStart")));
 

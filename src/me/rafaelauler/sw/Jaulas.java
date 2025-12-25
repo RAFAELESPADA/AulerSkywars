@@ -3,7 +3,9 @@ package me.rafaelauler.sw;
 
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -54,6 +56,33 @@ public enum Jaulas {
     
     public Location getLocation() {
 		return location;
+	
+}
+    public static List<Jaulas> getUniqueShuffledAnimals()
+    {
+        // Get values into a modifiable list
+        List<Jaulas> animalsList = Arrays.asList(Jaulas.values());
+        
+        // Shuffle the list to randomize the order
+        Collections.shuffle(animalsList);
+        
+        return animalsList;
+    }
+
+    public static Location getRandomLocation() {   	
+    	assert (Jaulas.values().length <= 12); {
+    	Random r = new Random();
+Jaulas[] allAnimals = Jaulas.values();
+        
+        // Generate a random index
+        int randomIndex = r.nextInt(allAnimals.length);
+        
+        List<Jaulas> uniqueShuffled = getUniqueShuffledAnimals();
+        for (Jaulas animal : uniqueShuffled)
+        
+    	return animal.getLocation();
+    	}
+		return null;
 	
 }
 public static final List<ItemStack> items = Arrays.asList(

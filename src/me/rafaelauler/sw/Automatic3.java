@@ -74,6 +74,11 @@ public class Automatic3 implements Listener {
             if (players.size() >= 2 && !iniciou) {
             	iniciou = true;
             }
+            for (Player hide : Bukkit.getOnlinePlayers()) {
+         	   if (!players.contains(hide)) {
+         		   players.forEach(p -> p.hidePlayer(hide));
+         	   }
+            }
             if (players.size() == 1 && !iniciou) {
             	iniciou = false;
             	time = 30;
@@ -311,6 +316,8 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
     pvp = true;
     for (Player players12 : players) {
 
+players.forEach(o -> playersInPvp.add(o));
+players12.teleport(Jaulas3.getRandomLocation());
         Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + players12.getName());
       if (!MainCommand.game.contains(players12.getName())) {
 

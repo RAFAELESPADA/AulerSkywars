@@ -80,7 +80,7 @@ public class Automatic2 implements Listener {
     }
 
     if (this.gameType == GameType.STOPPED) {
-    	for (Player hide : Bukkit.getWorld("lobby").getPlayers()) {
+    	for (Player hide : Bukkit.getWorld("spawn").getPlayers()) {
       	   for (Player visao : Bukkit.getOnlinePlayers()) {
       		   if (!visao.canSee(hide)) {
       		   visao.showPlayer(hide);

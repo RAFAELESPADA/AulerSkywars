@@ -92,10 +92,13 @@ if (Automatic3.players.size() >= 4) {
 	sender.sendMessage(ChatColor.RED + "Essa partida está lotada! Escolha outra!");
 	return true;
 }
-if (Automatic3.iniciou) {
+if (Automatic3.star) {
 	sender.sendMessage(ChatColor.RED + "Essa partida já foi iniciada! Escolha outra!");
 	return true;
 }
+
+/*     */ Automatic3 a3 = new Automatic3();
+a3.setGameType(Automatic3.GameType.STARTING);
 /*     */ Player p = (Player)sender;
 /*     */ 
 /* 179 */           p.sendMessage(Main.getInstance().getConfig().getString("Joined").replaceAll("&", "§"));

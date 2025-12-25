@@ -9,6 +9,7 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -21,6 +22,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -65,12 +67,36 @@ public class Automatic3 implements Listener {
     this.specs = new ArrayList<>();
     playersInPvp = new ArrayList<>();
   }
+  @EventHandler
+  public void onUpdate2(UpdateEvent e) {
+    if (e.getType() != UpdateEvent.UpdateType.SEGUNDO) {
+      return; 
+    }
+    if (players == null || players.size() == 0) {
+    	destroy();
+    }
+    if (players.size() == 1 && star) {
+    	 queuedPlayers();
+    }
+
+    if (this.gameType == GameType.STOPPED) {
+    	for (Player hide : Bukkit.getWorld("lobby").getPlayers()) {
+      	   for (Player visao : Bukkit.getOnlinePlayers()) {
+      		   if (!visao.canSee(hide)) {
+      		   visao.showPlayer(hide);
+      	   }
+      	   }
+         }
+    }
+  }
           @EventHandler
           public void onUpdate(UpdateEvent e) {
             if (e.getType() != UpdateEvent.UpdateType.SEGUNDO) {
               return; 
             }
-            
+            if (this.gameType == GameType.STOPPED) {
+            	return;
+            }
             if (players.size() >= 2 && !iniciou) {
             	iniciou = true;
             }
@@ -112,6 +138,8 @@ if (time == 34 && !star) {
               }
               for (Player p : new ArrayList<>(players)) {
             	  if (p.getWorld() != Bukkit.getServer().getWorld("swlobby") && p.getWorld() != Bukkit.getServer().getWorld("sw3")) {
+
+            		  Bukkit.getConsoleSender().sendMessage("QUITTING " + p.getName() + " FROM SKYWARS! Mundo: " + p.getWorld().getName());
             		  p.performCommand("sw leave");
             	  }
               }
@@ -185,17 +213,19 @@ if (time == 34 && !star) {
           
           @EventHandler
           public void onPlayerQuit(PlayerQuitEvent e) {
+            if (MainCommand.game.contains(e.getPlayer().getName())) {
+
+            	  e.getPlayer().chat("/sw leave");
+            }
             if (players.contains(e.getPlayer())) {
               players.remove(e.getPlayer());
           	  broadcast(Main.getInstance().getConfig().getString("PlayerLeaveServer").replaceAll("&", "§").replace("%player%", e.getPlayer().getName()));
         	  
-          	  e.getPlayer().chat("/sw leave");
             }
               if (Automatic3.this.getGameType() == Automatic3.GameType.GAMIMG && playersInPvp.contains(e.getPlayer())) {
               	  broadcast(Main.getInstance().getConfig().getString("PlayerLeaveServerDeath").replaceAll("&", "§").replace("%player%", e.getPlayer().getName())); 
                   e.getPlayer().damage(9999.0D);
                   playersInPvp.remove(e.getPlayer());
-                  pvp = false;
         	  Bukkit.dispatchCommand(e.getPlayer(), "sw leave");
               queuedPlayers();
             } 
@@ -319,7 +349,11 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 
     final Player firstPlayer = players.get(0);
     for (Player players12 : players) {
+    	players12.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
 
+    	players12.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+    	players12.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
+    	players12.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
 playersInPvp.add(players12);
 players12.teleport(Jaulas3.getRandomLocation());
         Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + players12.getName());
@@ -345,7 +379,7 @@ players.forEach(p -> p.teleport(Jaulas.getLocations2()));
     {
     	  {
     		  
-    		  if (players.size() == 1 && iniciou) {
+    		  if (players.size() == 1 && star) {
                     
       			    TitleAPI.sendTitle(firstPlayer, 50, 50, 50, "§6§lVITÓRIA!");
       			    for (Player oo : Bukkit.getOnlinePlayers()) {
@@ -357,10 +391,8 @@ players.forEach(p -> p.teleport(Jaulas.getLocations2()));
   		    	destroy();
   			  firstPlayer.chat("/sw leave");
   			Bukkit.broadcastMessage(Main.getInstance().getConfig().getString("EventWinner").replaceAll("&", "§").replace("%player%", firstPlayer.getName()));
-    		
-    		Bukkit.getWorld("sw1").getWorldFolder().delete();
-    		Bukkit.getServer().unloadWorld("sw1", false);
-    		Bukkit.getServer().createWorld(new WorldCreator(Main.getInstance().getDataFolder().getPath() + "\\Maps\\sw1"));
+    		Bukkit.getServer().unloadWorld("sw3", false);
+    		Bukkit.getServer().createWorld(new WorldCreator(Main.getInstance().getDataFolder().getPath() + "\\Maps\\sw3"));
     				  	   }}.runTaskLater(Main.plugin, 100l);
       	
     			  return;
@@ -408,7 +440,7 @@ players.forEach(p -> p.teleport(Jaulas.getLocations2()));
   }
   
   public void destroy() {
-      setGameType(GameType.STARTING);
+      setGameType(GameType.STOPPED);
       iniciou = false;
       star = false;
       for (String s : new ArrayList<>(MainCommand.game)) {

@@ -89,12 +89,13 @@ if (Automatic.players.size() >= 12) {
 	sender.sendMessage(ChatColor.RED + "Essa partida está lotada! Escolha outra!");
 	return true;
 }
-if (Automatic.iniciou) {
+if (Automatic.star) {
 	sender.sendMessage(ChatColor.RED + "Essa partida já foi iniciada! Escolha outra!");
 	return true;
 }
 /*     */ Player p = (Player)sender;
-/*     */ 
+/*     */ Automatic a1 = new Automatic();
+a1.setGameType(Automatic.GameType.STARTING);
 /* 179 */           p.sendMessage(Main.getInstance().getConfig().getString("Joined").replaceAll("&", "§"));
 p.playSound(p.getLocation(), Sound.valueOf("LEVEL_UP"), 10f, 10f);
 /*     */ TitleAPI.sendTitle(p, 80, 80, 80, "§b§lSKYWARS", "§fVocê entrou em uma sala!");

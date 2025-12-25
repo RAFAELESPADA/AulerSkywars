@@ -9,6 +9,7 @@ import java.util.Random;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -21,6 +22,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -65,12 +67,35 @@ public class Automatic implements Listener {
     this.specs = new ArrayList<>();
     playersInPvp = new ArrayList<>();
   }
+  @EventHandler
+  public void onUpdate2(UpdateEvent e) {
+    if (e.getType() != UpdateEvent.UpdateType.SEGUNDO) {
+      return; 
+    }
+    if (players == null || players.size() == 0) {
+    	destroy();
+    }
+    if (players.size() == 1 && star) {
+    	 queuedPlayers();
+    }
+    if (this.gameType == GameType.STOPPED) {
+    	for (Player hide : Bukkit.getWorld("lobby").getPlayers()) {
+      	   for (Player visao : Bukkit.getOnlinePlayers()) {
+      		   if (!visao.canSee(hide)) {
+      		   visao.showPlayer(hide);
+      	   }
+      	   }
+         }
+    }
+  }
           @EventHandler
           public void onUpdate(UpdateEvent e) {
             if (e.getType() != UpdateEvent.UpdateType.SEGUNDO) {
               return; 
             }
-            
+            if (this.gameType == GameType.STOPPED) {
+            	return;
+            }
             if (players.size() >= 2 && !iniciou) {
             	iniciou = true;
             }
@@ -112,8 +137,11 @@ if (time == 34 && !star) {
                   broadcast2(textComponent4, Bukkit.getWorld(Main.cfg_x1.getString("x1.coords.quit.world")));
                   
               }
+
               for (Player p : new ArrayList<>(players)) {
             	  if (p.getWorld() != Bukkit.getServer().getWorld("swlobby") && p.getWorld() != Bukkit.getServer().getWorld("sw1")) {
+
+            		  Bukkit.getConsoleSender().sendMessage("QUITTING " + p.getName() + " FROM SKYWARS! Mundo: " + p.getWorld().getName());
             		  p.performCommand("sw leave");
             	  }
               }
@@ -188,11 +216,14 @@ if (time == 34 && !star) {
           
           @EventHandler
           public void onPlayerQuit(PlayerQuitEvent e) {
+            if (MainCommand.game.contains(e.getPlayer().getName())) {
+
+            	  e.getPlayer().chat("/sw leave");
+            }
             if (players.contains(e.getPlayer())) {
               players.remove(e.getPlayer());
           	  broadcast(Main.getInstance().getConfig().getString("PlayerLeaveServer").replaceAll("&", "§").replace("%player%", e.getPlayer().getName()));
         	  
-          	  e.getPlayer().chat("/sw leave");
             }
               if (Automatic.this.getGameType() == Automatic.GameType.GAMIMG && playersInPvp.contains(e.getPlayer())) {
               	  broadcast(Main.getInstance().getConfig().getString("PlayerLeaveServerDeath").replaceAll("&", "§").replace("%player%", e.getPlayer().getName())); 
@@ -226,7 +257,7 @@ if (time == 34 && !star) {
               p.spigot().respawn();
               e.getDrops().clear();
 
-              p.chat("/pvr leave");
+              p.chat("/sw leave");
               p.sendMessage(Main.getInstance().getConfig().getString("PlayerKilledMessage").replaceAll("&", "§").replace("%player%", p.getName()));
               Automatic.this.broadcast(Main.getInstance().getConfig().getString("PlayerKilledBroadcast").replaceAll("&", "§").replace("%player%", p.getName()).replace("%killer%", d.getName()));
               Automatic.this.broadcast(Main.getInstance().getConfig().getString("PlayersLeft").replaceAll("&", "§").replace("%left%", String.valueOf(players.size())));
@@ -321,7 +352,11 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
     final Player firstPlayer = players.get(0);
     for (Player players12 : players) {
     	playersInPvp.add(players12);
-    	
+    	players12.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
+
+    	players12.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+    	players12.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
+    	players12.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
 players12.teleport(Jaulas.getRandomLocation());
         Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + players12.getName());
       if (!MainCommand.game.contains(players12.getName())) {
@@ -346,7 +381,7 @@ players12.teleport(Jaulas.getRandomLocation());
     {
     	  {
     		  
-    		  if (players.size() == 1 && iniciou) {
+    		  if (players.size() == 1 && star) {
                     
       			    TitleAPI.sendTitle(firstPlayer, 50, 50, 50, "§6§lVITÓRIA!");
       			  for (Player oo : Bukkit.getOnlinePlayers()) {
@@ -359,8 +394,6 @@ players12.teleport(Jaulas.getRandomLocation());
   			  firstPlayer.chat("/sw leave");
   			Bukkit.broadcastMessage(Main.getInstance().getConfig().getString("EventWinner").replaceAll("&", "§").replace("%player%", firstPlayer.getName()));
     		Bukkit.getServer().unloadWorld("sw1", false);	
-    		World w = Bukkit.getWorld("sw1");
-    		w.getWorldFolder().delete();
     		Bukkit.getServer().createWorld(new WorldCreator(Main.getInstance().getDataFolder().getPath() + "\\Maps\\sw1"));
     				  	   }}.runTaskLater(Main.plugin, 100l);
       	
@@ -409,12 +442,12 @@ players12.teleport(Jaulas.getRandomLocation());
   }
   
   public void destroy() {
-      setGameType(GameType.STARTING);
+      setGameType(GameType.STOPPED);
       iniciou = false;
       star = false;
       for (String s : new ArrayList<>(MainCommand.game)) {
     	  Player p = Bukkit.getPlayer(s);
-    	  Bukkit.dispatchCommand(p, "pvprounds leave");
+    	  Bukkit.dispatchCommand(p, "sw leave");
     	  org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.quit.world"));
     	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
     	  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));

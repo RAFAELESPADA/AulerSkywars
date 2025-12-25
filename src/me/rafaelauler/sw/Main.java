@@ -231,6 +231,8 @@ Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #3 DESCARREGADOS");
 (getInstance()).eventmanager = new EventManager();
 
 (getInstance()).eventmanager2 = new EventManager2();
+
+(getInstance()).eventmanager3 = new EventManager3();
   instance = this;
    plugin = this;
 	ConsoleCommandSender cmd = Bukkit.getConsoleSender();

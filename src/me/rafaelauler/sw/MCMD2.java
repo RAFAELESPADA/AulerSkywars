@@ -91,10 +91,13 @@ if (Automatic2.players.size() >= 12) {
 	sender.sendMessage(ChatColor.RED + "Essa partida está lotada! Escolha outra!");
 	return true;
 }
-if (Automatic2.iniciou) {
+if (Automatic2.star) {
 	sender.sendMessage(ChatColor.RED + "Essa partida já foi iniciada! Escolha outra!");
 	return true;
 }
+
+/*     */ Automatic2 a1 = new Automatic2();
+a1.setGameType(Automatic2.GameType.STARTING);
 /*     */ Player p = (Player)sender;
 /*     */ 
 /* 179 */           p.sendMessage(Main.getInstance().getConfig().getString("Joined").replaceAll("&", "§"));

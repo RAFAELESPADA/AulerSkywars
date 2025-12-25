@@ -182,6 +182,27 @@ p.getInventory().setArmorContents(null);
 /* 238 */           p.setFoodLevel(20000);
 
 }
+if (args[0].equalsIgnoreCase("list"))
+/*     */       {
+	Player p = (Player)sender;
+	if (!sender.hasPermission("skywars.list")) {
+		sender.sendMessage("SEM PERMISSÃO!");
+
+		return true;
+	}
+	for (Player p1 : Automatic.players) {
+		p.sendMessage(ChatColor.GREEN + "Sala #1 Jogadores: " + ChatColor.YELLOW + p1.getName());
+	}
+	for (Player p1 : Automatic2.players) {
+		p.sendMessage(ChatColor.GREEN + "Sala #2 Jogadores: " + ChatColor.YELLOW + p1.getName());
+	}
+	for (Player p1 : Automatic3.players) {
+		p.sendMessage(ChatColor.GREEN + "Sala #2 Jogadores: " + ChatColor.YELLOW + p1.getName());
+	}
+		return true;
+	}
+
+
 if (args[0].equalsIgnoreCase("leave"))
 /*     */       {
 	Player p = (Player)sender;

@@ -104,10 +104,9 @@ a3.setGameType(Automatic3.GameType.STARTING);
 /* 179 */           p.sendMessage(Main.getInstance().getConfig().getString("Joined").replaceAll("&", "§"));
 p.playSound(p.getLocation(), Sound.valueOf("LEVEL_UP"), 10f, 10f);
 /*     */ TitleAPI.sendTitle(p, 80, 80, 80, "§b§lSKYWARS", "§fVocê entrou em uma sala!");
-          Automatic3.players.add(p);
-
+          a3.putInEvent(p);
           p.getInventory().clear();
-          p.teleport(new Location(Bukkit.getWorld("swlobby"), -16.629, 97.1347, -11.604));
+          p.teleport(new Location(Bukkit.getWorld("swlobby"), 5169, 67, 2447));
 /*     */ 
 /*     */ 
 /*     */ 

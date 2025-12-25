@@ -78,16 +78,32 @@ public class Automatic3 implements Listener {
     if (players.size() == 1 && star) {
     	 queuedPlayers();
     }
-
-    if (this.gameType == GameType.STOPPED) {
-    	for (Player hide : Bukkit.getWorld("spawn").getPlayers()) {
-      	   for (Player visao : Bukkit.getOnlinePlayers()) {
-      		   if (!visao.canSee(hide)) {
-      		   visao.showPlayer(hide);
-      	   }
-      	   }
-         }
+    if (this.gameType == GameType.STOPPED && players.size() >= 1) {
+    	this.gameType = GameType.STARTING;
     }
+    for (Player w : Bukkit.getWorld("sw3").getPlayers()) {
+        if (!players.contains(w)) {
+        if (MainCommand.game.contains(w.getName())) {	
+        
+        	players.add(w);
+        }
+        }
+        }
+    for (Player p : Bukkit.getOnlinePlayers()) {
+ 	   if (!players.contains(p)) {
+ 		   players.forEach(p1 -> p1.hidePlayer(p));
+ 		   new BukkitRunnable() {
+				    public void run() {
+				    	for (Player b : Bukkit.getOnlinePlayers()) {
+				    		if (!b.canSee(p)) {
+				    			if (!b.getWorld().equals(Bukkit.getWorld("sw3"))) {
+				    			b.showPlayer(p);
+				    		}
+				    		}
+				    	}
+				    } }.runTaskLater(Main.plugin, 200l);
+ 		   }}
+ 
   }
           @EventHandler
           public void onUpdate(UpdateEvent e) {
@@ -100,11 +116,7 @@ public class Automatic3 implements Listener {
             if (players.size() >= 2 && !iniciou) {
             	iniciou = true;
             }
-            for (Player hide : Bukkit.getOnlinePlayers()) {
-         	   if (!players.contains(hide)) {
-         		   players.forEach(p -> p.hidePlayer(hide));
-         	   }
-            }
+         
             if (players.size() == 1 && !iniciou) {
             	iniciou = false;
             	time = 30;
@@ -452,11 +464,6 @@ players.forEach(p -> p.teleport(Jaulas.getLocations2()));
     	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
     	  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
       }
-      for (Player hide : Bukkit.getOnlinePlayers()) {
-    	   if (!players.contains(hide)) {
-    		   players.forEach(p -> p.showPlayer(hide));
-    	   }
-       }
       players.clear();
       time = 32;
       pvp = false;

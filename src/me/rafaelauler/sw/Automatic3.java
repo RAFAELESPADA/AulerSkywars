@@ -74,6 +74,10 @@ public class Automatic3 implements Listener {
             if (players.size() >= 2 && !iniciou) {
             	iniciou = true;
             }
+            if (players.size() == 1 && !iniciou) {
+            	iniciou = false;
+            	time = 30;
+            }
             else if (!iniciou) {
             	time = 30;
             	return;
@@ -337,8 +341,9 @@ players.forEach(p -> p.teleport(Jaulas.getLocations2()));
   		    	destroy();
   			  firstPlayer.chat("/sw leave");
   			Bukkit.broadcastMessage(Main.getInstance().getConfig().getString("EventWinner").replaceAll("&", "§").replace("%player%", firstPlayer.getName()));
-    		Bukkit.getServer().unloadWorld("sw1", false);
+    		
     		Bukkit.getWorld("sw1").getWorldFolder().delete();
+    		Bukkit.getServer().unloadWorld("sw1", false);
     		Bukkit.getServer().createWorld(new WorldCreator(Main.getInstance().getDataFolder().getPath() + "\\Maps\\sw1"));
     				  	   }}.runTaskLater(Main.plugin, 100l);
       	

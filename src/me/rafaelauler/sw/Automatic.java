@@ -73,6 +73,10 @@ public class Automatic implements Listener {
             if (players.size() >= 2 && !iniciou) {
             	iniciou = true;
             }
+            if (players.size() == 1 && !iniciou) {
+            	iniciou = false;
+            	time = 30;
+            }
             else if (!iniciou) {
             	time = 30;
             	return;
@@ -405,8 +409,9 @@ players.forEach(p -> p.teleport(Jaulas.getLocations2()));
       getPlayers().clear();
     HandlerList.unregisterAll(this.listener);
    Main.getInstance().getEventManager().setRdmAutomatic(null);
-	Bukkit.getServer().unloadWorld("sw1", false);
 	Bukkit.getWorld("sw1").getWorldFolder().delete();
+
+	Bukkit.getServer().unloadWorld("sw1", false);
 	Bukkit.getServer().createWorld(new WorldCreator(Main.getInstance().getDataFolder().getPath() + "\\Maps\\sw1"));
 
   }

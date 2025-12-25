@@ -72,7 +72,7 @@ public class Automatic3 implements Listener {
     if (e.getType() != UpdateEvent.UpdateType.SEGUNDO) {
       return; 
     }
-    if (players == null || players.size() == 0) {
+    if (players == null || players.size() == 0  && star) {
     	destroy();
     }
     if (players.size() == 1 && star) {
@@ -445,6 +445,8 @@ players.forEach(p -> p.teleport(Jaulas.getLocations2()));
       star = false;
       for (String s : new ArrayList<>(MainCommand.game)) {
     	  Player p = Bukkit.getPlayer(s);
+
+    	  p.sendMessage(ChatColor.RED + "A partida foi finalizada!");
     	  Bukkit.dispatchCommand(p, "sw leave");
     	  org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.quit.world"));
     	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 

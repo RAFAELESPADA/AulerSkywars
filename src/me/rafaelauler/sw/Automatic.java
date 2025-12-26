@@ -443,10 +443,19 @@ players12.teleport(Jaulas.getRandomLocation());
     			    	oo.playSound(oo.getLocation(), Sound.valueOf("NOTE_PLING"), 10f, 10f);
     			    }
     			  new BukkitRunnable() {
+    				  
     				    public void run() {
 
-  		    	destroy();
-  			  firstPlayer.chat("/sw leave");
+  			  			  firstPlayer.chat("/sw leave");
+    				    	new BukkitRunnable() {
+    	    				    public void run() {
+    			  			  ItemJoinAPI ij = new ItemJoinAPI();
+                                ij.getItems(firstPlayer);
+                                
+                  		    	destroy();
+                                firstPlayer.sendMessage("Parabens por vencer a partida! :)");
+    	    		  		    }}.runTaskLater(Main.plugin, 180l);
+    			  			
   		    }}.runTaskLater(Main.plugin, 100l);
     		  }
     	  }
@@ -521,7 +530,11 @@ players12.teleport(Jaulas.getRandomLocation());
     
    Main.getInstance().getEventManager().setRdmAutomatic(null);
 	deleteWorld(Bukkit.getWorld("sw1").getWorldFolder().getAbsoluteFile());
+	new BukkitRunnable() {
+	    public void run() {
     copyWorld(Bukkit.getWorld("sw1copy"), "sw1");
+
+	    }}.runTaskLater(Main.plugin, 100l);
   }
   public static boolean deleteWorld(File path) {
       if(path.exists()) {

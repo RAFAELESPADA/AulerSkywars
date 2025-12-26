@@ -398,7 +398,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
   	  players12.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
     	players12.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
     	players12.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
-players12.teleport(Jaulas2.getRandomLocation());
+players12.teleport(Jaulas.getRandomLocation());
         Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + players12.getName());
       if (!MainCommand.game.contains(players12.getName())) {
 
@@ -432,10 +432,19 @@ players12.teleport(Jaulas2.getRandomLocation());
     			    	oo.playSound(oo.getLocation(), Sound.valueOf("NOTE_PLING"), 10f, 10f);
     			    }
     			  new BukkitRunnable() {
+    				  
     				    public void run() {
 
-  		    	destroy();
-  			  firstPlayer.chat("/sw leave");
+  			  			  firstPlayer.chat("/sw leave");
+    				    	new BukkitRunnable() {
+    	    				    public void run() {
+    			  			  ItemJoinAPI ij = new ItemJoinAPI();
+                                ij.getItems(firstPlayer);
+                                
+                  		    	destroy();
+                                firstPlayer.sendMessage("Parabens por vencer a partida! :)");
+    	    		  		    }}.runTaskLater(Main.plugin, 180l);
+    			  			
   		    }}.runTaskLater(Main.plugin, 100l);
     		  }
     	  }
@@ -484,32 +493,37 @@ players12.teleport(Jaulas2.getRandomLocation());
       setGameType(GameType.STOPPED);
       iniciou = false;
       star = false;
+      
       for (String s : new ArrayList<>(MainCommand.game)) {
     	  Player p = Bukkit.getPlayer(s);
-
     	  p.sendMessage(ChatColor.RED + "A partida foi finalizada!");
     	  Bukkit.dispatchCommand(p, "sw leave");
     	  org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.quit.world"));
     	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
     	  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
       }
-      for (Player p : Bukkit.getWorld("sw2").getPlayers()) {
-      	  p.sendMessage(ChatColor.RED + "A partida foi finalizada!");
-  Bukkit.dispatchCommand(p, "sw leave");
-  org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.quit.world"));
-  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
-  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
-}
+      for (Player p : Bukkit.getWorld("sw1").getPlayers()) {
+    	  p.sendMessage(ChatColor.RED + "A partida foi finalizada!");
+    	  Bukkit.dispatchCommand(p, "sw leave");
+    	  org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.quit.world"));
+    	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
+    	  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
+      }
+   
       players.clear();
       time = 32;
       pvp = false;
       playersInPvp.clear();
       getPlayers().clear();
     HandlerList.unregisterAll(this.listener);
+    
+   Main.getInstance().getEventManager().setRdmAutomatic(null);
+	Automatic.deleteWorld(Bukkit.getWorld("sw1").getWorldFolder().getAbsoluteFile());
+	new BukkitRunnable() {
+	    public void run() {
+    Automatic.copyWorld(Bukkit.getWorld("sw1copy"), "sw1");
 
-	Automatic.deleteWorld(Bukkit.getWorld("sw2").getWorldFolder().getAbsoluteFile());
-    Automatic.copyWorld(Bukkit.getWorld("sw2copy"), "sw2");
-   Main.getInstance().getEventManager2().setRdmAutomatic(null);
+	    }}.runTaskLater(Main.plugin, 100l);
   }
 
   public void setMaxPlayers(int maxPlayers) {

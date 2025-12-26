@@ -125,6 +125,9 @@ public class Automatic implements Listener {
             if (players.size() == 1 && !iniciou) {
             	iniciou = false;
             	time = 34;
+            	for (Player p2 : players) {
+        		HelixActionBar.send(p2, ChatColor.YELLOW + "Aguardando mais 1 jogador...");
+            	}
             	return;
             }
             else if (!iniciou) {
@@ -388,14 +391,9 @@ players12.teleport(Jaulas.getRandomLocation());
   
     	if (!players.isEmpty()) {
     	    players.forEach(p-> p.sendMessage(ChatColor.GREEN + Main.getInstace().getConfig().getString("MatchStart")));
-
     	}
-    	else {
-    		
-    	     destroy(); 	
-    	}
-    {
-    	  {
+    	
+    	  
     		  
     		  if (players.size() == 1 && star) {
                     
@@ -408,7 +406,12 @@ players12.teleport(Jaulas.getRandomLocation());
 
   		    	destroy();
   			  firstPlayer.chat("/sw leave");
-
+for (String ko : MainCommand.game) {
+	Player k = Bukkit.getPlayer(ko);
+	if (k != null) {
+	k.chat("/sw leave");
+}
+}
   			Automatic.deleteWorld(Bukkit.getWorld("sw1").getWorldFolder().getAbsoluteFile());
   		    Automatic.copyWorld(Bukkit.getWorld("sw1copy"), "sw1");	
   		    }}.runTaskLater(Main.plugin, 100l);
@@ -416,7 +419,7 @@ players12.teleport(Jaulas.getRandomLocation());
     			  return;
     		  }
     	  }
-  	   }}}.runTaskLater(Main.plugin, 40l);
+	  }.runTaskLater(Main.plugin, 40l);
       
     	}
   

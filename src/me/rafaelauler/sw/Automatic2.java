@@ -118,6 +118,9 @@ public class Automatic2 implements Listener {
             if (players.size() == 1 && !iniciou) {
             	iniciou = false;
             	time = 30;
+            	for (Player p2 : players) {
+            		HelixActionBar.send(p2, ChatColor.YELLOW + "Aguardando mais 1 jogador...");
+                	}
             	return;
             }
             else if (!iniciou) {
@@ -350,7 +353,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
   public void queuedPlayers() {
 	  new BukkitRunnable() {
 		    public void run() {
-    
+
     pvp = true;
     if (players == null || players.size() == 0) {
     	destroy();
@@ -358,14 +361,14 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 
     final Player firstPlayer = players.get(0);
     for (Player players12 : players) {
-        Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + players12.getName());
-players12.teleport(Jaulas2.getRandomLocation());
-players12.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
+    	playersInPvp.add(players12);
+    	players12.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
 
-players12.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
-players12.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
-players12.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
-playersInPvp.add(players12);
+    	players12.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+    	players12.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
+    	players12.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
+players12.teleport(Jaulas.getRandomLocation());
+        Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + players12.getName());
       if (!MainCommand.game.contains(players12.getName())) {
 
     	    players.remove(players12);
@@ -377,14 +380,9 @@ playersInPvp.add(players12);
   
     	if (!players.isEmpty()) {
     	    players.forEach(p-> p.sendMessage(ChatColor.GREEN + Main.getInstace().getConfig().getString("MatchStart")));
-
     	}
-    	else {
-    		
-    	     destroy(); 	
-    	}
-    {
-    	  {
+    	
+    	  
     		  
     		  if (players.size() == 1 && star) {
                     
@@ -397,19 +395,23 @@ playersInPvp.add(players12);
 
   		    	destroy();
   			  firstPlayer.chat("/sw leave");
-  			Bukkit.broadcastMessage(Main.getInstance().getConfig().getString("EventWinner").replaceAll("&", "§").replace("%player%", firstPlayer.getName()));
-  			
-
-  			Automatic.deleteWorld(Bukkit.getWorld("sw2").getWorldFolder().getAbsoluteFile());
-  		    Automatic.copyWorld(Bukkit.getWorld("sw2copy"), "sw2");
+for (String ko : MainCommand.game) {
+	Player k = Bukkit.getPlayer(ko);
+	if (k != null) {
+	k.chat("/sw leave");
+}
+}
+  			Automatic.deleteWorld(Bukkit.getWorld("sw1").getWorldFolder().getAbsoluteFile());
+  		    Automatic.copyWorld(Bukkit.getWorld("sw1copy"), "sw1");	
   		    }}.runTaskLater(Main.plugin, 100l);
       	
     			  return;
     		  }
     	  }
-  	   }}}.runTaskLater(Main.plugin, 40l);
+	  }.runTaskLater(Main.plugin, 40l);
       
     	}
+
   
   public void broadcast(String message) {
     for (Player players2 : players) {

@@ -111,7 +111,14 @@ public class Automatic2 implements Listener {
             if (this.gameType == GameType.STOPPED) {
             	return;
             }
-           
+
+            new BukkitRunnable() {
+			    public void run() {
+                  Main.getInstace().CarregarBaus2();
+                  for (Player p : players) {
+                	  TitleAPI.sendTitle(p, 40, 70, 40, ChatColor.GREEN + "Os báus foram reabastecidos!");
+                  }
+			    }}.runTaskLater(Main.plugin, 20 * 60 * 10l);
             if (players.size() >= 2 && !iniciou) {
             	iniciou = true;
             }
@@ -290,6 +297,13 @@ if (e.getEntity().getKiller() == null) {
               p.spigot().respawn();
               e.getDrops().clear();
 
+        	  int currentKills = Main.getInstace().getConfig().getInt("players." + d.getUniqueId() + ".kills", 0);
+              Main.getInstance().getConfig().set("players." + d.getUniqueId() + ".kills", currentKills + 1);
+              Main.getInstace().saveConfig();
+
+        	  int currentDeaths = Main.getInstace().getConfig().getInt("players." + d.getUniqueId() + ".deaths", 0);
+              Main.getInstance().getConfig().set("players." + d.getUniqueId() + ".deaths", currentDeaths + 1);
+              Main.getInstace().saveConfig();
               p.chat("/sw leave");
               p.sendMessage(Main.getInstance().getConfig().getString("PlayerKilledMessage").replaceAll("&", "§").replace("%player%", p.getName()));
               Automatic2.this.broadcast(Main.getInstance().getConfig().getString("PlayerKilledBroadcast").replaceAll("&", "§").replace("%player%", p.getName()).replace("%killer%", d.getName()));
@@ -421,6 +435,10 @@ players12.teleport(Jaulas.getRandomLocation());
     		  if (players.size() == 1 && star) {
                     
       			    TitleAPI.sendTitle(firstPlayer, 50, 50, 50, "§6§lVITÓRIA!");
+
+                	  int currentDeaths = Main.getInstace().getConfig().getInt("players." + firstPlayer.getUniqueId() + ".wins", 0);
+                      Main.getInstance().getConfig().set("players." + firstPlayer.getUniqueId() + ".wins", currentDeaths + 1);
+                      Main.getInstace().saveConfig();
       			  for (String ko : MainCommand.game) {
       				Player k = Bukkit.getPlayer(ko);
       				if (k != null) {
@@ -523,7 +541,8 @@ players12.teleport(Jaulas.getRandomLocation());
 	    public void run() {
 	    	   Automatic.getMVWorldManager().deleteWorld("sw2");
 	    	Automatic.getMVWorldManager().cloneWorld("sw2copy", "sw2", "VoidGen");
-
+	    	Main main2 = new Main();
+			main2.CarregarBaus2();
 	    }}.runTaskLater(Main.plugin, 100l);
  }
 

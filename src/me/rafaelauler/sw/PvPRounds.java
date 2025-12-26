@@ -121,7 +121,17 @@ static Main plugin;
 
         return (Automatic3.players == null ? "0" : String.valueOf(Automatic3.players.size()));
       }
-
+if (indentifier.equals("kills")) {
+	return String.valueOf(Main.getInstace().getConfig().getInt("players." + p.getUniqueId() + ".kills"));
+                  
+}
+if (indentifier.equals("deaths")) {
+	return String.valueOf(Main.getInstace().getConfig().getInt("players." + p.getUniqueId() + ".deaths"));
+                  
+}
+if (indentifier.equals("wins")) {
+	return String.valueOf(Main.getInstace().getConfig().getInt("players." + p.getUniqueId() + ".wins"));
+}
     if (indentifier.equals("players_total")) {
 
         return String.valueOf(MainCommand.game.size());

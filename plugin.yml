@@ -2,8 +2,9 @@ name: AulerSkywars
 version: 1.0.0
 author: Rafael Auler
 main: me.rafaelauler.sw.Main
-description: PvPRounds plugin
+description: Simple skywars plugin
 depend: [Vault, Multiverse-Core]
+load: POSTWORLD
 softdepend: [ItemJoin, PlaceholderAPI]
 
 commands:

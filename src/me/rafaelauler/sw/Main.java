@@ -43,7 +43,7 @@ import org.bukkit.inventory.ItemStack;
 /*     */   public static Main instance;
 
 /*     */   private File cf1;
-/*  77 */   public static String pluginName = "PvPRounds";
+/*  77 */   public static String pluginName = "AulerSkywars";
 /*     */   
 /*  98 */   public static File file_x1 = new File("plugins/AulerSkywars", "1v1.yml");
 /*     */ 
@@ -163,7 +163,7 @@ public void onDisable()
     }
 
 Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #1 DESCARREGADOS");
-    for(Chunk c2 : Bukkit.getWorld("sw3").getLoadedChunks()){
+    for(Chunk c2 : Bukkit.getWorld("sw2").getLoadedChunks()){
         for(BlockState b2 : c2.getTileEntities()){
             if(b2 instanceof Chest){            	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
             inventory.clear();
@@ -267,6 +267,15 @@ Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #3 DESCARREGADOS");
 	CarregarBaus();
 	CarregarBaus2();
 	CarregarBaus3();
+
+	Automatic.getMVWorldManager().deleteWorld("sw1");
+	Automatic.getMVWorldManager().cloneWorld("sw1copy", "sw1", "VoidGen");
+
+	Automatic.getMVWorldManager().deleteWorld("sw2");
+	Automatic.getMVWorldManager().cloneWorld("sw2copy", "sw2", "VoidGen");
+
+	Automatic.getMVWorldManager().deleteWorld("sw3");
+	Automatic.getMVWorldManager().cloneWorld("sw3copy", "sw3", "VoidGen");
  	Bukkit.getConsoleSender().sendMessage("AULERSKYWARS HAS BEEN ENABLED!");
 
 }

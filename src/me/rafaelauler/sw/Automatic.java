@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -60,6 +61,7 @@ public class Automatic implements Listener {
   private boolean pvp;
   
   private List<Player> playersInPvp = new ArrayList<Player>();
+  public HashMap<Player, Integer> kills = new HashMap<Player, Integer>();
   
   private List<Player> specs;
   public static final List<String> playersIN = new ArrayList<>();
@@ -114,6 +116,14 @@ public class Automatic implements Listener {
             if (this.gameType == GameType.STOPPED) {
             	return;
             }
+            new BukkitRunnable() {
+			    public void run() {
+                  Main.getInstace().CarregarBaus();
+                  for (Player p : players) {
+                	  TitleAPI.sendTitle(p, 40, 70, 40, ChatColor.GREEN + "Os báus foram reabastecidos!");
+                  }
+			    }}.runTaskLater(Main.plugin, 20 * 60 * 10l);
+			    
             for (Player w : Bukkit.getWorld("sw1").getPlayers()) {
             if (!players.contains(w)) {
             if (MainCommand.game.contains(w.getName())) {	
@@ -283,6 +293,8 @@ if (e.getEntity().getKiller() == null) {
               p1.spigot().respawn();
               playersInPvp.remove(p1);
               players.remove(p1);
+              
+              kills.put(p1, 1);
               p1.spigot().respawn();
               e.getDrops().clear();
               p1.sendMessage(Main.getInstance().getConfig().getString("PlayerKilledMessage").replaceAll("&", "§").replace("%player%", p1.getName()));
@@ -300,6 +312,13 @@ if (e.getEntity().getKiller() == null) {
             	if (!iniciou) {
             		return;
             	}
+            	  int currentKills = Main.getInstace().getConfig().getInt("players." + d.getUniqueId() + ".kills", 0);
+                  Main.getInstance().getConfig().set("players." + d.getUniqueId() + ".kills", currentKills + 1);
+                  Main.getInstace().saveConfig();
+
+            	  int currentDeaths = Main.getInstace().getConfig().getInt("players." + d.getUniqueId() + ".deaths", 0);
+                  Main.getInstance().getConfig().set("players." + d.getUniqueId() + ".deaths", currentDeaths + 1);
+                  Main.getInstace().saveConfig();
               playersInPvp.remove(p);
               players.remove(p);
               p.spigot().respawn();
@@ -437,6 +456,10 @@ players12.teleport(Jaulas.getRandomLocation());
     		  if (players.size() == 1 && star) {
                     
       			    TitleAPI.sendTitle(firstPlayer, 50, 50, 50, "§6§lVITÓRIA!");
+
+                	  int currentDeaths = Main.getInstace().getConfig().getInt("players." + firstPlayer.getUniqueId() + ".wins", 0);
+                      Main.getInstance().getConfig().set("players." + firstPlayer.getUniqueId() + ".wins", currentDeaths + 1);
+                      Main.getInstace().saveConfig();
       			  for (String ko : MainCommand.game) {
       				Player k = Bukkit.getPlayer(ko);
       				if (k != null) {
@@ -541,7 +564,8 @@ players12.teleport(Jaulas.getRandomLocation());
 	    public void run() {
 	    	getMVWorldManager().deleteWorld("sw1");
 	    	Automatic.getMVWorldManager().cloneWorld("sw1copy", "sw1", "VoidGen");
-
+	    	Main main2 = new Main();
+			main2.CarregarBaus();
 	    }}.runTaskLater(Main.plugin, 100l);
   }
   public static boolean deleteWorld(File path) {

@@ -6,6 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 
 
 public class Eventos implements Listener {
@@ -25,6 +26,20 @@ public class Eventos implements Listener {
 	      e.setCancelled(true);
 	    }
 	  }
+	  @EventHandler
+	  public void aoentrar(PlayerJoinEvent e) {
+		  if (Main.getInstace().getConfig().getString("players." + e.getPlayer().getUniqueId()) == null) {
+			  Main.getInstace().getConfig().set("players." + e.getPlayer().getUniqueId() + ".kills", 0);
+
+			  Main.getInstace().getConfig().set("players." + e.getPlayer().getUniqueId() + ".deaths", 0);
+
+			  Main.getInstace().getConfig().set("players." + e.getPlayer().getUniqueId() + ".wins", 0);
+			  Bukkit.getConsoleSender().sendMessage("CRIADO COM SUCESSO PERFIL DO SKYWARS DE: " + e.getPlayer().getName());
+		  }
+	  
+	    }
+
+	  
 
 	  
 	  @EventHandler

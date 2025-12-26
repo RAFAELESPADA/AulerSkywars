@@ -264,9 +264,6 @@ Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #3 DESCARREGADOS");
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
-	CarregarBaus();
-	CarregarBaus2();
-	CarregarBaus3();
 
 	Automatic.getMVWorldManager().deleteWorld("sw1");
 	Automatic.getMVWorldManager().cloneWorld("sw1copy", "sw1", "VoidGen");
@@ -276,6 +273,9 @@ Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #3 DESCARREGADOS");
 
 	Automatic.getMVWorldManager().deleteWorld("sw3");
 	Automatic.getMVWorldManager().cloneWorld("sw3copy", "sw3", "VoidGen");
+	CarregarBaus();
+	CarregarBaus2();
+	CarregarBaus3();
  	Bukkit.getConsoleSender().sendMessage("AULERSKYWARS HAS BEEN ENABLED!");
 
 }

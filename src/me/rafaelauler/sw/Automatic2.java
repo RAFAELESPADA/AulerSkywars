@@ -376,7 +376,6 @@ playersInPvp.add(players12);
   
   
     	if (!players.isEmpty()) {
-    		playersInPvp.clear();
     	    players.forEach(p-> p.sendMessage(ChatColor.GREEN + Main.getInstace().getConfig().getString("MatchStart")));
 
     	}

@@ -105,7 +105,9 @@ p.playSound(p.getLocation(), Sound.valueOf("LEVEL_UP"), 10f, 10f);
           Automatic2.players.add(p);
           a1.putInEvent(p);
 
-a1.setGameType(Automatic2.GameType.STARTING);
+          if (a1.getGameType() == Automatic2.GameType.STOPPED) {
+        	  a1.setGameType(Automatic2.GameType.STARTING);
+        	  }
           p.getInventory().clear();
           p.teleport(new Location(Bukkit.getWorld("swlobby"), 5169, 67, 6448));
 /*     */ 

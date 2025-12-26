@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -388,8 +387,6 @@ players12.teleport(Jaulas.getRandomLocation());
   
   
     	if (!players.isEmpty()) {
-    		Random r = new Random();
-    		playersInPvp.clear();
     	    players.forEach(p-> p.sendMessage(ChatColor.GREEN + Main.getInstace().getConfig().getString("MatchStart")));
 
     	}

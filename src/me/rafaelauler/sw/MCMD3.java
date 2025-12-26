@@ -104,8 +104,9 @@ if (Automatic3.star) {
 p.playSound(p.getLocation(), Sound.valueOf("LEVEL_UP"), 10f, 10f);
 /*     */ TitleAPI.sendTitle(p, 80, 80, 80, "§b§lSKYWARS", "§fVocê entrou em uma sala!");
           a3.putInEvent(p);
-
-a3.setGameType(Automatic3.GameType.STARTING);
+          if (a3.getGameType() == Automatic3.GameType.STOPPED) {
+        	  a3.setGameType(Automatic3.GameType.STARTING);
+        	  }
           p.getInventory().clear();
           p.teleport(new Location(Bukkit.getWorld("swlobby"), 5169, 67, 2447));
 /*     */ 

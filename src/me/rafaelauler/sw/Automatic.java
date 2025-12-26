@@ -47,7 +47,7 @@ public class Automatic implements Listener {
   
   private Listener listener;
   
-  public static List<Player> players;
+  public static List<Player> players = new ArrayList<Player>();;
   
   private int maxPlayers;
   public static boolean iniciou;
@@ -56,14 +56,13 @@ public class Automatic implements Listener {
   
   private boolean pvp;
   
-  private List<Player> playersInPvp;
+  private List<Player> playersInPvp = new ArrayList<Player>();
   
   private List<Player> specs;
   public static final List<String> playersIN = new ArrayList<>();
   public Automatic() {
     this.main = Main.getInstance();
     time = 32;
-    players = new ArrayList<Player>();
     this.gameType = GameType.STARTING;
     this.maxPlayers = 60;
     this.full = false;
@@ -126,6 +125,7 @@ public class Automatic implements Listener {
             if (players.size() == 1 && !iniciou) {
             	iniciou = false;
             	time = 34;
+            	return;
             }
             else if (!iniciou) {
             	time = 30;
@@ -408,7 +408,6 @@ players12.teleport(Jaulas.getRandomLocation());
 
   		    	destroy();
   			  firstPlayer.chat("/sw leave");
-  			Bukkit.getServer().unloadWorld("sw1", false);
 
   			Automatic.deleteWorld(Bukkit.getWorld("sw1").getWorldFolder().getAbsoluteFile());
   		    Automatic.copyWorld(Bukkit.getWorld("sw1copy"), "sw1");	
@@ -480,7 +479,6 @@ players12.teleport(Jaulas.getRandomLocation());
     HandlerList.unregisterAll(this.listener);
     
    Main.getInstance().getEventManager().setRdmAutomatic(null);
-	Bukkit.getServer().unloadWorld("sw1", false);
 	deleteWorld(Bukkit.getWorld("sw1").getWorldFolder().getAbsoluteFile());
     copyWorld(Bukkit.getWorld("sw1copy"), "sw1");
   }

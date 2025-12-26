@@ -42,7 +42,7 @@ public class Automatic2 implements Listener {
   
   private Listener listener;
   
-  public static List<Player> players;
+  public static List<Player> players = new ArrayList<Player>();;
   
   private int maxPlayers;
   public static boolean iniciou;
@@ -51,14 +51,13 @@ public class Automatic2 implements Listener {
   
   private boolean pvp;
   
-  private List<Player> playersInPvp;
+  private List<Player> playersInPvp = new ArrayList<Player>();;
   
   private List<Player> specs;
   public static final List<String> playersIN = new ArrayList<>();
   public Automatic2() {
     this.main = Main.getInstance();
     time = 32;
-    players = new ArrayList<Player>();
     this.gameType = GameType.STARTING;
     this.maxPlayers = 60;
     this.full = false;
@@ -119,6 +118,7 @@ public class Automatic2 implements Listener {
             if (players.size() == 1 && !iniciou) {
             	iniciou = false;
             	time = 30;
+            	return;
             }
             else if (!iniciou) {
             	time = 30;
@@ -398,7 +398,7 @@ playersInPvp.add(players12);
   		    	destroy();
   			  firstPlayer.chat("/sw leave");
   			Bukkit.broadcastMessage(Main.getInstance().getConfig().getString("EventWinner").replaceAll("&", "§").replace("%player%", firstPlayer.getName()));
-  			Bukkit.getServer().unloadWorld("sw2", false);
+  			
 
   			Automatic.deleteWorld(Bukkit.getWorld("sw2").getWorldFolder().getAbsoluteFile());
   		    Automatic.copyWorld(Bukkit.getWorld("sw2copy"), "sw2");
@@ -467,7 +467,6 @@ playersInPvp.add(players12);
       playersInPvp.clear();
       getPlayers().clear();
     HandlerList.unregisterAll(this.listener);
-	Bukkit.getServer().unloadWorld("sw2", false);
 
 	Automatic.deleteWorld(Bukkit.getWorld("sw2").getWorldFolder().getAbsoluteFile());
     Automatic.copyWorld(Bukkit.getWorld("sw2copy"), "sw2");

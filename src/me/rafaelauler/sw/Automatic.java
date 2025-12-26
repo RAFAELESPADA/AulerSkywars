@@ -529,9 +529,6 @@ players12.teleport(Jaulas.getRandomLocation());
     HandlerList.unregisterAll(this.listener);
     
    Main.getInstance().getEventManager().setRdmAutomatic(null);
-   if (Bukkit.getWorld("sw1").getWorldFolder().getAbsoluteFile().exists()) {
-		Automatic.deleteWorld(Bukkit.getWorld("sw1").getWorldFolder().getAbsoluteFile());
-	   }
 	new BukkitRunnable() {
 	    public void run() {
     copyWorld(Bukkit.getWorld("sw1copy"), "sw1");

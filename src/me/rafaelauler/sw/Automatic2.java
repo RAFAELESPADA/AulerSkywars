@@ -111,14 +111,6 @@ public class Automatic2 implements Listener {
             if (this.gameType == GameType.STOPPED) {
             	return;
             }
-
-            new BukkitRunnable() {
-			    public void run() {
-                  Main.getInstace().CarregarBaus2();
-                  for (Player p : players) {
-                	  TitleAPI.sendTitle(p, 40, 70, 40, ChatColor.GREEN + "Os báus foram reabastecidos!");
-                  }
-			    }}.runTaskLater(Main.plugin, 20 * 60 * 10l);
             if (players.size() >= 2 && !iniciou) {
             	iniciou = true;
             }
@@ -402,7 +394,14 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
     	destroy();
     	return;
     }
-    
+
+    new BukkitRunnable() {
+	    public void run() {
+          Main.getInstace().CarregarBaus2();
+          for (Player p : players) {
+        	  TitleAPI.sendTitle(p, 40, 70, 40, ChatColor.GREEN + "Os báus foram reabastecidos!");
+          }
+	    }}.runTaskTimer(Main.plugin, 20 * 60 * 10l, 10l);
     final Player firstPlayer = players.get(0);
     for (Player players12 : new ArrayList<>(players)) {
     	if (players.size() > 1) {

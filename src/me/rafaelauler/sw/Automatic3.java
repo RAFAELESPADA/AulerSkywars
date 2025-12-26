@@ -519,12 +519,13 @@ players12.teleport(Jaulas.getRandomLocation());
     HandlerList.unregisterAll(this.listener);
     
    Main.getInstance().getEventManager().setRdmAutomatic(null);
+   Automatic.getMVWorldManager().deleteWorld("sw3");
 	new BukkitRunnable() {
 	    public void run() {
-    Automatic.copyWorld(Bukkit.getWorld("sw3copy"), "sw3");
+	    	Automatic.getMVWorldManager().cloneWorld("sw3copy", "sw3", "VoidGen");
 
 	    }}.runTaskLater(Main.plugin, 100l);
-  }
+ }
 
   public void setMaxPlayers(int maxPlayers) {
     this.maxPlayers = maxPlayers;

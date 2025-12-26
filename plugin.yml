@@ -3,7 +3,7 @@ version: 1.0.0
 author: Rafael Auler
 main: me.rafaelauler.sw.Main
 description: PvPRounds plugin
-depend: [Vault]
+depend: [Vault, Multiverse-Core]
 softdepend: [ItemJoin, PlaceholderAPI]
 
 commands:

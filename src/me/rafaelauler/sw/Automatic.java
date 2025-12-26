@@ -27,8 +27,11 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import com.onarandombox.MultiverseCore.MultiverseCore;
 
 import me.RockinChaos.itemjoin.api.ItemJoinAPI;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -100,7 +103,9 @@ public class Automatic implements Listener {
     		   }}
        
     }
-  
+  public static MultiverseCore getMVWorldManager() {
+      return JavaPlugin.getPlugin(MultiverseCore.class);
+  }
           @EventHandler
           public void onUpdate(UpdateEvent e) {
             if (e.getType() != UpdateEvent.UpdateType.SEGUNDO) {
@@ -529,9 +534,11 @@ players12.teleport(Jaulas.getRandomLocation());
     HandlerList.unregisterAll(this.listener);
     
    Main.getInstance().getEventManager().setRdmAutomatic(null);
+
+	getMVWorldManager().deleteWorld("sw1");
 	new BukkitRunnable() {
 	    public void run() {
-    copyWorld(Bukkit.getWorld("sw1copy"), "sw1");
+	    	Automatic.getMVWorldManager().cloneWorld("sw1copy", "sw1", "VoidGen");
 
 	    }}.runTaskLater(Main.plugin, 100l);
   }

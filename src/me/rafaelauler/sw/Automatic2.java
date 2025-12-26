@@ -356,6 +356,8 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 
     pvp = true;
     if (players == null || players.size() == 0) {
+    	Bukkit.broadcastMessage(ChatColor.DARK_RED + "A partida SW2 foi finalizada!");
+    	
     	destroy();
     }
 
@@ -463,6 +465,13 @@ for (String ko : MainCommand.game) {
     	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
     	  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
       }
+      for (Player p : Bukkit.getWorld("sw2").getPlayers()) {
+      	  p.sendMessage(ChatColor.RED + "A partida foi finalizada!");
+  Bukkit.dispatchCommand(p, "sw leave");
+  org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.quit.world"));
+  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
+  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
+}
       players.clear();
       time = 32;
       pvp = false;

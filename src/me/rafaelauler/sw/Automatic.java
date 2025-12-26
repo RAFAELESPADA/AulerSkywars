@@ -367,6 +367,8 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 
     pvp = true;
     if (players == null || players.size() == 0) {
+    	Bukkit.broadcastMessage(ChatColor.DARK_RED + "A partida SW1 foi finalizada!");
+    	
     	destroy();
     }
 
@@ -375,7 +377,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
     	playersInPvp.add(players12);
     	players12.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
 
-    	players12.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+  	  players12.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
     	players12.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
     	players12.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
 players12.teleport(Jaulas.getRandomLocation());
@@ -468,6 +470,13 @@ for (String ko : MainCommand.game) {
       for (String s : new ArrayList<>(MainCommand.game)) {
     	  Player p = Bukkit.getPlayer(s);
     	  p.sendMessage(ChatColor.RED + "A partida foi finalizada!");
+    	  Bukkit.dispatchCommand(p, "sw leave");
+    	  org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.quit.world"));
+    	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
+    	  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
+      }
+      for (Player p : Bukkit.getWorld("sw1").getPlayers()) {
+    	      	  p.sendMessage(ChatColor.RED + "A partida foi finalizada!");
     	  Bukkit.dispatchCommand(p, "sw leave");
     	  org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.quit.world"));
     	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 

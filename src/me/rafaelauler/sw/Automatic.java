@@ -266,10 +266,30 @@ if (time == 34 && !star) {
           public void onPlayerDeath(PlayerDeathEvent e) {
             if (!(e.getEntity() instanceof Player))
               return; 
+
+            if (players.contains(e.getEntity())) {
+            	if (!iniciou) {
+            		
+            	}
+if (e.getEntity().getKiller() == null) {
+                Player p1 = e.getEntity();
+              playersInPvp.remove(p1);
+              players.remove(p1);
+              p1.spigot().respawn();
+              playersInPvp.remove(p1);
+              players.remove(p1);
+              p1.spigot().respawn();
+              e.getDrops().clear();
+              p1.sendMessage(Main.getInstance().getConfig().getString("PlayerKilledMessage").replaceAll("&", "§").replace("%player%", p1.getName()));
+              Automatic.this.broadcast(Main.getInstance().getConfig().getString("PlayersLeft").replaceAll("&", "§").replace("%left%", String.valueOf(players.size()))); 	  
+              p1.chat("/sw leave");
+            }
+            }
             if (e.getEntity().getKiller() == null)
               return; 
             Player p = e.getEntity();
             Player d = e.getEntity().getKiller();
+            
             if ((players.contains(d) || players.contains(p)) && 
               playersInPvp.contains(d) && playersInPvp.contains(p) && (MainCommand.game.contains(d.getName()) && MainCommand.game.contains(p.getName()))) {
             	if (!iniciou) {

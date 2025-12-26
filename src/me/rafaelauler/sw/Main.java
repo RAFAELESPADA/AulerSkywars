@@ -71,15 +71,15 @@ public EventManager3 getEventManager3() {
     return this.eventmanager3;
   }
 public void CarregarBaus2() {
+	
 	   Random random = new Random();
 	   int itemsAmount = random.nextInt(chestItemMaxAmount + 1 - chestItemMinAmount) + chestItemMaxAmount;
 	   for(Chunk c2 : Bukkit.getWorld("sw2").getLoadedChunks()){
 	          for(BlockState b2 : c2.getTileEntities()){
 	              if(b2 instanceof Chest){            	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
 	              
-	              
 	              Chest chest = (Chest) b2;
-	              
+	              chest.getInventory().clear();
 	              for (int i2 = 0; i2 < itemsAmount; i2++) {
 	                  int slot = random.nextInt(inventory.getSize());
 
@@ -90,10 +90,9 @@ public void CarregarBaus2() {
 	chest.getInventory().setItem( slot, randomItem);
 	}                                           
 	              }
-
-Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #2 CARREGADOS");
+	          }
 	  }
-	   }
+	   
 }
 public void CarregarBaus3() {
 
@@ -106,7 +105,8 @@ public void CarregarBaus3() {
               
               
               Chest chest = (Chest) b3;
-              
+
+              chest.getInventory().clear();
               for (int i2 = 0; i2 < itemsAmount; i2++) {
                   int slot = random.nextInt(inventory.getSize());
 
@@ -118,9 +118,9 @@ chest.getInventory().setItem( slot, randomItem);
 }
 
             }
-
-Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #3 CARREGADOS");}
+}
     }
+
 }
 public void CarregarBaus() {
 	   Random random = new Random();
@@ -133,7 +133,8 @@ public void CarregarBaus() {
                 
           
                                     Chest chest = (Chest) b;
-                                    
+
+                  	              chest.getInventory().clear();
                                     for (int i2 = 0; i2 < itemsAmount; i2++) {
                                         int slot = random.nextInt(inventory.getSize());
 
@@ -144,8 +145,6 @@ public void CarregarBaus() {
     chest.getInventory().setItem( slot, randomItem);
           }
       }   
-
-Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #1 CARREGADOS");
       }}
 
 

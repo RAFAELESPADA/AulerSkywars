@@ -34,6 +34,7 @@ public class Eventos implements Listener {
 			  Main.getInstace().getConfig().set("players." + e.getPlayer().getUniqueId() + ".deaths", 0);
 
 			  Main.getInstace().getConfig().set("players." + e.getPlayer().getUniqueId() + ".wins", 0);
+			  Main.getInstance().saveConfig();
 			  Bukkit.getConsoleSender().sendMessage("CRIADO COM SUCESSO PERFIL DO SKYWARS DE: " + e.getPlayer().getName());
 		  }
 	  

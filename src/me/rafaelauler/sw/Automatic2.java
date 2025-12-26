@@ -301,8 +301,8 @@ if (e.getEntity().getKiller() == null) {
               Main.getInstance().getConfig().set("players." + d.getUniqueId() + ".kills", currentKills + 1);
               Main.getInstace().saveConfig();
 
-        	  int currentDeaths = Main.getInstace().getConfig().getInt("players." + d.getUniqueId() + ".deaths", 0);
-              Main.getInstance().getConfig().set("players." + d.getUniqueId() + ".deaths", currentDeaths + 1);
+        	  int currentDeaths = Main.getInstace().getConfig().getInt("players." + p.getUniqueId() + ".deaths", 0);
+              Main.getInstance().getConfig().set("players." + p.getUniqueId() + ".deaths", currentDeaths + 1);
               Main.getInstace().saveConfig();
               p.chat("/sw leave");
               p.sendMessage(Main.getInstance().getConfig().getString("PlayerKilledMessage").replaceAll("&", "§").replace("%player%", p.getName()));

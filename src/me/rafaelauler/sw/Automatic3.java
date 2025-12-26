@@ -197,9 +197,13 @@ if (time == 34 && !star) {
                time = 32;
               } 
               if (!star) {
-            	  if (time > 0) {
+            	  if (time > 0  && players.size() > 1) {
              time = time - 1;
-              }
+            	  }
+             else if (players.size() == 1) {
+            	 time = 32;
+             }
+              
              if (!pvp && star) {
              queuedPlayers();
              }
@@ -369,13 +373,14 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
     
     final Player firstPlayer = players.get(0);
     for (Player players12 : new ArrayList<>(players)) {
+    	if (players.size() > 1) {
     	playersInPvp.add(players12);
     	players12.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
 
   	  players12.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
     	players12.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
     	players12.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
-players12.teleport(Jaulas.getRandomLocation());
+players12.teleport(Jaulas3.getRandomLocation());
         Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + players12.getName());
       if (!MainCommand.game.contains(players12.getName())) {
 
@@ -384,11 +389,12 @@ players12.teleport(Jaulas.getRandomLocation());
     	    players12.sendMessage("Ocorreu um erro com sua conexão ao skywars");
       }
     }
+    }
     
       
   
   
-    	if (!players.isEmpty()) {
+    	if (!players.isEmpty() && players.size() > 1) {
     	    players.forEach(p-> p.sendMessage(ChatColor.GREEN + Main.getInstace().getConfig().getString("MatchStart")));
     	}
     	
@@ -397,6 +403,13 @@ players12.teleport(Jaulas.getRandomLocation());
     		  if (players.size() == 1 && star) {
                     
       			    TitleAPI.sendTitle(firstPlayer, 50, 50, 50, "§6§lVITÓRIA!");
+      			  for (String ko : MainCommand.game) {
+      				Player k = Bukkit.getPlayer(ko);
+      				if (k != null) {
+      					if (k != firstPlayer) {
+      				k.chat("/sw leave");
+      			}
+      			}
       			  for (Player oo : Bukkit.getOnlinePlayers()) {
     			    	oo.playSound(oo.getLocation(), Sound.valueOf("NOTE_PLING"), 10f, 10f);
     			    }
@@ -405,19 +418,12 @@ players12.teleport(Jaulas.getRandomLocation());
 
   		    	destroy();
   			  firstPlayer.chat("/sw leave");
-for (String ko : MainCommand.game) {
-	Player k = Bukkit.getPlayer(ko);
-	if (k != null) {
-	k.chat("/sw leave");
-}
-}
   		    }}.runTaskLater(Main.plugin, 100l);
     		  }
     	  }
-	  }.runTaskLater(Main.plugin, 40l);
+		    }}.runTaskLater(Main.plugin, 40l);
       
     	}
-
   
   public void broadcast(String message) {
     for (Player players2 : players) {

@@ -502,14 +502,15 @@ players12.teleport(Jaulas.getRandomLocation());
     	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
     	  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
       }
-      for (Player p : Bukkit.getWorld("sw1").getPlayers()) {
-    	  p.sendMessage(ChatColor.RED + "A partida foi finalizada!");
-    	  Bukkit.dispatchCommand(p, "sw leave");
-    	  org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.quit.world"));
-    	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
-    	  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
-      }
-   
+      if (Bukkit.getWorld("sw2") != null) {
+          for (Player p : Bukkit.getWorld("sw2").getPlayers()) {
+        	  p.sendMessage(ChatColor.RED + "A partida foi finalizada!");
+        	  Bukkit.dispatchCommand(p, "sw leave");
+        	  org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.quit.world"));
+        	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
+        	  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
+          }
+          }
       players.clear();
       time = 32;
       pvp = false;
@@ -518,9 +519,9 @@ players12.teleport(Jaulas.getRandomLocation());
     HandlerList.unregisterAll(this.listener);
     
    Main.getInstance().getEventManager().setRdmAutomatic(null);  
-   Automatic.getMVWorldManager().deleteWorld("sw2");
 	new BukkitRunnable() {
 	    public void run() {
+	    	   Automatic.getMVWorldManager().deleteWorld("sw2");
 	    	Automatic.getMVWorldManager().cloneWorld("sw2copy", "sw2", "VoidGen");
 
 	    }}.runTaskLater(Main.plugin, 100l);

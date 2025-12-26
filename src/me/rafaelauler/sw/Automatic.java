@@ -518,6 +518,7 @@ players12.teleport(Jaulas.getRandomLocation());
     	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
     	  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
       }
+      if (Bukkit.getWorld("sw1") != null) {
       for (Player p : Bukkit.getWorld("sw1").getPlayers()) {
     	  p.sendMessage(ChatColor.RED + "A partida foi finalizada!");
     	  Bukkit.dispatchCommand(p, "sw leave");
@@ -525,7 +526,7 @@ players12.teleport(Jaulas.getRandomLocation());
     	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
     	  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
       }
-   
+      }
       players.clear();
       time = 32;
       pvp = false;
@@ -535,9 +536,10 @@ players12.teleport(Jaulas.getRandomLocation());
     
    Main.getInstance().getEventManager().setRdmAutomatic(null);
 
-	getMVWorldManager().deleteWorld("sw1");
+	
 	new BukkitRunnable() {
 	    public void run() {
+	    	getMVWorldManager().deleteWorld("sw1");
 	    	Automatic.getMVWorldManager().cloneWorld("sw1copy", "sw1", "VoidGen");
 
 	    }}.runTaskLater(Main.plugin, 100l);

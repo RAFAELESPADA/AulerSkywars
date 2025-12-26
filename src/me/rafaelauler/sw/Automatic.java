@@ -2,7 +2,12 @@ package me.rafaelauler.sw;
 
 
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -59,7 +64,7 @@ public class Automatic implements Listener {
   public Automatic() {
     this.main = Main.getInstance();
     time = 32;
-    players = new ArrayList<>();
+    players = new ArrayList<Player>();
     this.gameType = GameType.STARTING;
     this.maxPlayers = 60;
     this.full = false;
@@ -406,10 +411,11 @@ players12.teleport(Jaulas.getRandomLocation());
 
   		    	destroy();
   			  firstPlayer.chat("/sw leave");
-  			Bukkit.broadcastMessage(Main.getInstance().getConfig().getString("EventWinner").replaceAll("&", "§").replace("%player%", firstPlayer.getName()));
-    		Bukkit.getServer().unloadWorld("sw1", false);	
-    		Bukkit.getServer().createWorld(new WorldCreator(Main.getInstance().getDataFolder().getPath() + "\\Maps\\sw1"));
-    				  	   }}.runTaskLater(Main.plugin, 100l);
+  			Bukkit.getServer().unloadWorld("sw1", false);
+
+  			Automatic.deleteWorld(Bukkit.getWorld("sw1").getWorldFolder().getAbsoluteFile());
+  		    Automatic.copyWorld(Bukkit.getWorld("sw1copy"), "sw1");	
+  		    }}.runTaskLater(Main.plugin, 100l);
       	
     			  return;
     		  }
@@ -478,10 +484,56 @@ players12.teleport(Jaulas.getRandomLocation());
     
    Main.getInstance().getEventManager().setRdmAutomatic(null);
 	Bukkit.getServer().unloadWorld("sw1", false);
-	Bukkit.getServer().createWorld(new WorldCreator(Main.getInstance().getDataFolder().getPath() + "\\Maps\\sw1"));
-
+	deleteWorld(Bukkit.getWorld("sw1").getWorldFolder().getAbsoluteFile());
+    copyWorld(Bukkit.getWorld("sw1copy"), "sw1");
   }
-
+  public static boolean deleteWorld(File path) {
+      if(path.exists()) {
+          File files[] = path.listFiles();
+          for(int i=0; i<files.length; i++) {
+              if(files[i].isDirectory()) {
+                  deleteWorld(files[i]);
+              } else {
+                  files[i].delete();
+              }
+          }
+      }
+      return(path.delete());
+}
+  public static void copyWorld(World originalWorld, String newWorldName) {
+      copyFileStructure(originalWorld.getWorldFolder(), new File(Bukkit.getWorldContainer(), newWorldName));
+      new WorldCreator(newWorldName).createWorld();
+}
+  private static void copyFileStructure(File source, File target){
+	    try {
+	        ArrayList<String> ignore = new ArrayList<>(Arrays.asList("uid.dat", "session.lock"));
+	        if(!ignore.contains(source.getName())) {
+	            if(source.isDirectory()) {
+	                if(!target.exists())
+	                    if (!target.mkdirs())
+	                        throw new IOException("Couldn't create world directory!");
+	                String files[] = source.list();
+	                for (String file : files) {
+	                    File srcFile = new File(source, file);
+	                    File destFile = new File(target, file);
+	                    copyFileStructure(srcFile, destFile);
+	                }
+	            } else {
+	                FileInputStream in = new FileInputStream(source);
+	                FileOutputStream out = new FileOutputStream(target);
+	                byte[] buffer = new byte[1024];
+	                int length;
+	                while ((length = in.read(buffer)) > 0)
+	                    out.write(buffer, 0, length);
+	                in.close();
+	                out.close();
+	            }
+	        }
+	    } catch (IOException e) {
+	        throw new RuntimeException(e);
+	    }
+	}
+	 
   public void setMaxPlayers(int maxPlayers) {
     this.maxPlayers = maxPlayers;
   }

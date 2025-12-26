@@ -12,7 +12,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
-import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -59,7 +58,7 @@ public class Automatic3 implements Listener {
   public Automatic3() {
     this.main = Main.getInstance();
     time = 32;
-    players = new ArrayList<>();
+    players = new ArrayList<Player>();
     this.gameType = GameType.STARTING;
     this.maxPlayers = 60;
     this.full = false;
@@ -403,9 +402,12 @@ players.forEach(p -> p.teleport(Jaulas.getLocations2()));
   		    	destroy();
   			  firstPlayer.chat("/sw leave");
   			Bukkit.broadcastMessage(Main.getInstance().getConfig().getString("EventWinner").replaceAll("&", "§").replace("%player%", firstPlayer.getName()));
-    		Bukkit.getServer().unloadWorld("sw3", false);
-    		Bukkit.getServer().createWorld(new WorldCreator(Main.getInstance().getDataFolder().getPath() + "\\Maps\\sw3"));
-    				  	   }}.runTaskLater(Main.plugin, 100l);
+
+  	      World w = Bukkit.getWorld("sw3");
+  	      Bukkit.getServer().unloadWorld(w, false);
+  			Automatic.deleteWorld(Bukkit.getWorld("sw3").getWorldFolder().getAbsoluteFile());
+  		    Automatic.copyWorld(Bukkit.getWorld("sw3copy"), "sw3");
+  		    }}.runTaskLater(Main.plugin, 100l);
       	
     			  return;
     		  }
@@ -470,9 +472,9 @@ players.forEach(p -> p.teleport(Jaulas.getLocations2()));
       playersInPvp.clear();
       getPlayers().clear();	
       World w = Bukkit.getWorld("sw3");
-      Bukkit.getServer().unloadWorld(w, false);
-		Bukkit.getServer().createWorld(new WorldCreator(Main.getInstance().getDataFolder().getPath() + "\\Maps\\sw3"));
-    HandlerList.unregisterAll(this.listener);
+	      Bukkit.getServer().unloadWorld(w, false);
+			Automatic.deleteWorld(Bukkit.getWorld("sw3").getWorldFolder().getAbsoluteFile());
+		    Automatic.copyWorld(Bukkit.getWorld("sw3copy"), "sw3");  HandlerList.unregisterAll(this.listener);
    Main.getInstance().getEventManager3().setRdmAutomatic(null);
   }
 

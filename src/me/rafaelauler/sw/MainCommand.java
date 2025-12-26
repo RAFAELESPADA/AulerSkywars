@@ -78,8 +78,10 @@ public static ArrayList<Player> player = new ArrayList();
 /* 107 */         sender.sendMessage(ChatColor.DARK_AQUA + "§eCreated by Rafael Auler");
 /* 108 */         sender.sendMessage("");
 /* 109 */         sender.sendMessage(ChatColor.DARK_AQUA + " - " + ChatColor.AQUA + "/" + commandLabel + ChatColor.DARK_AQUA + " - " + ChatColor.GRAY + "Main command");
-/* 110 */         sender.sendMessage(ChatColor.DARK_AQUA + " - " + ChatColor.AQUA + "/" + commandLabel + " " + ChatColor.GREEN + "join" + ChatColor.DARK_AQUA + " - " + ChatColor.GRAY + "Join the PVP TOURNAMENT ROOM #1!");
-/* 111 */         sender.sendMessage(ChatColor.DARK_AQUA + " - " + ChatColor.AQUA + "/" + commandLabel + " " + ChatColor.GREEN + "leave" + ChatColor.DARK_AQUA + " - " + ChatColor.GRAY + "Leave the PVP TOURNAMENT ROOM #1!");                              
+/* 110 */         sender.sendMessage(ChatColor.DARK_AQUA + " - " + ChatColor.AQUA + "/" + commandLabel + " " + ChatColor.GREEN + "join" + ChatColor.DARK_AQUA + " - " + ChatColor.GRAY + "Join the SKYWARS LOBBY!");
+/* 111 */         sender.sendMessage(ChatColor.DARK_AQUA + " - " + ChatColor.AQUA + "/" + commandLabel + " " + ChatColor.GREEN + "leave" + ChatColor.DARK_AQUA + " - " + ChatColor.GRAY + "Leave the SKYWARS LOBBY!");   
+/* 111 */         sender.sendMessage(ChatColor.DARK_AQUA + " - " + ChatColor.AQUA + "/" + commandLabel + " " + ChatColor.GREEN + "leave" + ChatColor.DARK_AQUA + " - " + ChatColor.GRAY + "STOP ALL SKYWARS GAMES INSTANCES!");
+/* 111 */         sender.sendMessage(ChatColor.DARK_AQUA + " - " + ChatColor.AQUA + "/" + commandLabel + " " + ChatColor.GREEN + "list" + ChatColor.DARK_AQUA + " - " + ChatColor.GRAY + "List PLAYERS ON SKYWARS!");
 /* 116 */         sender.sendMessage(ChatColor.DARK_AQUA + " - " + ChatColor.AQUA + "/" + commandLabel + " " + ChatColor.GREEN + "info" + ChatColor.DARK_AQUA + " - " + ChatColor.GRAY + "Shows plugin info");
 /* 120 */         sender.sendMessage(ChatColor.DARK_AQUA + "§m------------------------------------------");
 /* 102 */         return true;
@@ -187,7 +189,10 @@ if (args[0].equalsIgnoreCase("list"))
 	Player p = (Player)sender;
 	if (!sender.hasPermission("skywars.list")) {
 		sender.sendMessage("SEM PERMISSÃO!");
-
+		return true;
+	}
+	if (Automatic.players.size() + Automatic2.players.size() + Automatic3.players.size() == 0) {
+		p.sendMessage(ChatColor.RED + "Não há jogadores nas salas de Skywars");
 		return true;
 	}
 	for (Player p1 : Automatic.players) {
@@ -199,10 +204,9 @@ if (args[0].equalsIgnoreCase("list"))
 	for (Player p1 : Automatic3.players) {
 		p.sendMessage(ChatColor.GREEN + "Sala #2 Jogadores: " + ChatColor.YELLOW + p1.getName());
 	}
+	
 		return true;
 	}
-
-
 if (args[0].equalsIgnoreCase("leave"))
 /*     */       {
 	Player p = (Player)sender;

@@ -12,7 +12,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
-import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -59,7 +58,7 @@ public class Automatic2 implements Listener {
   public Automatic2() {
     this.main = Main.getInstance();
     time = 32;
-    players = new ArrayList<>();
+    players = new ArrayList<Player>();
     this.gameType = GameType.STARTING;
     this.maxPlayers = 60;
     this.full = false;
@@ -400,9 +399,11 @@ playersInPvp.add(players12);
   		    	destroy();
   			  firstPlayer.chat("/sw leave");
   			Bukkit.broadcastMessage(Main.getInstance().getConfig().getString("EventWinner").replaceAll("&", "§").replace("%player%", firstPlayer.getName()));
-    		Bukkit.getServer().unloadWorld("sw2", false);
-    		Bukkit.getServer().createWorld(new WorldCreator(Main.getInstance().getDataFolder().getPath() + "\\Maps\\sw2"));
-    				  	   }}.runTaskLater(Main.plugin, 100l);
+  			Bukkit.getServer().unloadWorld("sw2", false);
+
+  			Automatic.deleteWorld(Bukkit.getWorld("sw2").getWorldFolder().getAbsoluteFile());
+  		    Automatic.copyWorld(Bukkit.getWorld("sw2copy"), "sw2");
+  		    }}.runTaskLater(Main.plugin, 100l);
       	
     			  return;
     		  }
@@ -468,8 +469,9 @@ playersInPvp.add(players12);
       getPlayers().clear();
     HandlerList.unregisterAll(this.listener);
 	Bukkit.getServer().unloadWorld("sw2", false);
-	Bukkit.getServer().createWorld(new WorldCreator(Main.getInstance().getDataFolder().getPath() + "\\Maps\\sw2"));
 
+	Automatic.deleteWorld(Bukkit.getWorld("sw2").getWorldFolder().getAbsoluteFile());
+    Automatic.copyWorld(Bukkit.getWorld("sw2copy"), "sw2");
    Main.getInstance().getEventManager2().setRdmAutomatic(null);
   }
 

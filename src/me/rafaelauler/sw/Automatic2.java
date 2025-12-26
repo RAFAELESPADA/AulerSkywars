@@ -517,11 +517,13 @@ players12.teleport(Jaulas.getRandomLocation());
       getPlayers().clear();
     HandlerList.unregisterAll(this.listener);
     
-   Main.getInstance().getEventManager().setRdmAutomatic(null);
-	Automatic.deleteWorld(Bukkit.getWorld("sw1").getWorldFolder().getAbsoluteFile());
+   Main.getInstance().getEventManager().setRdmAutomatic(null);  
+   if (Bukkit.getWorld("sw2").getWorldFolder().getAbsoluteFile().exists()) {
+	Automatic.deleteWorld(Bukkit.getWorld("sw2").getWorldFolder().getAbsoluteFile());
+   }
 	new BukkitRunnable() {
 	    public void run() {
-    Automatic.copyWorld(Bukkit.getWorld("sw1copy"), "sw1");
+    Automatic.copyWorld(Bukkit.getWorld("sw2copy"), "sw2");
 
 	    }}.runTaskLater(Main.plugin, 100l);
   }

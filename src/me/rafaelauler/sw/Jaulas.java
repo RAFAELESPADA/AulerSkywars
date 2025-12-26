@@ -128,6 +128,13 @@ public static final List<ItemStack> items = Arrays.asList(
 
     		new ItemStack(Material.GOLD_SWORD),
 
+    		new ItemStack(Material.STONE_SWORD),
+
+    		new ItemStack(Material.STONE_SWORD),
+    		new ItemStack(Material.STONE_SWORD),
+    		new ItemStack(Material.STONE_SWORD),
+    		new ItemStack(Material.STONE_SWORD),
+    		new ItemStack(Material.STONE_SWORD),
     		new ItemStack(Material.COOKED_BEEF, 16),
     		new ItemStack(Material.IRON_HELMET),
     		new ItemStack(Material.ARROW , 10),

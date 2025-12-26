@@ -372,10 +372,12 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
     	Bukkit.broadcastMessage(ChatColor.DARK_RED + "A partida SW1 foi finalizada!");
     	
     	destroy();
+    	return;
     }
     if (players.size() == 0) {
     	Bukkit.broadcastMessage(ChatColor.DARK_GREEN + "A partida SW1 foi finalizada!");    	
     	destroy();
+    	return;
     }
     
     final Player firstPlayer = players.get(0);

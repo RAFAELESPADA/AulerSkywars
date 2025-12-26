@@ -389,6 +389,8 @@ players12.teleport(Jaulas.getRandomLocation());
       if (!MainCommand.game.contains(players12.getName())) {
 
     	    players.remove(players12);
+    	    players12.chat("/sw leave");
+    	    players12.sendMessage("Ocorreu um erro com sua conexão ao skywars");
       }
     }
     
@@ -418,11 +420,7 @@ for (String ko : MainCommand.game) {
 	k.chat("/sw leave");
 }
 }
-  			Automatic.deleteWorld(Bukkit.getWorld("sw1").getWorldFolder().getAbsoluteFile());
-  		    Automatic.copyWorld(Bukkit.getWorld("sw1copy"), "sw1");	
   		    }}.runTaskLater(Main.plugin, 100l);
-      	
-    			  return;
     		  }
     	  }
 	  }.runTaskLater(Main.plugin, 40l);

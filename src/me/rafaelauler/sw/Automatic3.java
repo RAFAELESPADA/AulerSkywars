@@ -357,18 +357,22 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 		    public void run() {
 
     pvp = true;
-    if (players == null || players.size() == 0) {
-    	Bukkit.broadcastMessage(ChatColor.DARK_RED + "A partida SW3 foi finalizada!");
+    if (players == null) {
+    	Bukkit.broadcastMessage(ChatColor.DARK_RED + "A partida SW1 foi finalizada!");
     	
     	destroy();
     }
-
+    if (players.size() == 0) {
+    	Bukkit.broadcastMessage(ChatColor.DARK_GREEN + "A partida SW1 foi finalizada!");    	
+    	destroy();
+    }
+    
     final Player firstPlayer = players.get(0);
-    for (Player players12 : players) {
+    for (Player players12 : new ArrayList<>(players)) {
     	playersInPvp.add(players12);
     	players12.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
 
-    	players12.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+  	  players12.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
     	players12.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
     	players12.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
 players12.teleport(Jaulas.getRandomLocation());
@@ -376,6 +380,8 @@ players12.teleport(Jaulas.getRandomLocation());
       if (!MainCommand.game.contains(players12.getName())) {
 
     	    players.remove(players12);
+    	    players12.chat("/sw leave");
+    	    players12.sendMessage("Ocorreu um erro com sua conexão ao skywars");
       }
     }
     
@@ -405,11 +411,7 @@ for (String ko : MainCommand.game) {
 	k.chat("/sw leave");
 }
 }
-  			Automatic.deleteWorld(Bukkit.getWorld("sw1").getWorldFolder().getAbsoluteFile());
-  		    Automatic.copyWorld(Bukkit.getWorld("sw1copy"), "sw1");	
   		    }}.runTaskLater(Main.plugin, 100l);
-      	
-    			  return;
     		  }
     	  }
 	  }.runTaskLater(Main.plugin, 40l);

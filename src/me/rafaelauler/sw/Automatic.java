@@ -425,26 +425,26 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
           }
 	    }}.runTaskTimer(Main.plugin, 20 * 60 * 10l, 20l * 60 * 5);
     final Player firstPlayer = players.get(0);
-    for (Player players12 : new ArrayList<>(players)) {
     	if (players.size() > 1 && started == false) {
-    	playersInPvp.add(players12);
-    	players12.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
-  	  players12.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
-    	players12.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
-    	players12.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
-players12.teleport(Jaulas.getRandomLocation());
+    	players.forEach(p-> playersInPvp.add(p));
+    	 players.forEach(p-> p.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET)));
+    	 players.forEach(p-> p.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS)));
+    	 players.forEach(p-> p.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE)));
+    	 players.forEach(p-> p.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS)));
+    	 players.forEach(p-> p.teleport(Jaulas.getRandomLocation()));
 started = true;
 if (!players.isEmpty() && players.size() > 1) {
     players.forEach(p-> p.sendMessage(ChatColor.GREEN + Main.getInstace().getConfig().getString("MatchStart")));
 }
-        Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + players12.getName());
-      if (!MainCommand.game.contains(players12.getName())) {
 
-    	    players.remove(players12);
-    	    players12.chat("/sw leave");
-    	    players12.sendMessage("Ocorreu um erro com sua conexão ao skywars");
+        Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + getPlayers());
+for (Player p : getPlayers()) {
+	if (!MainCommand.game.contains(p.getName())) {
+    	    players.remove(p);
+    	    players.forEach(p2-> p2.chat("/sw leave"));
+    	    players.forEach(p2 -> p2.sendMessage("Ocorreu um erro com sua conexão ao skywars"));
       }
-    }
+}
     }
     
       
@@ -471,7 +471,7 @@ if (!players.isEmpty() && players.size() > 1) {
     			    	oo.playSound(oo.getLocation(), Sound.valueOf("NOTE_PLING"), 10f, 10f);
     			    }
 
-      			  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Marte");
+      			  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Antartica");
     			  new BukkitRunnable() {
     				  
     				    public void run() {

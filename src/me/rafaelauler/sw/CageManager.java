@@ -28,7 +28,7 @@ public class CageManager {
                 center.getBlockY() + b[1],
                 center.getBlockZ() + b[2]
             );
-
+            
             block.setType(Material.GLASS);
             cages.add(block);
         }

@@ -79,6 +79,7 @@ public enum Jaulas {
     public Location getRandomLocation() {
         Vector v = cageVectors.get(ThreadLocalRandom.current().nextInt(cageVectors.size()));
         World world = requireWorld();
+        
         return new Location(world, v.getX(), v.getY(), v.getZ());
     }
 
@@ -93,28 +94,26 @@ public enum Jaulas {
         }
         return locations;
     }
-    public void teleportGroupedByOrder(List<? extends Player> players) {
+    public void teleportByQueueOrder(List<? extends Player> players) {
         if (players == null || players.isEmpty()) return;
 
-        Location base = getRandomLocation();
-
-        double radius = 1.5; // distância entre players
-        double angleStep = Math.PI * 2 / Math.max(players.size(), 1);
+        World world = requireWorld();
 
         for (int i = 0; i < players.size(); i++) {
             Player p = players.get(i);
             if (p == null) continue;
 
-            double angle = i * angleStep;
+            Location target;
 
-            double offsetX = Math.cos(angle) * radius;
-            double offsetZ = Math.sin(angle) * radius;
+            if (i < cageVectors.size()) {
+                Vector v = cageVectors.get(i);
+                target = new Location(world, v.getX(), v.getY(), v.getZ());
+            } else {
+                // Caso tenha mais players do que jaulas
+                target = getRandomLocation();
+            }
 
-            Location loc = base.clone().add(offsetX, 0, offsetZ);
-            loc.setYaw(base.getYaw());
-            loc.setPitch(base.getPitch());
-
-            p.teleport(loc);
+            p.teleport(target);
         }
     }
 

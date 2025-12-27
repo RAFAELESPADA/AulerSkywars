@@ -232,6 +232,10 @@ if (time == 34 && !star) {
              queuedPlayers();
              run = true;
              }
+
+             if (!started && star) {
+                 VerificarWin();
+                 }
             } 
           }
           public void putInEvent2(Player player) {
@@ -295,7 +299,9 @@ if (e.getEntity().getKiller() == null) {
               p1.spigot().respawn();
               playersInPvp.remove(p1);
               players.remove(p1);
+              
               p1.spigot().respawn();
+              VerificarWin();
               p1.sendMessage(Main.getInstance().getConfig().getString("PlayerKilledMessage").replaceAll("&", "§").replace("%player%", p1.getName()));
               Automatic3.this.broadcast(Main.getInstance().getConfig().getString("PlayersLeft").replaceAll("&", "§").replace("%left%", String.valueOf(players.size()))); 	  
               p1.chat("/sw leave");
@@ -325,7 +331,7 @@ if (e.getEntity().getKiller() == null) {
               p.sendMessage(Main.getInstance().getConfig().getString("PlayerKilledMessage").replaceAll("&", "§").replace("%player%", p.getName()));
               Automatic3.this.broadcast(Main.getInstance().getConfig().getString("PlayerKilledBroadcast").replaceAll("&", "§").replace("%player%", p.getName()).replace("%killer%", d.getName()));
               Automatic3.this.broadcast(Main.getInstance().getConfig().getString("PlayersLeft").replaceAll("&", "§").replace("%left%", String.valueOf(players.size())));
-        	  
+              VerificarWin();
 org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.quit.world"));
 /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
 /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
@@ -409,9 +415,49 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 	  }
   }
 
+  public void VerificarWin() {
+	  
+  Player firstPlayer = players.get(0);
+	  if (players.size() == 1 && star) {
+			  if (!rodou) {
+			    TitleAPI.sendTitle(firstPlayer, 50, 50, 50, "§6§lVITÓRIA!");
+
+          	  int currentDeaths = Main.getInstace().getConfig().getInt("players." + firstPlayer.getUniqueId() + ".wins", 0);
+                Main.getInstance().getConfig().set("players." + firstPlayer.getUniqueId() + ".wins", currentDeaths + 1);
+                Main.getInstace().saveConfig();
+			  for (String ko : MainCommand.game) {
+				Player k = Bukkit.getPlayer(ko);
+				if (k != null) {
+					if (k != firstPlayer) {
+				k.chat("/sw leave");
+			}
+			}
+			  for (Player oo : Bukkit.getOnlinePlayers()) {
+			    	oo.playSound(oo.getLocation(), Sound.valueOf("NOTE_PLING"), 10f, 10f);
+			    }
+
+			  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Antartica");
+			
+			  new BukkitRunnable() {
+				  
+				    public void run() {
+
+		  			  firstPlayer.chat("/sw leave");
+				    	new BukkitRunnable() {
+	    				    public void run() {
+			  			  ItemJoinAPI ij = new ItemJoinAPI();
+                          ij.getItems(firstPlayer);
+                          
+            		    	destroy();
+                          firstPlayer.sendMessage("Parabens por vencer a partida! :)");
+	    		  		    }}.runTaskLater(Main.plugin, 180l);
+	    		  		  rodou = true;	
+				    }}.runTaskLater(Main.plugin, 100l);
+
+			  }}}
+  }
   
   public void queuedPlayers() {
-	    final Player firstPlayer = players.get(0);
 	  new BukkitRunnable() {
 		    public void run() {
 
@@ -443,7 +489,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
   	 players.forEach(p-> p.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS)));
   	 List<Player> ordered = new ArrayList<>(players);
 
-  	 Jaulas.SW3.teleportGroupedByOrder(ordered);
+  	 Jaulas.SW3.teleportByQueueOrder(ordered);
   	 for (Player p : ordered) {
   		    CageManager.createCage(p.getLocation());
   		    TitleAPI.sendTitle(p, 40, 40, 40, ChatColor.GREEN + "A partida irá começar em 15 segundos");
@@ -477,44 +523,8 @@ for (Player p : getPlayers()) {
   	
   	  
   		  
-  		  if (players.size() == 1 && star) {
-  			  if (!rodou) {
-    			    TitleAPI.sendTitle(firstPlayer, 50, 50, 50, "§6§lVITÓRIA!");
-
-              	  int currentDeaths = Main.getInstace().getConfig().getInt("players." + firstPlayer.getUniqueId() + ".wins", 0);
-                    Main.getInstance().getConfig().set("players." + firstPlayer.getUniqueId() + ".wins", currentDeaths + 1);
-                    Main.getInstace().saveConfig();
-    			  for (String ko : MainCommand.game) {
-    				Player k = Bukkit.getPlayer(ko);
-    				if (k != null) {
-    					if (k != firstPlayer) {
-    				k.chat("/sw leave");
-    			}
-    			}
-    			  for (Player oo : Bukkit.getOnlinePlayers()) {
-  			    	oo.playSound(oo.getLocation(), Sound.valueOf("NOTE_PLING"), 10f, 10f);
-  			    }
-
-    			  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Antartica");
-    			
-  			  new BukkitRunnable() {
-  				  
-  				    public void run() {
-
-			  			  firstPlayer.chat("/sw leave");
-  				    	new BukkitRunnable() {
-  	    				    public void run() {
-  			  			  ItemJoinAPI ij = new ItemJoinAPI();
-                              ij.getItems(firstPlayer);
-                              
-                		    	destroy();
-                              firstPlayer.sendMessage("Parabens por vencer a partida! :)");
-  	    		  		    }}.runTaskLater(Main.plugin, 180l);
-  	    		  		  rodou = true;	
-  				    }}.runTaskLater(Main.plugin, 100l);
-
-    			  }}
-  		  }}}.runTaskLater(Main.plugin, 20 * 5l);
+  	
+  		  }}.runTaskLater(Main.plugin, 20 * 5l);
 }
   	
   public void broadcast(String message) {

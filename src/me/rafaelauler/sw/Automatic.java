@@ -306,6 +306,7 @@ if (e.getEntity().getKiller() == null) {
                 Player p1 = e.getEntity();
               playersInPvp.remove(p1);
               players.remove(p1);
+              VerificarWin();
               p1.spigot().respawn();
               playersInPvp.remove(p1);
               players.remove(p1);
@@ -325,6 +326,7 @@ if (e.getEntity().getKiller() == null) {
             	if (!iniciou) {
             		return;
             	}
+            	 VerificarWin();
               playersInPvp.remove(p);
               players.remove(p);
               p.spigot().respawn();
@@ -384,6 +386,47 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
             
             e.setCancelled(true);
           }
+          public void VerificarWin() {
+        	  
+        	  Player firstPlayer = players.get(0);
+        		  if (players.size() == 1 && star) {
+        				  if (!rodou) {
+        				    TitleAPI.sendTitle(firstPlayer, 50, 50, 50, "§6§lVITÓRIA!");
+
+        	          	  int currentDeaths = Main.getInstace().getConfig().getInt("players." + firstPlayer.getUniqueId() + ".wins", 0);
+        	                Main.getInstance().getConfig().set("players." + firstPlayer.getUniqueId() + ".wins", currentDeaths + 1);
+        	                Main.getInstace().saveConfig();
+        				  for (String ko : MainCommand.game) {
+        					Player k = Bukkit.getPlayer(ko);
+        					if (k != null) {
+        						if (k != firstPlayer) {
+        					k.chat("/sw leave");
+        				}
+        				}
+        				  for (Player oo : Bukkit.getOnlinePlayers()) {
+        				    	oo.playSound(oo.getLocation(), Sound.valueOf("NOTE_PLING"), 10f, 10f);
+        				    }
+
+        				  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Antartica");
+        				
+        				  new BukkitRunnable() {
+        					  
+        					    public void run() {
+
+        			  			  firstPlayer.chat("/sw leave");
+        					    	new BukkitRunnable() {
+        		    				    public void run() {
+        				  			  ItemJoinAPI ij = new ItemJoinAPI();
+        	                          ij.getItems(firstPlayer);
+        	                          
+        	            		    	destroy();
+        	                          firstPlayer.sendMessage("Parabens por vencer a partida! :)");
+        		    		  		    }}.runTaskLater(Main.plugin, 180l);
+        		    		  		  rodou = true;	
+        					    }}.runTaskLater(Main.plugin, 100l);
+
+        				  }}}
+        	  }
           @EventHandler
           public void onPlayerCommandgPreProcess(PlayerCommandPreprocessEvent e) {
             Player p = e.getPlayer();
@@ -458,7 +501,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
     	 players.forEach(p-> p.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS)));
     	 List<Player> ordered = new ArrayList<>(players);
 
-    	 Jaulas.SW1.teleportGroupedByOrder(ordered);
+    	 Jaulas.SW1.teleportByQueueOrder(ordered);
     	 for (Player p : ordered) {
     		    CageManager.createCage(p.getLocation());
     		    TitleAPI.sendTitle(p, 40, 40, 40, ChatColor.GREEN + "A partida irá começar em 15 segundos");

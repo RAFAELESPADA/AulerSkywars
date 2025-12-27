@@ -271,7 +271,7 @@ if (e.getEntity().getKiller() == null) {
               playersInPvp.remove(p1);
               players.remove(p1);
               p1.spigot().respawn();
-              VerificarWin();
+      
               p1.sendMessage(Main.getInstance().getConfig().getString("PlayerKilledMessage").replaceAll("&", "§").replace("%player%", p1.getName()));
               Automatic2.this.broadcast(Main.getInstance().getConfig().getString("PlayersLeft").replaceAll("&", "§").replace("%left%", String.valueOf(players.size()))); 	  
               p1.chat("/sw leave");
@@ -300,8 +300,7 @@ if (e.getEntity().getKiller() == null) {
               p.chat("/sw leave");
               p.sendMessage(Main.getInstance().getConfig().getString("PlayerKilledMessage").replaceAll("&", "§").replace("%player%", p.getName()));
               Automatic2.this.broadcast(Main.getInstance().getConfig().getString("PlayerKilledBroadcast").replaceAll("&", "§").replace("%player%", p.getName()).replace("%killer%", d.getName()));
-              Automatic2.this.broadcast(Main.getInstance().getConfig().getString("PlayersLeft").replaceAll("&", "§").replace("%left%", String.valueOf(players.size())));
-              VerificarWin();	  
+              Automatic2.this.broadcast(Main.getInstance().getConfig().getString("PlayersLeft").replaceAll("&", "§").replace("%left%", String.valueOf(players.size())));  
 org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.quit.world"));
 /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
 /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
@@ -320,6 +319,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
         	               	   }}}.runTaskLater(Main.plugin, 25l);
             }
             queuedPlayers();
+            VerificarWin();
             }             
           @EventHandler(priority = EventPriority.MONITOR)
           public void onEntityDamageByEntity(EntityDamageByEntityEvent e) {
@@ -481,14 +481,19 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
   	 List<Player> ordered = new ArrayList<>(players);
 
   	 Jaulas.SW2.teleportByQueueOrder(ordered);
-  	 for (Player p : ordered) {
-  		    CageManager.createCage(p.getLocation());
-  		    TitleAPI.sendTitle(p, 40, 40, 40, ChatColor.GREEN + "A partida irá começar em 15 segundos");
-  		    p.playSound(p.getLocation(), Sound.valueOf("CLICK"), 2f, 2f);
-  		}
-  	 new BukkitRunnable() {
-  		    public void run() {
+   	 for (Player p : ordered) {
+		    CageManager.createCage(p.getLocation());
+		    p.getWorld().getBlockAt(new Location(p.getWorld(), p.getLocation().getX(), p.getLocation().getBlockY() - 1, p.getLocation().getZ())).setType(Material.GLASS);
+		    TitleAPI.sendTitle(p, 40, 40, 40, ChatColor.GREEN + "A partida irá começar em 15 segundos");
+		    p.playSound(p.getLocation(), Sound.valueOf("CLICK"), 2f, 2f);
+		}
+	 new BukkitRunnable() {
+		    public void run() {
 CageManager.removeAllCages();
+List<Player> ordered = new ArrayList<>(players);
+for (Player p : ordered) {
+p.getWorld().getBlockAt(new Location(p.getWorld(), p.getLocation().getX(), p.getLocation().getBlockY() - 1, p.getLocation().getZ())).setType(Material.AIR);
+}
 new BukkitRunnable() {
     public void run() {
 started = true;

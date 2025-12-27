@@ -306,7 +306,7 @@ if (e.getEntity().getKiller() == null) {
                 Player p1 = e.getEntity();
               playersInPvp.remove(p1);
               players.remove(p1);
-              VerificarWin();
+            
               p1.spigot().respawn();
               playersInPvp.remove(p1);
               players.remove(p1);
@@ -326,7 +326,7 @@ if (e.getEntity().getKiller() == null) {
             	if (!iniciou) {
             		return;
             	}
-            	 VerificarWin();
+            	
               playersInPvp.remove(p);
               players.remove(p);
               p.spigot().respawn();
@@ -360,6 +360,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
         	               	   }}}.runTaskLater(Main.plugin, 25l);
             }
             queuedPlayers();
+            VerificarWin();
             }   
           
           @EventHandler(priority = EventPriority.MONITOR)
@@ -504,18 +505,23 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
     	 Jaulas.SW1.teleportByQueueOrder(ordered);
     	 for (Player p : ordered) {
     		    CageManager.createCage(p.getLocation());
+    		    p.getWorld().getBlockAt(new Location(p.getWorld(), p.getLocation().getX(), p.getLocation().getBlockY() - 1, p.getLocation().getZ())).setType(Material.GLASS);
     		    TitleAPI.sendTitle(p, 40, 40, 40, ChatColor.GREEN + "A partida irá começar em 15 segundos");
     		    p.playSound(p.getLocation(), Sound.valueOf("CLICK"), 2f, 2f);
     		}
     	 new BukkitRunnable() {
     		    public void run() {
 CageManager.removeAllCages();
+List<Player> ordered = new ArrayList<>(players);
+for (Player p : ordered) {
+p.getWorld().getBlockAt(new Location(p.getWorld(), p.getLocation().getX(), p.getLocation().getBlockY() - 1, p.getLocation().getZ())).setType(Material.AIR);
+}
 new BukkitRunnable() {
     public void run() {
 started = true;
     }}.runTaskLater(Main.plugin, 20 * 6l);
 	    
-    		    }
+    	 }
   	    }.runTaskLater(Main.plugin, 20 * 15l);
  	    }
 

@@ -543,6 +543,7 @@ for (Player p : getPlayers()) {
       players.clear();
       time = 32;
       pvp = false;
+      rodou = false;
       started = false;
       playersInPvp.clear();
       getPlayers().clear();

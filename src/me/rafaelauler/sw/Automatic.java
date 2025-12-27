@@ -10,14 +10,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -31,6 +36,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -64,6 +70,8 @@ public class Automatic implements Listener {
 
   private boolean run = false;
   private boolean rodou = false;
+
+  private boolean rodou2 = false;
   private boolean pvp;
   private boolean started = false;;
   
@@ -388,11 +396,52 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
             
             e.setCancelled(true);
           }
+          public static void throwRandomFirework(Player p) {
+        	    Firework fw = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
+        	    FireworkMeta fwm = fw.getFireworkMeta();
+
+        	    //Our random generator
+        	    Random r = new Random();
+
+        	    //Get the type
+        	    int rt = r.nextInt(5) + 1;
+        	    FireworkEffect.Type type = FireworkEffect.Type.BALL;
+        	    if (rt == 2) type = FireworkEffect.Type.BALL_LARGE;
+        	    if (rt == 3) type = FireworkEffect.Type.BURST;
+        	    if (rt == 4) type = FireworkEffect.Type.CREEPER;
+        	    if (rt == 5) type = FireworkEffect.Type.STAR;
+
+        	    //Get our random colours
+        	    int r1i = r.nextInt(17) + 1;
+        	    int r2i = r.nextInt(17) + 1;
+        	    Color c1 = Color.fromRGB(r1i);
+        	    Color c2 = Color.fromRGB(r2i);
+        	    FireworkEffect effect = FireworkEffect.builder().flicker(r.nextBoolean()).withColor(c1).withFade(c2).with(type).trail(r.nextBoolean()).build();
+
+        	    //Then apply the effect to the meta
+        	    fwm.addEffect(effect);
+
+        	    //Generate some random power and set it
+
+
+        	    //Create our effect with this   int rp = r.nextInt(2) + 1;
+        	    int rp = r.nextInt(2) + 1;
+        	    fwm.setPower(rp);
+
+        	    //Then apply this to our rocket
+        	    fw.setFireworkMeta(fwm);
+        	}
           public void VerificarWin() {
-        	  
+        	  if (players == null || players.size() == 0) {
+        		  return;
+        	  }
         	  Player firstPlayer = players.get(0);
+        	  if (rodou) {
+        		  throwRandomFirework(firstPlayer);
+        		  return;
+        	  }
         		  if (players.size() == 1 && star) {
-        				  if (!rodou) {
+        				  
         				    TitleAPI.sendTitle(firstPlayer, 50, 50, 50, "§6§lVITÓRIA!");
 
         	          	  int currentDeaths = Main.getInstace().getConfig().getInt("players." + firstPlayer.getUniqueId() + ".wins", 0);
@@ -428,7 +477,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
         					    }}.runTaskLater(Main.plugin, 100l);
 
         				  }}}
-        	  }
+        	  
           @EventHandler
           public void onPlayerCommandgPreProcess(PlayerCommandPreprocessEvent e) {
             Player p = e.getPlayer();

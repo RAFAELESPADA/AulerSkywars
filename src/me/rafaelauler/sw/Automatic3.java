@@ -413,47 +413,52 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 	  }
   }
 
-  public void VerificarWin() {
-	  
-  Player firstPlayer = players.get(0);
-	  if (players.size() == 1 && star) {
-			  if (!rodou) {
-			    TitleAPI.sendTitle(firstPlayer, 50, 50, 50, "§6§lVITÓRIA!");
-
-          	  int currentDeaths = Main.getInstace().getConfig().getInt("players." + firstPlayer.getUniqueId() + ".wins", 0);
-                Main.getInstance().getConfig().set("players." + firstPlayer.getUniqueId() + ".wins", currentDeaths + 1);
-                Main.getInstace().saveConfig();
-			  for (String ko : MainCommand.game) {
-				Player k = Bukkit.getPlayer(ko);
-				if (k != null) {
-					if (k != firstPlayer) {
-				k.chat("/sw leave");
-			}
-			}
-			  for (Player oo : Bukkit.getOnlinePlayers()) {
-			    	oo.playSound(oo.getLocation(), Sound.valueOf("NOTE_PLING"), 10f, 10f);
-			    }
-
-			  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Antartica");
-			
-			  new BukkitRunnable() {
+ public void VerificarWin() {
+	  if (players == null || players.size() == 0) {
+		  return;
+	  }
+	  Player firstPlayer = players.get(0);
+	  if (rodou) {
+		  Automatic.throwRandomFirework(firstPlayer);
+		  return;
+	  }
+		  if (players.size() == 1 && star) {
 				  
-				    public void run() {
+				    TitleAPI.sendTitle(firstPlayer, 50, 50, 50, "§6§lVITÓRIA!");
 
-		  			  firstPlayer.chat("/sw leave");
-				    	new BukkitRunnable() {
-	    				    public void run() {
-			  			  ItemJoinAPI ij = new ItemJoinAPI();
-                          ij.getItems(firstPlayer);
-                          
-            		    	destroy();
-                          firstPlayer.sendMessage("Parabens por vencer a partida! :)");
-	    		  		    }}.runTaskLater(Main.plugin, 180l);
-	    		  		  rodou = true;	
-				    }}.runTaskLater(Main.plugin, 100l);
+	          	  int currentDeaths = Main.getInstace().getConfig().getInt("players." + firstPlayer.getUniqueId() + ".wins", 0);
+	                Main.getInstance().getConfig().set("players." + firstPlayer.getUniqueId() + ".wins", currentDeaths + 1);
+	                Main.getInstace().saveConfig();
+				  for (String ko : MainCommand.game) {
+					Player k = Bukkit.getPlayer(ko);
+					if (k != null) {
+						if (k != firstPlayer) {
+					k.chat("/sw leave");
+				}
+				}
+				  for (Player oo : Bukkit.getOnlinePlayers()) {
+				    	oo.playSound(oo.getLocation(), Sound.valueOf("NOTE_PLING"), 10f, 10f);
+				    }
 
-			  }}}
-  }
+				  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Antartica");
+				
+				  new BukkitRunnable() {
+					  
+					    public void run() {
+
+			  			  firstPlayer.chat("/sw leave");
+					    	new BukkitRunnable() {
+		    				    public void run() {
+				  			  ItemJoinAPI ij = new ItemJoinAPI();
+	                          ij.getItems(firstPlayer);
+	                          
+	            		    	destroy();
+	                          firstPlayer.sendMessage("Parabens por vencer a partida! :)");
+		    		  		    }}.runTaskLater(Main.plugin, 180l);
+		    		  		  rodou = true;	
+					    }}.runTaskLater(Main.plugin, 100l);
+
+				  }}}
   
   public void queuedPlayers() {
 	  new BukkitRunnable() {

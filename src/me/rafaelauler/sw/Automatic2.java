@@ -408,10 +408,16 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 	  }
   }
   public void VerificarWin() {
-	  
+	  if (players == null || players.size() == 0) {
+		  return;
+	  }
 	  Player firstPlayer = players.get(0);
+	  if (rodou) {
+		  Automatic.throwRandomFirework(firstPlayer);
+		  return;
+	  }
 		  if (players.size() == 1 && star) {
-				  if (!rodou) {
+				  
 				    TitleAPI.sendTitle(firstPlayer, 50, 50, 50, "§6§lVITÓRIA!");
 
 	          	  int currentDeaths = Main.getInstace().getConfig().getInt("players." + firstPlayer.getUniqueId() + ".wins", 0);
@@ -447,8 +453,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 					    }}.runTaskLater(Main.plugin, 100l);
 
 				  }}}
-	  }
-  
+	  
   public void queuedPlayers() {
 	    final Player firstPlayer = players.get(0);
 	  new BukkitRunnable() {

@@ -367,7 +367,16 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
             
             e.setCancelled(true);
           }
-          
+          @EventHandler
+          public void onPlayerCommandgPreProcess(PlayerCommandPreprocessEvent e) {
+            Player p = e.getPlayer();
+            if (e.getMessage().toLowerCase().startsWith("/") && (e.getMessage().toLowerCase().contains("/lobby") || e.getMessage().toLowerCase().contains("/sw leave")) && star && players.contains(p)) {
+              players.remove(p);
+              queuedPlayers();
+
+              broadcast2(new TextComponent(ChatColor.RED + p.getName() + " desistiu da partida"), Bukkit.getWorld("sw3"));
+          }
+          }
           @EventHandler
           public void onPlayerCommandPreProcess(PlayerCommandPreprocessEvent e) {
             Player p = e.getPlayer();
@@ -422,7 +431,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
           for (Player p : players) {
         	  TitleAPI.sendTitle(p, 40, 70, 40, ChatColor.GREEN + "Os báus foram reabastecidos!");
           }
-	    }}.runTaskTimer(Main.plugin, 20 * 60 * 10l, 10l);
+	    }}.runTaskTimer(Main.plugin, 20 * 60 * 10l, 20l * 60 * 5);
     final Player firstPlayer = players.get(0);
     for (Player players12 : new ArrayList<>(players)) {
     	if (players.size() > 1) {
@@ -469,6 +478,8 @@ players12.teleport(Jaulas.getRandomLocation());
       			  for (Player oo : Bukkit.getOnlinePlayers()) {
     			    	oo.playSound(oo.getLocation(), Sound.valueOf("NOTE_PLING"), 10f, 10f);
     			    }
+
+      			  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Marte");
     			  new BukkitRunnable() {
     				  
     				    public void run() {

@@ -52,7 +52,7 @@ public class Automatic3 implements Listener {
   private boolean pvp;
   private boolean started = false;
   private List<Player> playersInPvp = new ArrayList<Player>();;
-  
+  public boolean rodou = false;
   private List<Player> specs;
   public static final List<String> playersIN = new ArrayList<>();
   public Automatic3() {
@@ -202,7 +202,7 @@ if (time == 34 && !star) {
             	 time = 32;
              }
               
-             if (!pvp && star) {
+             if (!started && star) {
              queuedPlayers();
              }
             } 
@@ -437,7 +437,8 @@ for (Player p : getPlayers()) {
     	  
     		  
     		  if (players.size() == 1 && star) {
-                    
+    			  
+                    if (!rodou) {
       			    TitleAPI.sendTitle(firstPlayer, 50, 50, 50, "§6§lVITÓRIA!");
 
                 	  int currentDeaths = Main.getInstace().getConfig().getInt("players." + firstPlayer.getUniqueId() + ".wins", 0);
@@ -455,6 +456,8 @@ for (Player p : getPlayers()) {
     			    }
 
       			  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Antartica");
+      			 
+      			  }
     			  new BukkitRunnable() {
     				  
     				    public void run() {
@@ -468,7 +471,7 @@ for (Player p : getPlayers()) {
                   		    	destroy();
                                 firstPlayer.sendMessage("Parabens por vencer a partida! :)");
     	    		  		    }}.runTaskLater(Main.plugin, 180l);
-    			  			
+    	    		  		  rodou = true;
   		    }}.runTaskLater(Main.plugin, 100l);
     		  }
     	  }
@@ -550,8 +553,8 @@ for (Player p : getPlayers()) {
 	    public void run() {
 	    	   Automatic.getMVWorldManager().deleteWorld("sw3");
 	    	Automatic.getMVWorldManager().cloneWorld("sw3copy", "sw3", "VoidGen");
-	    	Main main2 = new Main();
-			main2.CarregarBaus3();
+	   
+			Main.getInstace().CarregarBaus3();
 	    }}.runTaskLater(Main.plugin, 100l);
  }
 

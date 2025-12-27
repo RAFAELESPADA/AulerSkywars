@@ -57,7 +57,8 @@ public class Automatic implements Listener {
   public static boolean iniciou;
   public static boolean star = false;
   private boolean full;
-  
+
+  private boolean rodou = false;
   private boolean pvp;
   private boolean started = false;;
   
@@ -217,7 +218,7 @@ if (time == 34 && !star) {
                   else if (players.size() == 1) {
                  	 time = 32;
                   }
-             if (!pvp && star) {
+             if (!started && star) {
              queuedPlayers();
             
              }
@@ -454,7 +455,7 @@ for (Player p : getPlayers()) {
     	  
     		  
     		  if (players.size() == 1 && star) {
-                    
+    			  if (!rodou) {
       			    TitleAPI.sendTitle(firstPlayer, 50, 50, 50, "§6§lVITÓRIA!");
 
                 	  int currentDeaths = Main.getInstace().getConfig().getInt("players." + firstPlayer.getUniqueId() + ".wins", 0);
@@ -472,6 +473,7 @@ for (Player p : getPlayers()) {
     			    }
 
       			  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Antartica");
+      			
     			  new BukkitRunnable() {
     				  
     				    public void run() {
@@ -485,11 +487,11 @@ for (Player p : getPlayers()) {
                   		    	destroy();
                                 firstPlayer.sendMessage("Parabens por vencer a partida! :)");
     	    		  		    }}.runTaskLater(Main.plugin, 180l);
-    			  			
+    	    		  		  rodou = true;	
   		    }}.runTaskLater(Main.plugin, 100l);
     		  }
     	  }
-		    }}.runTaskLater(Main.plugin, 40l);
+		    }}}.runTaskLater(Main.plugin, 40l);
       
     	}
   

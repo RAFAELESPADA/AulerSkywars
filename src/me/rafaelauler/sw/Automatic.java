@@ -426,15 +426,17 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 	    }}.runTaskTimer(Main.plugin, 20 * 60 * 10l, 20l * 60 * 5);
     final Player firstPlayer = players.get(0);
     for (Player players12 : new ArrayList<>(players)) {
-    	if (players.size() > 1 && !started) {
+    	if (players.size() > 1 && started == false) {
     	playersInPvp.add(players12);
     	players12.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
-
   	  players12.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
     	players12.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
     	players12.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
 players12.teleport(Jaulas.getRandomLocation());
 started = true;
+if (!players.isEmpty() && players.size() > 1) {
+    players.forEach(p-> p.sendMessage(ChatColor.GREEN + Main.getInstace().getConfig().getString("MatchStart")));
+}
         Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + players12.getName());
       if (!MainCommand.game.contains(players12.getName())) {
 
@@ -447,10 +449,7 @@ started = true;
     
       
   
-  
-    	if (!players.isEmpty() && players.size() > 1) {
-    	    players.forEach(p-> p.sendMessage(ChatColor.GREEN + Main.getInstace().getConfig().getString("MatchStart")));
-    	}
+
     	
     	  
     		  

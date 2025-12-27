@@ -407,10 +407,12 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 	    }}.runTaskTimer(Main.plugin, 20 * 60 * 10l, 20l * 60 * 5);
     final Player firstPlayer = players.get(0);
     for (Player players12 : new ArrayList<>(players)) {
-    	if (players.size() > 1 && !started) {
+    	if (players.size() > 1 && started == false) {
     	playersInPvp.add(players12);
     	players12.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
-
+    	if (!players.isEmpty() && players.size() > 1) {
+    	    players.forEach(p-> p.sendMessage(ChatColor.GREEN + Main.getInstace().getConfig().getString("MatchStart")));
+    	}
   	  players12.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
     	players12.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
     	players12.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
@@ -429,9 +431,7 @@ started = true;
       
   
   
-    	if (!players.isEmpty() && players.size() > 1) {
-    	    players.forEach(p-> p.sendMessage(ChatColor.GREEN + Main.getInstace().getConfig().getString("MatchStart")));
-    	}
+    
     	
     	  
     		  

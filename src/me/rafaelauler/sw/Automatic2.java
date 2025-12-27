@@ -481,6 +481,9 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 	    }}.runTaskTimer(Main.plugin, 20 * 60 * 10l, 20l * 60 * 5);
   	if (players.size() > 1 && started == false) {
   	players.forEach(p-> playersInPvp.add(p));
+	players.forEach(p-> p.getInventory().addItem(new ItemStack(Material.WOOD_SWORD)));
+
+ 	 players.forEach(p-> p.getInventory().addItem(new ItemStack(Material.STONE , 64)));
   	 players.forEach(p-> p.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET)));
   	 players.forEach(p-> p.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS)));
   	 players.forEach(p-> p.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE)));

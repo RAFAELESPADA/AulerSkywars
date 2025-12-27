@@ -107,6 +107,10 @@ p.playSound(p.getLocation(), Sound.valueOf("LEVEL_UP"), 10f, 10f);
           if (a3.getGameType() == Automatic3.GameType.STOPPED) {
         	  a3.setGameType(Automatic3.GameType.STARTING);
         	  }
+
+          p.setAllowFlight(false);
+          p.setFlying(false);
+          p.getInventory().setArmorContents(null);
           p.getInventory().clear();
           p.teleport(new Location(Bukkit.getWorld("swlobby"), 5169, 67, 2447));
 /*     */ 

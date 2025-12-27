@@ -73,9 +73,6 @@ public class Automatic3 implements Listener {
     if (players == null || players.size() == 0  && star) {
     	destroy();
     }
-    if (players.size() == 1 && star) {
-    	 queuedPlayers();
-    }
     if (this.gameType == GameType.STOPPED && players.size() >= 1) {
     	this.gameType = GameType.STARTING;
     }
@@ -271,7 +268,6 @@ if (e.getEntity().getKiller() == null) {
               playersInPvp.remove(p1);
               players.remove(p1);
               p1.spigot().respawn();
-              e.getDrops().clear();
               p1.sendMessage(Main.getInstance().getConfig().getString("PlayerKilledMessage").replaceAll("&", "§").replace("%player%", p1.getName()));
               Automatic3.this.broadcast(Main.getInstance().getConfig().getString("PlayersLeft").replaceAll("&", "§").replace("%left%", String.valueOf(players.size()))); 	  
               p1.chat("/sw leave");
@@ -290,7 +286,6 @@ if (e.getEntity().getKiller() == null) {
               playersInPvp.remove(p);
               players.remove(p);
               p.spigot().respawn();
-              e.getDrops().clear();
 
         	  int currentKills = Main.getInstace().getConfig().getInt("players." + d.getUniqueId() + ".kills", 0);
               Main.getInstance().getConfig().set("players." + d.getUniqueId() + ".kills", currentKills + 1);
@@ -359,6 +354,11 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
             Player p = e.getPlayer();
             if (!Automatic3.this.isInEvent(p))
               return; 
+            if (e.getMessage().toLowerCase().startsWith("/") && !e.getMessage().toLowerCase().contains("/lobby") && !e.getMessage().toLowerCase().contains("/sw") && !p.hasPermission("skywars.bypass") && !star && players.contains(p)) {
+                e.setCancelled(true);
+  		 	  p.sendMessage(Main.getInstance().getConfig().getString("CommandBlocked").replaceAll("&", "§"));
+                return;
+              }
             if (e.getMessage().toLowerCase().startsWith("/") && Automatic3.this.isInPvP(p) && !e.getMessage().toLowerCase().contains("/lobby") && !e.getMessage().toLowerCase().contains("/sw") && !p.hasPermission("skywars.bypass") && iniciou) {
               e.setCancelled(true);
 		 	  p.sendMessage(Main.getInstance().getConfig().getString("CommandBlocked").replaceAll("&", "§"));
@@ -474,8 +474,10 @@ players12.teleport(Jaulas.getRandomLocation());
     for (Player players2 : players) {
       players2.sendMessage(String.valueOf(Main.getInstance().getConfig().getString("Prefix").replaceAll("&", "§")) + message);
 
-     TitleAPI.sendTitle(players2, 40, 40, 40, Main.getInstance().getConfig().getString("Prefix").replaceAll("&", "§"), message);
-    }
+      if (players.size() > 1) {
+    	     TitleAPI.sendTitle(players2, 40, 40, 40, Main.getInstance().getConfig().getString("Prefix").replaceAll("&", "§"), message);
+    	    }
+    	    }
     for (Player players2 : this.specs) {
       players2.sendMessage(String.valueOf((Main.getInstance().getConfig().getString("Prefix").replaceAll("&", "§")) + message));
     TitleAPI.sendTitle(players2, 40, 40, 40, Main.getInstance().getConfig().getString("Prefix").replaceAll("&", "§"), message);

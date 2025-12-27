@@ -120,7 +120,8 @@ public class Automatic implements Listener {
             if (this.gameType == GameType.STOPPED) {
             	return;
             }
-			    
+
+            VerificarWin(); 
             for (Player w : Bukkit.getWorld("sw1").getPlayers()) {
             if (!players.contains(w)) {
             if (MainCommand.game.contains(w.getName())) {	

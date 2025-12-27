@@ -139,6 +139,7 @@ public class Automatic3 implements Listener {
             	iniciou = true;
             }
 
+            VerificarWin();
             if (players.size() == 1 && !iniciou) {
             	iniciou = false;
             	time = 30;

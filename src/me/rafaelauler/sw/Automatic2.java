@@ -116,6 +116,8 @@ public class Automatic2 implements Listener {
             if (players.size() >= 2 && !iniciou) {
             	iniciou = true;
             }
+
+            VerificarWin();
             if (players.size() == 1 && !iniciou) {
             	iniciou = false;
             	time = 30;

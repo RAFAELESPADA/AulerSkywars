@@ -374,7 +374,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
               players.remove(p);
               queuedPlayers();
 
-              broadcast2(new TextComponent(ChatColor.RED + p.getName() + " desistiu da partida"), Bukkit.getWorld("sw3"));
+              broadcast2(new TextComponent(ChatColor.RED + p.getName() + " desistiu da partida"), Bukkit.getWorld("sw1"));
           }
           }
           @EventHandler

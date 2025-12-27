@@ -54,7 +54,8 @@ public class Automatic2 implements Listener {
   private boolean rodou = false;
   private boolean started = false;;
   private boolean pvp;
-  
+
+  private boolean run = false;
   private List<Player> playersInPvp = new ArrayList<Player>();;
   
   private List<Player> specs;
@@ -203,8 +204,9 @@ if (time == 34 && !star) {
                       else if (players.size() == 1) {
                      	 time = 32;
                       }
-             if (!started && star) {
+             if (!started && star && !run) {
              queuedPlayers();
+             run = true;
              }
             } 
           }
@@ -574,7 +576,7 @@ for (Player p : getPlayers()) {
       players.clear();
       time = 32;
       pvp = false;
-
+run = false;
       rodou = false;
       started = false;
       playersInPvp.clear();

@@ -61,6 +61,8 @@ public class Automatic implements Listener {
   public static boolean star = false;
   private boolean full;
 
+
+  private boolean run = false;
   private boolean rodou = false;
   private boolean pvp;
   private boolean started = false;;
@@ -221,9 +223,9 @@ if (time == 34 && !star) {
                   else if (players.size() == 1) {
                  	 time = 32;
                   }
-             if (!started && star) {
+             if (!started && star && !run) {
              queuedPlayers();
-            
+            run = true;
              }
             } 
           
@@ -596,7 +598,7 @@ for (Player p : getPlayers()) {
       players.clear();
       time = 32;
       pvp = false;
-
+ run = false;
       rodou = false;
       started = false;
       playersInPvp.clear();

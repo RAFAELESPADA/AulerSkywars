@@ -50,6 +50,8 @@ public class Automatic3 implements Listener {
   private int maxPlayers;
   public static boolean iniciou;
   public static boolean star = false;
+
+  public static boolean run = false;
   private boolean full;
   
   private boolean pvp;
@@ -226,8 +228,9 @@ if (time == 34 && !star) {
             	 time = 32;
              }
               
-             if (!started && star) {
+             if (!started && star && !run) {
              queuedPlayers();
+             run = true;
              }
             } 
           }
@@ -581,6 +584,7 @@ for (Player p : getPlayers()) {
       pvp = false;
       rodou = false;
       started = false;
+      run = false;
       playersInPvp.clear();
       getPlayers().clear();
     HandlerList.unregisterAll(this.listener);

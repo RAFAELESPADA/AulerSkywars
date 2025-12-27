@@ -402,6 +402,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 
   
   public void queuedPlayers() {
+	    final Player firstPlayer = players.get(0);
 	  new BukkitRunnable() {
 		    public void run() {
 
@@ -425,18 +426,28 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
         	  TitleAPI.sendTitle(p, 40, 70, 40, ChatColor.GREEN + "Os báus foram reabastecidos!");
           }
 	    }}.runTaskTimer(Main.plugin, 20 * 60 * 10l, 20l * 60 * 5);
-    final Player firstPlayer = players.get(0);
     	if (players.size() > 1 && started == false) {
     	players.forEach(p-> playersInPvp.add(p));
     	 players.forEach(p-> p.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET)));
     	 players.forEach(p-> p.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS)));
     	 players.forEach(p-> p.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE)));
     	 players.forEach(p-> p.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS)));
-    	 players.forEach(p-> p.teleport(Jaulas.getRandomLocation()));
+    	 List<Player> ordered = new ArrayList<>(players);
+
+    	 Jaulas.SW1.teleportGroupedByOrder(ordered);
+    	 for (Player p : ordered) {
+    		    CageManager.createCage(p.getLocation());
+    		    TitleAPI.sendTitle(p, 40, 40, 40, ChatColor.GREEN + "A partida irá começar em 15 segundos");
+    		    p.playSound(p.getLocation(), Sound.valueOf("CLICK"), 2f, 2f);
+    		}
+    	 new BukkitRunnable() {
+    		    public void run() {
+CageManager.removeAllCages();
+    		    }
+  	    }.runTaskLater(Main.plugin, 20 * 15l);
+ 	    }
+ 	    
 started = true;
-if (!players.isEmpty() && players.size() > 1) {
-    players.forEach(p-> p.sendMessage(ChatColor.GREEN + Main.getInstace().getConfig().getString("MatchStart")));
-}
 
         Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + getPlayers());
 for (Player p : getPlayers()) {
@@ -446,7 +457,7 @@ for (Player p : getPlayers()) {
     	    players.forEach(p2 -> p2.sendMessage("Ocorreu um erro com sua conexão ao skywars"));
       }
 }
-    }
+  
     
       
   
@@ -488,12 +499,14 @@ for (Player p : getPlayers()) {
                                 firstPlayer.sendMessage("Parabens por vencer a partida! :)");
     	    		  		    }}.runTaskLater(Main.plugin, 180l);
     	    		  		  rodou = true;	
-  		    }}.runTaskLater(Main.plugin, 100l);
-    		  }
-    	  }
-		    }}}.runTaskLater(Main.plugin, 40l);
-      
-    	}
+    				    }}.runTaskLater(Main.plugin, 100l);
+
+      			  }}
+    		  }}}.runTaskLater(Main.plugin, 20 * 5l);
+  }
+    	  
+    		  
+    	
   
   public void broadcast(String message) {
     for (Player players2 : players) {

@@ -459,7 +459,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
         				    }
 
         				  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Antartica");
-        				
+        				  rodou = true;	
         				  new BukkitRunnable() {
         					  
         					    public void run() {
@@ -473,7 +473,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
         	            		    	destroy();
         	                          firstPlayer.sendMessage("Parabens por vencer a partida! :)");
         		    		  		    }}.runTaskLater(Main.plugin, 180l);
-        		    		  		  rodou = true;	
+        		    		  		  
         					    }}.runTaskLater(Main.plugin, 100l);
 
         				  }}}

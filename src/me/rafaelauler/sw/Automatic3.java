@@ -50,7 +50,7 @@ public class Automatic3 implements Listener {
   private boolean full;
   
   private boolean pvp;
-  
+  private boolean started = false;
   private List<Player> playersInPvp = new ArrayList<Player>();;
   
   private List<Player> specs;
@@ -61,6 +61,7 @@ public class Automatic3 implements Listener {
     this.gameType = GameType.STARTING;
     this.maxPlayers = 60;
     this.full = false;
+    
     this.pvp = false;
     this.specs = new ArrayList<>();
     playersInPvp = new ArrayList<>();
@@ -189,7 +190,7 @@ if (time == 34 && !star) {
                 this.gameType = GameType.GAMIMG;
             	  broadcast(Main.getInstance().getConfig().getString("TournamentStarted").replaceAll("&", "§"));
                star = true;
-               pvp = true;
+               
                queuedPlayers();
                time = 32;
               } 
@@ -235,7 +236,7 @@ if (time == 34 && !star) {
             if (players.contains(e.getPlayer())) {
               players.remove(e.getPlayer());
           	  broadcast(Main.getInstance().getConfig().getString("PlayerLeaveServer").replaceAll("&", "§").replace("%player%", e.getPlayer().getName()));
-        	  
+          	 queuedPlayers();
             }
               if (Automatic3.this.getGameType() == Automatic3.GameType.GAMIMG && playersInPvp.contains(e.getPlayer())) {
               	  broadcast(Main.getInstance().getConfig().getString("PlayerLeaveServerDeath").replaceAll("&", "§").replace("%player%", e.getPlayer().getName())); 
@@ -298,19 +299,13 @@ if (e.getEntity().getKiller() == null) {
               Automatic3.this.broadcast(Main.getInstance().getConfig().getString("PlayerKilledBroadcast").replaceAll("&", "§").replace("%player%", p.getName()).replace("%killer%", d.getName()));
               Automatic3.this.broadcast(Main.getInstance().getConfig().getString("PlayersLeft").replaceAll("&", "§").replace("%left%", String.valueOf(players.size())));
         	  
-        	  if (players.size() > 1) {
 org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.quit.world"));
 /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
 /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
 			 	 p.getInventory().clear();
 			 	 p.getInventory().setArmorContents(null);
-			 	   Bukkit.getConsoleSender().sendMessage(d.getName() + " killed " + p.getName() + " in the event 1v1");
-			 	  Automatic3.this.broadcast(Main.getInstance().getConfig().getString("Searching").replaceAll("&", "§"));
-		              }
-        	  org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.quit.world"));
-        	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
-        	  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
-        	  p.getInventory().setArmorContents(null);
+			 	   Bukkit.getConsoleSender().sendMessage(d.getName() + " killed " + p.getName() + " in the skywars match");
+			 p.getInventory().setArmorContents(null);
         	  ItemJoinAPI itemAPI = new ItemJoinAPI();
         	  new BukkitRunnable() {
         	                  
@@ -392,7 +387,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 	  new BukkitRunnable() {
 		    public void run() {
 
-    pvp = true;
+    
     if (players == null) {
     	Bukkit.broadcastMessage(ChatColor.DARK_RED + "A partida SW3 foi finalizada!");
     	
@@ -414,7 +409,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 	    }}.runTaskTimer(Main.plugin, 20 * 60 * 10l, 20l * 60 * 5);
     final Player firstPlayer = players.get(0);
     for (Player players12 : new ArrayList<>(players)) {
-    	if (players.size() > 1) {
+    	if (players.size() > 1 && !started) {
     	playersInPvp.add(players12);
     	players12.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
 
@@ -422,6 +417,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
     	players12.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
     	players12.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
 players12.teleport(Jaulas.getRandomLocation());
+started = true;
         Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + players12.getName());
       if (!MainCommand.game.contains(players12.getName())) {
 
@@ -544,6 +540,7 @@ players12.teleport(Jaulas.getRandomLocation());
       players.clear();
       time = 32;
       pvp = false;
+      started = false;
       playersInPvp.clear();
       getPlayers().clear();
     HandlerList.unregisterAll(this.listener);

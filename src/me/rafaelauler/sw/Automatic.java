@@ -23,7 +23,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -242,7 +245,26 @@ if (time == 34 && !star) {
         	    for (PotionEffect pot : player.getActivePotionEffects())
         	      player.removePotionEffect(pot.getType()); 
         	  }
-          
+          @EventHandler
+          public void onUpdate(EntityDamageEvent e) {
+        	  if (!(e.getEntity() instanceof Player)) {
+        		  return;
+        	  }
+        	  if (e.getCause() == DamageCause.FALL) {
+        		  if (!started) {
+        			  e.setCancelled(true);
+        		  }
+        	  }
+          }
+          @EventHandler
+          public void onUpdate(BlockBreakEvent e) {
+        	  
+        	  if (players.contains(e.getPlayer())) {
+        		  if (!started) {
+        			  e.setCancelled(true);
+        		  }
+        	  }
+          }
           
           @EventHandler
           public void onPlayerQuit(PlayerQuitEvent e) {
@@ -443,11 +465,14 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
     	 new BukkitRunnable() {
     		    public void run() {
 CageManager.removeAllCages();
+new BukkitRunnable() {
+    public void run() {
+started = true;
+    }}.runTaskLater(Main.plugin, 20 * 6l);
+	    
     		    }
   	    }.runTaskLater(Main.plugin, 20 * 15l);
  	    }
- 	    
-started = true;
 
         Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + getPlayers());
 for (Player p : getPlayers()) {

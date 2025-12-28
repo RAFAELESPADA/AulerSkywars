@@ -583,6 +583,7 @@ for (Player p : ordered) {
 p.getWorld().getBlockAt(new Location(p.getWorld(), p.getLocation().getX(), p.getLocation().getBlockY() - 1, p.getLocation().getZ())).setType(Material.AIR);
 }
 
+Main.getInstance().CarregarTodos();
 Main.getInstace().CarregarBaus();
 new BukkitRunnable() {
     public void run() {
@@ -732,7 +733,9 @@ for (Player p : getPlayers()) {
 	    	
 			Main.getInstance().CarregarBaus();
 	    }}.runTaskLater(Main.plugin, 100l);
+	    Main.getInstance().CarregarTodos();
   }
+  
   public static boolean deleteWorld(File path) {
       if(path.exists()) {
           File files[] = path.listFiles();

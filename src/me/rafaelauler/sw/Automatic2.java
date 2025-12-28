@@ -516,6 +516,7 @@ for (Player p : ordered) {
 p.getWorld().getBlockAt(new Location(p.getWorld(), p.getLocation().getX(), p.getLocation().getBlockY() - 1, p.getLocation().getZ())).setType(Material.AIR);
 }
 
+Main.getInstance().CarregarTodos();
 Main.getInstace().CarregarBaus2();
 new BukkitRunnable() {
     public void run() {
@@ -661,6 +662,8 @@ run = false;
 
 			Main.getInstance().CarregarBaus2();
 	    }}.runTaskLater(Main.plugin, 100l);
+
+	    Main.getInstance().CarregarTodos();
  }
 
   public void setMaxPlayers(int maxPlayers) {

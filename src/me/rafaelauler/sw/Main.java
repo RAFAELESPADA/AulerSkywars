@@ -8,6 +8,7 @@ import java.util.Random;
 
 /*     */ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.command.ConsoleCommandSender;
@@ -17,8 +18,10 @@ import org.bukkit.configuration.file.YamlConfiguration;
 /*     */ import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 /*     */ import org.bukkit.plugin.Plugin;
 /*     */ import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 
 
@@ -36,8 +39,8 @@ import org.bukkit.inventory.ItemStack;
 
 	 private EventManager2 eventmanager2;
 
-	    private final int chestItemMinAmount = 2;
-	    private final int chestItemMaxAmount = 6;
+	    private final int chestItemMinAmount = 3;
+	    private final int chestItemMaxAmount = 8;
 	 private EventManager3 eventmanager3;
 	 /*     */ /*     */   public static Plugin plugin;
 /*     */   public static Main instance;
@@ -70,6 +73,38 @@ public EventManager2 getEventManager2() {
 public EventManager3 getEventManager3() {
     return this.eventmanager3;
   }
+public boolean isInvEmpty(Inventory inv) {
+    for (ItemStack item : inv.getContents()) {
+        if (item != null) {
+            return false;
+        }
+    }
+    return true;
+}
+public void CarregarTodos() {
+    for (World w : Bukkit.getWorlds()) {
+    	for(Chunk c2 : w.getLoadedChunks()){
+    		for(BlockState b2 : c2.getTileEntities()){
+    			if (b2 instanceof Chest) {
+    				if (w.getName().startsWith("sw")) {
+    					  Chest chest = (Chest) b2;
+    					   Random random = new Random();
+    					   int itemsAmount = random.nextInt(chestItemMaxAmount + 1 - chestItemMinAmount) + chestItemMaxAmount;
+
+    		         	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
+    		    	      chest.setMetadata("SW", new FixedMetadataValue(Main.getInstance(), Boolean.valueOf(true)));
+    		              chest.getInventory().clear();
+    		              for (int i2 = 0; i2 < itemsAmount; i2++) {
+    		                  int slot = random.nextInt(inventory.getSize());
+    		                  int randomItemIndex = random.nextInt(Jaulas.items.size());
+    		                  ItemStack randomItem = Jaulas.items.get(randomItemIndex);
+    		chest.getInventory().setItem( slot, randomItem); 
+    		              }
+    				}
+    			}
+    		}
+    	}}
+}
 public void CarregarBaus22() {
 	
 	   Random random = new Random();
@@ -77,10 +112,12 @@ public void CarregarBaus22() {
 	   for(Chunk c2 : Bukkit.getWorld("sw1copy").getLoadedChunks()){
 
 	          for(BlockState b2 : c2.getTileEntities()){
-	              if(b2 instanceof Chest){            	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
-	              
+	              if(b2 instanceof Chest){ 
+	              Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
 	              Chest chest = (Chest) b2;
+	    	      chest.setMetadata("SW", new FixedMetadataValue(Main.getInstance(), Boolean.valueOf(true)));
 	              chest.getInventory().clear();
+	             
 	              for (int i2 = 0; i2 < itemsAmount; i2++) {
 	                  int slot = random.nextInt(inventory.getSize());
 
@@ -93,6 +130,8 @@ public void CarregarBaus22() {
 	              }
 	          }
 	          }
+
+		 Bukkit.getConsoleSender().sendMessage("SETADO ITEMS DO BAU PARA A SALA #1 COPY");
 	  }
 public void CarregarBaus222() {
 	
@@ -102,8 +141,9 @@ public void CarregarBaus222() {
 
 	          for(BlockState b2 : c2.getTileEntities()){
 	              if(b2 instanceof Chest){            	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
-	              
 	              Chest chest = (Chest) b2;
+
+	    	      chest.setMetadata("SW", new FixedMetadataValue(Main.getInstance(), Boolean.valueOf(true)));
 	              chest.getInventory().clear();
 	              for (int i2 = 0; i2 < itemsAmount; i2++) {
 	                  int slot = random.nextInt(inventory.getSize());
@@ -117,6 +157,8 @@ public void CarregarBaus222() {
 	              }
 	          }
 	          }
+
+		 Bukkit.getConsoleSender().sendMessage("SETADO ITEMS DO BAU PARA A SALA #2 COPY");
 	  }
 public void CarregarBaus2222() {
 	
@@ -126,8 +168,9 @@ public void CarregarBaus2222() {
 
 	          for(BlockState b2 : c2.getTileEntities()){
 	              if(b2 instanceof Chest){            	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
-	              
 	              Chest chest = (Chest) b2;
+
+	    	      chest.setMetadata("SW", new FixedMetadataValue(Main.getInstance(), Boolean.valueOf(true)));
 	              chest.getInventory().clear();
 	              for (int i2 = 0; i2 < itemsAmount; i2++) {
 	                  int slot = random.nextInt(inventory.getSize());
@@ -141,6 +184,8 @@ public void CarregarBaus2222() {
 	              }
 	          }
 	          }
+
+		 Bukkit.getConsoleSender().sendMessage("SETADO ITEMS DO BAU PARA A SALA #3 COPY");
 	  }
 public void CarregarBaus22222() {
 	
@@ -150,8 +195,9 @@ public void CarregarBaus22222() {
 
 	          for(BlockState b2 : c2.getTileEntities()){
 	              if(b2 instanceof Chest){            	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
-	              
 	              Chest chest = (Chest) b2;
+
+	    	      chest.setMetadata("SW", new FixedMetadataValue(Main.getInstance(), Boolean.valueOf(true)));
 	              chest.getInventory().clear();
 	              for (int i2 = 0; i2 < itemsAmount; i2++) {
 	                  int slot = random.nextInt(inventory.getSize());
@@ -165,6 +211,8 @@ public void CarregarBaus22222() {
 	              }
 	          }
 	          }
+
+		 Bukkit.getConsoleSender().sendMessage("SETADO ITEMS DO BAU PARA A SALA #4 COPY");
 	  }
 public void CarregarBaus222222() {
 	
@@ -174,8 +222,9 @@ public void CarregarBaus222222() {
 
 	          for(BlockState b2 : c2.getTileEntities()){
 	              if(b2 instanceof Chest){            	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
-	              
 	              Chest chest = (Chest) b2;
+
+	    	      chest.setMetadata("SW", new FixedMetadataValue(Main.getInstance(), Boolean.valueOf(true)));
 	              chest.getInventory().clear();
 	              for (int i2 = 0; i2 < itemsAmount; i2++) {
 	                  int slot = random.nextInt(inventory.getSize());
@@ -189,6 +238,8 @@ public void CarregarBaus222222() {
 	              }
 	          }
 	          }
+
+		 Bukkit.getConsoleSender().sendMessage("SETADO ITEMS DO BAU PARA A SALA #5 COPY");
 	  }
 public void CarregarBaus2() {
 	
@@ -198,8 +249,9 @@ public void CarregarBaus2() {
 
 	          for(BlockState b2 : c2.getTileEntities()){
 	              if(b2 instanceof Chest){            	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
-	              
 	              Chest chest = (Chest) b2;
+
+	    	      chest.setMetadata("SW", new FixedMetadataValue(Main.getInstance(), Boolean.valueOf(true)));
 	              chest.getInventory().clear();
 	              for (int i2 = 0; i2 < itemsAmount; i2++) {
 	                  int slot = random.nextInt(inventory.getSize());
@@ -213,7 +265,8 @@ public void CarregarBaus2() {
 	              }
 	          }
 	  }
-	   
+
+		 Bukkit.getConsoleSender().sendMessage("SETADO ITEMS DO BAU PARA A SALA #2");
 }
 public void CarregarBaus4() {
 	
@@ -222,8 +275,9 @@ public void CarregarBaus4() {
 	   for(Chunk c2 : Bukkit.getWorld("sw4").getLoadedChunks()){
 	          for(BlockState b2 : c2.getTileEntities()){
 	              if(b2 instanceof Chest){            	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
-	              
 	              Chest chest = (Chest) b2;
+
+	    	      chest.setMetadata("SW", new FixedMetadataValue(Main.getInstance(), Boolean.valueOf(true)));
 	              chest.getInventory().clear();
 	              for (int i2 = 0; i2 < itemsAmount; i2++) {
 	                  int slot = random.nextInt(inventory.getSize());
@@ -237,7 +291,8 @@ public void CarregarBaus4() {
 	              }
 	          }
 	  }
-	   
+
+		 Bukkit.getConsoleSender().sendMessage("SETADO ITEMS DO BAU PARA A SALA #4");
 }
 public void CarregarBaus5() {
 	
@@ -246,8 +301,10 @@ public void CarregarBaus5() {
 	   for(Chunk c2 : Bukkit.getWorld("sw5").getLoadedChunks()){
 	          for(BlockState b2 : c2.getTileEntities()){
 	              if(b2 instanceof Chest){            	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
-	              
+
 	              Chest chest = (Chest) b2;
+
+	    	      chest.setMetadata("SW", new FixedMetadataValue(Main.getInstance(), Boolean.valueOf(true)));
 	              chest.getInventory().clear();
 	              for (int i2 = 0; i2 < itemsAmount; i2++) {
 	                  int slot = random.nextInt(inventory.getSize());
@@ -261,7 +318,8 @@ public void CarregarBaus5() {
 	              }
 	          }
 	  }
-	   
+
+		 Bukkit.getConsoleSender().sendMessage("SETADO ITEMS DO BAU PARA A SALA #5");
 }
 public void CarregarBaus3() {
 
@@ -271,10 +329,11 @@ public void CarregarBaus3() {
         for(BlockState b3 : c3.getTileEntities()){
             if(b3 instanceof Chest){
          	   Inventory inventory = ((Chest)b3.getBlock().getState()).getInventory();
-              
+
               
               Chest chest = (Chest) b3;
 
+    	      chest.setMetadata("SW", new FixedMetadataValue(Main.getInstance(), Boolean.valueOf(true)));
               chest.getInventory().clear();
               for (int i2 = 0; i2 < itemsAmount; i2++) {
                   int slot = random.nextInt(inventory.getSize());
@@ -290,6 +349,7 @@ chest.getInventory().setItem( slot, randomItem);
 }
     }
 
+	 Bukkit.getConsoleSender().sendMessage("SETADO ITEMS DO BAU PARA A SALA #3");
 }
 public void CarregarBaus() {
 	   Random random = new Random();
@@ -299,11 +359,13 @@ public void CarregarBaus() {
       for(BlockState b : c.getTileEntities()){
           if(b instanceof Chest){
          	   Inventory inventory = ((Chest)b.getBlock().getState()).getInventory();
-                
+
           
                                     Chest chest = (Chest) b;
 
+                  	    	      chest.setMetadata("SW1", new FixedMetadataValue(Main.getInstance(), Boolean.valueOf(true)));
                   	              chest.getInventory().clear();
+                  	              
                                     for (int i2 = 0; i2 < itemsAmount; i2++) {
                                         int slot = random.nextInt(inventory.getSize());
 
@@ -315,6 +377,7 @@ public void CarregarBaus() {
           }
       }   
       }}
+	 Bukkit.getConsoleSender().sendMessage("SETADO ITEMS DO BAU PARA A SALA #1");
 
 
                   
@@ -333,7 +396,8 @@ public void onDisable()
 Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #1 DESCARREGADOS");
     for(Chunk c2 : Bukkit.getWorld("sw2").getLoadedChunks()){
         for(BlockState b2 : c2.getTileEntities()){
-            if(b2 instanceof Chest){            	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
+            if(b2 instanceof Chest){
+            	Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
             inventory.clear();
             }
         }
@@ -407,7 +471,7 @@ Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #5 DESCARREGADOS");
 }
 /*     */   public void onEnable()
 /*     */   {
-	  
+		    
 	getCommand("sw").setExecutor(new MainCommand());
 	getCommand("sw1").setExecutor(new MCMD1());
 	getCommand("sw2").setExecutor(new MCMD2());
@@ -452,6 +516,27 @@ Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #5 DESCARREGADOS");
 	/*     */     
 /* 121 */     instance = this;
 /* 122 */     plugin = this;
+new BukkitRunnable() {
+    public void run() {
+    Bukkit.getConsoleSender().sendMessage("SETADO BAUS PARA TODAS AS SALAS");	
+    for (World w : Bukkit.getWorlds()) {
+    	for(Chunk c2 : w.getLoadedChunks()){
+    		for(BlockState b2 : c2.getTileEntities()){
+    			if (b2 instanceof Chest) {
+    				if (w.getName().startsWith("sw")) {
+    					  Chest chest = (Chest) b2;
+    					   Random random = new Random();
+    					   int itemsAmount = random.nextInt(chestItemMaxAmount + 1 - chestItemMinAmount) + chestItemMaxAmount;
+
+    		         	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
+    		    	      chest.setMetadata("SW", new FixedMetadataValue(Main.getInstance(), Boolean.valueOf(true)));
+    		              chest.getInventory().clear();
+    		              for (int i2 = 0; i2 < itemsAmount; i2++) {
+    		                  int slot = random.nextInt(inventory.getSize());
+    		                  int randomItemIndex = random.nextInt(Jaulas.items.size());
+    		                  ItemStack randomItem = Jaulas.items.get(randomItemIndex);
+    		chest.getInventory().setItem( slot, randomItem);                              		          
+    }}}}}}}}.runTaskTimer(getInstace(), 20 * 10l, 100 * 20l * 5);
 (getInstance()).eventmanager = new EventManager();
 
 (getInstance()).eventmanager2 = new EventManager2();

@@ -62,7 +62,7 @@ public static HashMap<String, Integer> saveair = new HashMap();
 /*  76 */   HashMap<String, Location> maps = new HashMap();
 /*  77 */   public static ArrayList<String> game = new ArrayList();
 public static ArrayList<Player> player = new ArrayList();
-/*  78 */   List<String> commands = Arrays.asList(new String[] { "admin", "list", "create", "delete", "1v1", "score", "setspawn", "spawn", "join", "leave", "reset", "coins", "setchallenge", "kit", "kitunlocker", "shop", "resetkit", "stats", "reload", "update" });
+/*  78 */   List<String> commands = Arrays.asList(new String[] { "admin", "list" , "forcechest", "create", "delete", "1v1", "score", "setspawn", "spawn", "join", "leave", "reset", "coins", "setchallenge", "kit", "kitunlocker", "shop", "resetkit", "stats", "reload", "update" });
 /*     */   
 /*     */   public MainCommand() {}
 /*     */   
@@ -101,6 +101,14 @@ if (args[0].equalsIgnoreCase("stop"))
 
 	            		   Automatic5 r411 = new Automatic5();
 	            		   r411.destroy();
+/* 121 */         return true;
+/*     */       }
+}
+if (args[0].equalsIgnoreCase("forcechest"))
+/*     */       {
+	if (sender.hasPermission("skywars.stop")) {
+	/* 27 */       sender.sendMessage("§4§l\u274C Você preencheu os baus da ilhas");
+	               Main.getInstace().CarregarTodos();
 /* 121 */         return true;
 /*     */       }
 }

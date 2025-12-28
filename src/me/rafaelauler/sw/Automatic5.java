@@ -590,9 +590,29 @@ Main.getInstace().CarregarBaus5();
 new BukkitRunnable() {
     public void run() {
 started = true;
-    }}.runTaskLater(Main.plugin, 20 * 2l);
-	    
-    	 }
+Main.getInstance().CarregarTodos();
+
+Bukkit.broadcastMessage(ChatColor.GREEN + "SKYWARS SALA #5 INICOU! BOA SORTE A TODOS");
+new BukkitRunnable() {
+    public void run() {
+    	Main.getInstance().CarregarTodos();
+    	Bukkit.getLogger().info("BAUS DAS SALAS CARREGADOS PORQUE A PARTIDA #5 COMEÇOU");
+    }
+	 }.runTaskLater(Main.plugin, 20 * 5l); }}.runTaskLater(Main.plugin, 20 * 2l);
+	 new BukkitRunnable() {
+         public void run() {
+Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "sw forcechest");
+         	Bukkit.getLogger().info("BAUS DAS SALAS VIA CMD CARREGADOS PORQUE A PARTIDA #5 COMEÇOU");
+         	Main.getInstance().CarregarTodos();
+         }
+     	 }.runTaskLater(Main.plugin, 20 * 8l); 
+     	new BukkitRunnable() {
+            public void run() {
+Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "sw forcechest");
+            	Bukkit.getLogger().info("BAUS DAS SALAS VIA CMD CARREGADOS PORQUE A PARTIDA #1 COMEÇOU");
+            	Main.getInstance().CarregarTodos();
+            }
+        	 }.runTaskLater(Main.plugin, 20 * 15l);}
   	    }.runTaskLater(Main.plugin, 20 * 15l);
  	    }
 

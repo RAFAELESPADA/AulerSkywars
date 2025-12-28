@@ -445,7 +445,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 				    	oo.playSound(oo.getLocation(), Sound.valueOf("NOTE_PLING"), 10f, 10f);
 				    }
 
-				  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Grego");
+				  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Selva");
 				  rodou = true;	
 				  new BukkitRunnable() {
 					  
@@ -521,10 +521,32 @@ Main.getInstace().CarregarBaus3();
 new BukkitRunnable() {
     public void run() {
 started = true;
+
+Main.getInstance().CarregarTodos();
+
+Bukkit.broadcastMessage(ChatColor.GREEN + "SKYWARS SALA #3 INICOU! BOA SORTE A TODOS");
     }}.runTaskLater(Main.plugin, 20 * 2l);
-  		    }
+    new BukkitRunnable() {
+        public void run() {
+        	Main.getInstance().CarregarTodos();
+
+        	Bukkit.getLogger().info("BAUS DAS SALAS CARREGADOS PORQUE A PARTIDA #3 COMEÇOU");
+        }
+    	 }.runTaskLater(Main.plugin, 20 * 5l);new BukkitRunnable() {
+             public void run() {
+Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "sw forcechest");
+             	Bukkit.getLogger().info("BAUS DAS SALAS VIA CMD CARREGADOS PORQUE A PARTIDA #3 COMEÇOU");
+             	Main.getInstance().CarregarTodos();
+             }
+         	 }.runTaskLater(Main.plugin, 20 * 8l);  }
 	    }.runTaskLater(Main.plugin, 20 * 15l);
-	    }
+	    new BukkitRunnable() {
+            public void run() {
+Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "sw forcechest");
+            	Bukkit.getLogger().info("BAUS DAS SALAS VIA CMD CARREGADOS PORQUE A PARTIDA #3 COMEÇOU");
+            	Main.getInstance().CarregarTodos();
+            }
+        	 }.runTaskLater(Main.plugin, 20 * 15l); }
 
 
       Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + getPlayers());
@@ -561,7 +583,7 @@ for (Player p : getPlayers()) {
   			    	oo.playSound(oo.getLocation(), Sound.valueOf("NOTE_PLING"), 10f, 10f);
   			    }
 
-    			  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Grego");
+    			  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars SELVA");
     			
   			  new BukkitRunnable() {
   				  

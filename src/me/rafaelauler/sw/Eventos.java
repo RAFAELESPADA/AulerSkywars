@@ -28,6 +28,7 @@ public class Eventos implements Listener {
 	  }
 	  @EventHandler
 	  public void aoentrar(PlayerJoinEvent e) {
+		  e.getPlayer().getInventory().setArmorContents(null); 
 		  if (Main.getInstace().getConfig().getString("players." + e.getPlayer().getUniqueId()) == null) {
 			  Main.getInstace().getConfig().set("players." + e.getPlayer().getUniqueId() + ".kills", 0);
 

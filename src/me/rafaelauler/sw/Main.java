@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.logging.Level;
 
 /*     */ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -104,6 +105,7 @@ public void CarregarTodos() {
     			}
     		}
     	}}
+	Bukkit.getLogger().log(Level.INFO, "o bau de todos os mapas foram setados!");
 }
 public void CarregarBaus22() {
 	

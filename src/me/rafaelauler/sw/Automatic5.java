@@ -402,7 +402,8 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
         	  
         	  if (players.contains(e.getPlayer())) {
         		  if (!started && star) {
-        			  e.setCancelled(true);
+
+          			e.getPlayer().teleport(e.getTo());
         		  }
         	  }
           }

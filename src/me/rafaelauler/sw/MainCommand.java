@@ -202,7 +202,7 @@ if (args[0].equalsIgnoreCase("list"))
 		p.sendMessage(ChatColor.GREEN + "Sala #2 Jogadores: " + ChatColor.YELLOW + p1.getName());
 	}
 	for (Player p1 : Automatic3.players) {
-		p.sendMessage(ChatColor.GREEN + "Sala #2 Jogadores: " + ChatColor.YELLOW + p1.getName());
+		p.sendMessage(ChatColor.GREEN + "Sala #3 Jogadores: " + ChatColor.YELLOW + p1.getName());
 	}
 	for (Player p1 : Automatic4.players) {
 		p.sendMessage(ChatColor.GREEN + "Sala #4 Jogadores: " + ChatColor.YELLOW + p1.getName());

@@ -108,7 +108,7 @@ a1.setGameType(Automatic4.GameType.STARTING);
           if (!MainCommand.game.contains(p.getName())) {
         		MainCommand.game.add(p.getName());
         	}
-          a1.putInEvent(p);
+          a1.putInEvent2(p);
           p.getInventory().setArmorContents(null);
           p.getInventory().clear();
           p.teleport(new Location(Bukkit.getWorld("swlobby"), 15628, 76, 6145));

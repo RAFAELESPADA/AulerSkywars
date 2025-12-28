@@ -283,8 +283,8 @@ if (time == 34 && !star) {
         	  
         	  if (players.contains(e.getPlayer())) {
         		  if (!started  && star) {
-        			  e.setCancelled(true);
-        		  }
+        			e.getPlayer().teleport(e.getTo());
+        			}
         	  }
           }
           

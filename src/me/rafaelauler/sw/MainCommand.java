@@ -204,6 +204,12 @@ if (args[0].equalsIgnoreCase("list"))
 	for (Player p1 : Automatic3.players) {
 		p.sendMessage(ChatColor.GREEN + "Sala #2 Jogadores: " + ChatColor.YELLOW + p1.getName());
 	}
+	for (Player p1 : Automatic4.players) {
+		p.sendMessage(ChatColor.GREEN + "Sala #4 Jogadores: " + ChatColor.YELLOW + p1.getName());
+	}
+	for (Player p1 : Automatic5.players) {
+		p.sendMessage(ChatColor.GREEN + "Sala #5 Jogadores: " + ChatColor.YELLOW + p1.getName());
+	}
 	
 		return true;
 	}
@@ -221,6 +227,9 @@ if (args[0].equalsIgnoreCase("leave"))
 	/*     */ Automatic3.players.remove(p);
 	/*     */ Automatic2.players.remove(p);
 	/*     */ Automatic.players.remove(p);
+
+	/*     */ Automatic5.players.remove(p);
+	/*     */ Automatic4.players.remove(p);
 	/*     */ 
 	/* 283 */       game.remove(p.getName());
 	/* 284 */       game.remove(p.getName());

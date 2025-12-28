@@ -121,6 +121,16 @@ static Main plugin;
 
         return (Automatic3.players == null ? "0" : String.valueOf(Automatic3.players.size()));
       }
+
+    
+    if (indentifier.equals("players_room_4")) {
+
+        return (Automatic4.players == null ? "0" : String.valueOf(Automatic4.players.size()));
+      }
+    if (indentifier.equals("players_room_5")) {
+
+        return (Automatic5.players == null ? "0" : String.valueOf(Automatic5.players.size()));
+      }
 if (indentifier.equals("kills")) {
 	return String.valueOf(Main.getInstace().getConfig().getInt("players." + p.getUniqueId() + ".kills"));
                   

@@ -51,14 +51,14 @@ public class Automatic3 implements Listener {
   private int maxPlayers;
   public static boolean iniciou;
   public static boolean star = false;
-
-  public static boolean run = false;
   private boolean full;
-  
+  private boolean rodou = false;
+  private boolean started = false;;
   private boolean pvp;
-  private boolean started = false;
+
+  private boolean run = false;
   private List<Player> playersInPvp = new ArrayList<Player>();;
-  public boolean rodou = false;
+  
   private List<Player> specs;
   public static final List<String> playersIN = new ArrayList<>();
   public Automatic3() {
@@ -67,7 +67,6 @@ public class Automatic3 implements Listener {
     this.gameType = GameType.STARTING;
     this.maxPlayers = 60;
     this.full = false;
-    
     this.pvp = false;
     this.specs = new ArrayList<>();
     playersInPvp = new ArrayList<>();
@@ -80,9 +79,6 @@ public class Automatic3 implements Listener {
     if (players == null || players.size() == 0  && star) {
     	destroy();
     }
-    if (this.gameType == GameType.STOPPED && players.size() >= 1) {
-    	this.gameType = GameType.STARTING;
-    }
     for (Player w : Bukkit.getWorld("sw3").getPlayers()) {
         if (!players.contains(w)) {
         if (MainCommand.game.contains(w.getName())) {	
@@ -91,6 +87,9 @@ public class Automatic3 implements Listener {
         }
         }
         }
+    if (this.gameType == GameType.STOPPED && players.size() >= 1) {
+    	this.gameType = GameType.STARTING;
+    }
     for (Player p : Bukkit.getOnlinePlayers()) {
  	   if (!players.contains(p)) {
  		   players.forEach(p1 -> p1.hidePlayer(p));
@@ -105,29 +104,8 @@ public class Automatic3 implements Listener {
 				    	}
 				    } }.runTaskLater(Main.plugin, 200l);
  		   }}
- 
-  }
-
-  @EventHandler
-  public void onUpdate(EntityDamageEvent e) {
-	  if (!(e.getEntity() instanceof Player)) {
-		  return;
-	  }
-	  if (e.getCause() == DamageCause.FALL) {
-		  if (!started) {
-			  e.setCancelled(true);
-		  }
-	  }
-  }
-  @EventHandler
-  public void onUpdate(BlockBreakEvent e) {
-	  
-	  if (players.contains(e.getPlayer())) {
-		  if (!started) {
-			  e.setCancelled(true);
-		  }
-	  }
-  }
+    }
+  
           @EventHandler
           public void onUpdate(UpdateEvent e) {
             if (e.getType() != UpdateEvent.UpdateType.SEGUNDO) {
@@ -144,13 +122,13 @@ public class Automatic3 implements Listener {
             if (players.size() == 1 && !iniciou) {
             	iniciou = false;
             	time = 30;
+            	for (Player p2 : players) {
+            		HelixActionBar.send(p2, ChatColor.YELLOW + "Aguardando mais 1 jogador...");
+                	}
             	return;
             }
             else if (!iniciou) {
             	time = 30;
-            	for (Player p2 : players) {
-            		HelixActionBar.send(p2, ChatColor.YELLOW + "Aguardando mais 1 jogador...");
-                	}
             	return;
             }
               if (MainCommand.game.isEmpty() && iniciou) {
@@ -224,12 +202,11 @@ if (time == 34 && !star) {
               } 
               if (!star) {
             	  if (time > 0  && players.size() > 1) {
-             time = time - 1;
-            	  }
-             else if (players.size() == 1) {
-            	 time = 32;
-             }
-              
+                      time = time - 1;
+                     	  }
+                      else if (players.size() == 1) {
+                     	 time = 32;
+                      }
              if (!started && star && !run) {
              queuedPlayers();
              run = true;
@@ -255,7 +232,6 @@ if (time == 34 && !star) {
         	      player.removePotionEffect(pot.getType()); 
         	  }
           
-          
           @EventHandler
           public void onPlayerQuit(PlayerQuitEvent e) {
             if (MainCommand.game.contains(e.getPlayer().getName())) {
@@ -265,7 +241,7 @@ if (time == 34 && !star) {
             if (players.contains(e.getPlayer())) {
               players.remove(e.getPlayer());
           	  broadcast(Main.getInstance().getConfig().getString("PlayerLeaveServer").replaceAll("&", "§").replace("%player%", e.getPlayer().getName()));
-          	 queuedPlayers();
+        	  
             }
               if (Automatic3.this.getGameType() == Automatic3.GameType.GAMIMG && playersInPvp.contains(e.getPlayer())) {
               	  broadcast(Main.getInstance().getConfig().getString("PlayerLeaveServerDeath").replaceAll("&", "§").replace("%player%", e.getPlayer().getName())); 
@@ -297,9 +273,8 @@ if (e.getEntity().getKiller() == null) {
               p1.spigot().respawn();
               playersInPvp.remove(p1);
               players.remove(p1);
-              
               p1.spigot().respawn();
-            
+      
               p1.sendMessage(Main.getInstance().getConfig().getString("PlayerKilledMessage").replaceAll("&", "§").replace("%player%", p1.getName()));
               Automatic3.this.broadcast(Main.getInstance().getConfig().getString("PlayersLeft").replaceAll("&", "§").replace("%left%", String.valueOf(players.size()))); 	  
               p1.chat("/sw leave");
@@ -328,8 +303,7 @@ if (e.getEntity().getKiller() == null) {
               p.chat("/sw leave");
               p.sendMessage(Main.getInstance().getConfig().getString("PlayerKilledMessage").replaceAll("&", "§").replace("%player%", p.getName()));
               Automatic3.this.broadcast(Main.getInstance().getConfig().getString("PlayerKilledBroadcast").replaceAll("&", "§").replace("%player%", p.getName()).replace("%killer%", d.getName()));
-              Automatic3.this.broadcast(Main.getInstance().getConfig().getString("PlayersLeft").replaceAll("&", "§").replace("%left%", String.valueOf(players.size())));
-          
+              Automatic3.this.broadcast(Main.getInstance().getConfig().getString("PlayersLeft").replaceAll("&", "§").replace("%left%", String.valueOf(players.size())));  
 org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.quit.world"));
 /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
 /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
@@ -349,8 +323,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
             }
             queuedPlayers();
             VerificarWin();
-            }           
-          
+            }             
           @EventHandler(priority = EventPriority.MONITOR)
           public void onEntityDamageByEntity(EntityDamageByEntityEvent e) {
         	  
@@ -375,15 +348,18 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
             
             e.setCancelled(true);
           }
+
           @EventHandler
           public void onPlayerCommandgPreProcess(PlayerCommandPreprocessEvent e) {
             Player p = e.getPlayer();
             if (e.getMessage().toLowerCase().startsWith("/") && (e.getMessage().toLowerCase().contains("/lobby") || e.getMessage().toLowerCase().contains("/sw leave")) && star && players.contains(p)) {
               players.remove(p);
               queuedPlayers();
+
               broadcast2(new TextComponent(ChatColor.RED + p.getName() + " desistiu da partida"), Bukkit.getWorld("sw3"));
           }
           }
+
           @EventHandler
           public void onPlayerCommandPreProcess(PlayerCommandPreprocessEvent e) {
             Player p = e.getPlayer();
@@ -401,7 +377,6 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
             } 
           }
   
-  
   public boolean isInEvent(Player player) {
     return getPlayers().contains(player);
   }
@@ -413,8 +388,37 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 	    Bukkit.getConsoleSender().sendMessage(player + " got removed from event!");
 	  }
   }
+  @EventHandler
+  public void onUpdate(EntityDamageEvent e) {
+	  if (!(e.getEntity() instanceof Player)) {
+		  return;
+	  }
+	  if (e.getCause() == DamageCause.FALL) {
+		  if (!started) {
+			  e.setCancelled(true);
+		  }
+	  }
+  }
+  @EventHandler
+  public void onUpdate(PlayerMoveEvent e) {
+	  
+	  if (players.contains(e.getPlayer())) {
+		  if (!started && star) {
 
- public void VerificarWin() {
+  			e.getPlayer().teleport(e.getTo());
+		  }
+	  }
+  }
+  @EventHandler
+  public void onUpdate(BlockBreakEvent e) {
+	  
+	  if (players.contains(e.getPlayer())) {
+		  if (!started) {
+			  e.setCancelled(true);
+		  }
+	  }
+  }
+  public void VerificarWin() {
 	  if (players == null || players.size() == 0) {
 		  return;
 	  }
@@ -441,7 +445,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 				    	oo.playSound(oo.getLocation(), Sound.valueOf("NOTE_PLING"), 10f, 10f);
 				    }
 
-				  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Selva");
+				  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Grego");
 				  rodou = true;	
 				  new BukkitRunnable() {
 					  
@@ -456,21 +460,13 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 	            		    	destroy();
 	                          firstPlayer.sendMessage("Parabens por vencer a partida! :)");
 		    		  		    }}.runTaskLater(Main.plugin, 180l);
-		    		  		  
+		    		  		
 					    }}.runTaskLater(Main.plugin, 100l);
 
 				  }}}
- @EventHandler
- public void onUpdate(PlayerMoveEvent e) {
 	  
-	  if (players.contains(e.getPlayer())) {
-		  if (!started && star) {
-
-  			e.getPlayer().teleport(e.getTo());
-		  }
-	  }
- }
   public void queuedPlayers() {
+	    final Player firstPlayer = players.get(0);
 	  new BukkitRunnable() {
 		    public void run() {
 
@@ -544,8 +540,44 @@ for (Player p : getPlayers()) {
   	
   	  
   		  
-  	
-  		  }}.runTaskLater(Main.plugin, 20 * 5l);
+  		  if (players.size() == 1 && star) {
+  			  if (!rodou) {
+    			    TitleAPI.sendTitle(firstPlayer, 50, 50, 50, "§6§lVITÓRIA!");
+
+              	  int currentDeaths = Main.getInstace().getConfig().getInt("players." + firstPlayer.getUniqueId() + ".wins", 0);
+                    Main.getInstance().getConfig().set("players." + firstPlayer.getUniqueId() + ".wins", currentDeaths + 1);
+                    Main.getInstace().saveConfig();
+    			  for (String ko : MainCommand.game) {
+    				Player k = Bukkit.getPlayer(ko);
+    				if (k != null) {
+    					if (k != firstPlayer) {
+    				k.chat("/sw leave");
+    			}
+    			}
+    			  for (Player oo : Bukkit.getOnlinePlayers()) {
+  			    	oo.playSound(oo.getLocation(), Sound.valueOf("NOTE_PLING"), 10f, 10f);
+  			    }
+
+    			  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Grego");
+    			
+  			  new BukkitRunnable() {
+  				  
+  				    public void run() {
+
+			  			  firstPlayer.chat("/sw leave");
+  				    	new BukkitRunnable() {
+  	    				    public void run() {
+  			  			  ItemJoinAPI ij = new ItemJoinAPI();
+                              ij.getItems(firstPlayer);
+                              
+                		    	destroy();
+                              firstPlayer.sendMessage("Parabens por vencer a partida! :)");
+  	    		  		    }}.runTaskLater(Main.plugin, 180l);
+  	    		  		  rodou = true;	
+  				    }}.runTaskLater(Main.plugin, 100l);
+
+    			  }}
+  		  }}}.runTaskLater(Main.plugin, 20 * 5l);
 }
   	
   public void broadcast(String message) {
@@ -609,24 +641,23 @@ for (Player p : getPlayers()) {
         	  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
           }
           }
-   
       players.clear();
       time = 32;
       pvp = false;
+run = false;
       rodou = false;
       started = false;
-      run = false;
       playersInPvp.clear();
       getPlayers().clear();
     HandlerList.unregisterAll(this.listener);
     
-   Main.getInstance().getEventManager().setRdmAutomatic(null);
+   Main.getInstance().getEventManager().setRdmAutomatic(null);  
 	new BukkitRunnable() {
 	    public void run() {
 	    	   Automatic.getMVWorldManager().deleteWorld("sw3");
 	    	Automatic.getMVWorldManager().cloneWorld("sw3copy", "sw3", "VoidGen");
-	   
-			Main.getInstace().CarregarBaus3();
+
+			Main.getInstance().CarregarBaus2();
 	    }}.runTaskLater(Main.plugin, 100l);
  }
 

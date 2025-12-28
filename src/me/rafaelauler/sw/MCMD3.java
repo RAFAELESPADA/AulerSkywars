@@ -111,6 +111,9 @@ p.playSound(p.getLocation(), Sound.valueOf("LEVEL_UP"), 10f, 10f);
         		MainCommand.game.add(p.getName());
         	}
           a3.putInEvent(p);
+          if (!Automatic3.players.contains(p)) {
+        	  Automatic3.players.add(p);
+          }
           p.setAllowFlight(false);
           p.setFlying(false);
           p.getInventory().setArmorContents(null);

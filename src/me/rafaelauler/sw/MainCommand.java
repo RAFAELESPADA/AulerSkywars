@@ -96,6 +96,11 @@ if (args[0].equalsIgnoreCase("stop"))
 	            		   r3.destroy();
 	            		   Automatic3 r4 = new Automatic3();
 	            		   r4.destroy();
+	            		   Automatic4 r41 = new Automatic4();
+	            		   r41.destroy();
+
+	            		   Automatic5 r411 = new Automatic5();
+	            		   r411.destroy();
 /* 121 */         return true;
 /*     */       }
 }
@@ -191,7 +196,7 @@ if (args[0].equalsIgnoreCase("list"))
 		sender.sendMessage("SEM PERMISSÃO!");
 		return true;
 	}
-	if (Automatic.players.size() + Automatic2.players.size() + Automatic3.players.size() == 0) {
+	if (Automatic.players.size() + Automatic2.players.size() + Automatic3.players.size() + Automatic4.players.size() + Automatic5.players.size() == 0) {
 		p.sendMessage(ChatColor.RED + "Não há jogadores nas salas de Skywars");
 		return true;
 	}

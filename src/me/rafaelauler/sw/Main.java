@@ -282,6 +282,10 @@ Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #5 DESCARREGADOS");
 	 Bukkit.getPluginManager().registerEvents(new Automatic2(), this);
 
 	 Bukkit.getPluginManager().registerEvents(new Automatic3(), this);
+
+	 Bukkit.getPluginManager().registerEvents(new Automatic4(), this);
+
+	 Bukkit.getPluginManager().registerEvents(new Automatic5(), this);
 	 ;
 
 

@@ -2,16 +2,27 @@ package me.rafaelauler.sw;
 
 
 
-
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.WorldCreator;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -25,8 +36,12 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import com.onarandombox.MultiverseCore.MultiverseCore;
 
 import me.RockinChaos.itemjoin.api.ItemJoinAPI;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -36,7 +51,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.wavemc.core.bukkit.api.HelixActionBar;
 import net.wavemc.core.util.UpdateEvent;
 
-public class Automatic3 implements Listener {
+public class Automatic5 implements Listener {
   private Main main;
   
   private int time;
@@ -50,23 +65,27 @@ public class Automatic3 implements Listener {
   private int maxPlayers;
   public static boolean iniciou;
   public static boolean star = false;
-
-  public static boolean run = false;
   private boolean full;
-  
+
+
+  private boolean run = false;
+  private boolean rodou = false;
+
+  private boolean rodou2 = false;
   private boolean pvp;
-  private boolean started = false;
-  private List<Player> playersInPvp = new ArrayList<Player>();;
-  public boolean rodou = false;
+  private boolean started = false;;
+  
+  private List<Player> playersInPvp = new ArrayList<Player>();
+  public HashMap<Player, Integer> kills = new HashMap<Player, Integer>();
+  
   private List<Player> specs;
   public static final List<String> playersIN = new ArrayList<>();
-  public Automatic3() {
+  public Automatic5() {
     this.main = Main.getInstance();
     time = 32;
     this.gameType = GameType.STARTING;
     this.maxPlayers = 60;
     this.full = false;
-    
     this.pvp = false;
     this.specs = new ArrayList<>();
     playersInPvp = new ArrayList<>();
@@ -76,56 +95,30 @@ public class Automatic3 implements Listener {
     if (e.getType() != UpdateEvent.UpdateType.SEGUNDO) {
       return; 
     }
-    if (players == null || players.size() == 0  && star) {
+    if (players == null || players.size() == 0 && star) {
     	destroy();
     }
     if (this.gameType == GameType.STOPPED && players.size() >= 1) {
     	this.gameType = GameType.STARTING;
     }
-    for (Player w : Bukkit.getWorld("sw3").getPlayers()) {
-        if (!players.contains(w)) {
-        if (MainCommand.game.contains(w.getName())) {	
-        
-        	players.add(w);
-        }
-        }
-        }
-    for (Player p : Bukkit.getOnlinePlayers()) {
- 	   if (!players.contains(p)) {
- 		   players.forEach(p1 -> p1.hidePlayer(p));
- 		   new BukkitRunnable() {
+       for (Player p : Bukkit.getOnlinePlayers()) {
+    	   if (!players.contains(p)) {
+    		   players.forEach(p1 -> p1.hidePlayer(p));
+    		   new BukkitRunnable() {
 				    public void run() {
 				    	for (Player b : Bukkit.getOnlinePlayers()) {
 				    		if (!b.canSee(p)) {
-				    			if (!b.getWorld().equals(Bukkit.getWorld("sw3"))) {
+				    			if (!b.getWorld().equals(Bukkit.getWorld("sw5"))) {
 				    			b.showPlayer(p);
 				    		}
 				    		}
 				    	}
 				    } }.runTaskLater(Main.plugin, 200l);
- 		   }}
- 
-  }
-
-  @EventHandler
-  public void onUpdate(EntityDamageEvent e) {
-	  if (!(e.getEntity() instanceof Player)) {
-		  return;
-	  }
-	  if (e.getCause() == DamageCause.FALL) {
-		  if (!started) {
-			  e.setCancelled(true);
-		  }
-	  }
-  }
-  @EventHandler
-  public void onUpdate(BlockBreakEvent e) {
-	  
-	  if (players.contains(e.getPlayer())) {
-		  if (!started) {
-			  e.setCancelled(true);
-		  }
-	  }
+    		   }}
+       
+    }
+  public static MultiverseCore getMVWorldManager() {
+      return JavaPlugin.getPlugin(MultiverseCore.class);
   }
           @EventHandler
           public void onUpdate(UpdateEvent e) {
@@ -135,21 +128,31 @@ public class Automatic3 implements Listener {
             if (this.gameType == GameType.STOPPED) {
             	return;
             }
+
+            VerificarWin(); 
+            for (Player w : Bukkit.getWorld("sw5").getPlayers()) {
+            if (!players.contains(w)) {
+            if (MainCommand.game.contains(w.getName())) {	
+            
+            	players.add(w);
+            }
+            }
+            }
             if (players.size() >= 2 && !iniciou) {
             	iniciou = true;
             }
-
-            VerificarWin();
+            
+            
             if (players.size() == 1 && !iniciou) {
             	iniciou = false;
-            	time = 30;
+            	time = 34;
+            	for (Player p2 : players) {
+        		HelixActionBar.send(p2, ChatColor.YELLOW + "Aguardando mais 1 jogador...");
+            	}
             	return;
             }
             else if (!iniciou) {
             	time = 30;
-            	for (Player p2 : players) {
-            		HelixActionBar.send(p2, ChatColor.YELLOW + "Aguardando mais 1 jogador...");
-                	}
             	return;
             }
               if (MainCommand.game.isEmpty() && iniciou) {
@@ -164,19 +167,21 @@ if (!playersInPvp.contains(p2) && !star) {
 }
 if (time == 34 && !star) {
 	for (Player p2 : players) {
-	HelixActionBar.send(p2, ChatColor.YELLOW + "Aguardando mais 1 jogador...");
+
+		HelixActionBar.send(p2, ChatColor.YELLOW + "Aguardando mais 1 jogador...");
 }
 }
-              if (time == 30 && !star  && iniciou) {
+              if (time == 30 && !star && iniciou) {
             	  broadcast(Main.getInstance().getConfig().getString("TournamentStart").replaceAll("&", "§").replace("%time%", "30"));
             	  TextComponent textComponent4 = new TextComponent(Main.getInstance().getConfig().getString("TournamentStartGlobal").replaceAll("&", "§").replace("%time%", "30"));
                   textComponent4.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(Main.getInstance().getConfig().getString("ClickToJoin").replaceAll("&", "§")).create()));
-                  textComponent4.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sw3 join"));
+                  textComponent4.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sw5 join"));
                   broadcast2(textComponent4, Bukkit.getWorld(Main.cfg_x1.getString("x1.coords.quit.world")));
                   
               }
+
               for (Player p : new ArrayList<>(players)) {
-            	  if (p.getWorld() != Bukkit.getServer().getWorld("swlobby") && p.getWorld() != Bukkit.getServer().getWorld("sw3")) {
+            	  if (p.getWorld() != Bukkit.getServer().getWorld("swlobby") && p.getWorld() != Bukkit.getServer().getWorld("sw5")) {
 
             		  Bukkit.getConsoleSender().sendMessage("QUITTING " + p.getName() + " FROM SKYWARS! Mundo: " + p.getWorld().getName());
             		  p.performCommand("sw leave");
@@ -186,7 +191,7 @@ if (time == 34 && !star) {
             	  broadcast(Main.getInstance().getConfig().getString("TournamentStart").replaceAll("&", "§").replace("%time%", "15"));
             	  TextComponent textComponent = new TextComponent(Main.getInstance().getConfig().getString("TournamentStartGlobal").replaceAll("&", "§").replace("%time%", "15"));
                   textComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(Main.getInstance().getConfig().getString("ClickToJoin").replaceAll("&", "§")).create()));
-                  textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sw3 join"));
+                  textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sw5 join"));
                   broadcast2(textComponent, Bukkit.getWorld(Main.cfg_x1.getString("x1.coords.quit.world")));
                   
                   }
@@ -194,7 +199,7 @@ if (time == 34 && !star) {
             	  broadcast(Main.getInstance().getConfig().getString("TournamentStart").replaceAll("&", "§").replace("%time%", "10"));
             	  TextComponent textComponent2 = new TextComponent(Main.getInstance().getConfig().getString("TournamentStartGlobal").replaceAll("&", "§").replace("%time%", "10"));
                   textComponent2.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(Main.getInstance().getConfig().getString("ClickToJoin").replaceAll("&", "§")).create()));
-                  textComponent2.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sw3 join"));
+                  textComponent2.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sw5 join"));
                   broadcast2(textComponent2, Bukkit.getWorld(Main.cfg_x1.getString("x1.coords.quit.world")));
               
                  
@@ -203,7 +208,7 @@ if (time == 34 && !star) {
             	  broadcast(Main.getInstance().getConfig().getString("TournamentStart").replaceAll("&", "§").replace("%time%", "5"));
             	  TextComponent textComponent3 = new TextComponent(Main.getInstance().getConfig().getString("TournamentStartGlobal").replaceAll("&", "§").replace("%time%", "5"));
                   textComponent3.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(Main.getInstance().getConfig().getString("ClickToJoin").replaceAll("&", "§")).create()));
-                  textComponent3.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sw3 join"));
+                  textComponent3.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sw5 join"));
                  broadcast2(textComponent3, Bukkit.getWorld(Main.cfg_x1.getString("x1.coords.quit.world")));
               
               }
@@ -221,20 +226,18 @@ if (time == 34 && !star) {
                queuedPlayers();
                time = 32;
               } 
-              if (!star) {
-            	  if (time > 0  && players.size() > 1) {
-             time = time - 1;
-            	  }
-             else if (players.size() == 1) {
-            	 time = 32;
-             }
-              
+              if (time > 0  && players.size() > 1) {
+                  time = time - 1;
+                 	  }
+                  else if (players.size() == 1) {
+                 	 time = 32;
+                  }
              if (!started && star && !run) {
              queuedPlayers();
-             run = true;
+            run = true;
              }
             } 
-          }
+          
           public void putInEvent2(Player player) {
         	  if (players.contains(player)) {
         		  return;
@@ -253,7 +256,26 @@ if (time == 34 && !star) {
         	    for (PotionEffect pot : player.getActivePotionEffects())
         	      player.removePotionEffect(pot.getType()); 
         	  }
-          
+          @EventHandler
+          public void onUpdate(EntityDamageEvent e) {
+        	  if (!(e.getEntity() instanceof Player)) {
+        		  return;
+        	  }
+        	  if (e.getCause() == DamageCause.FALL) {
+        		  if (!started) {
+        			  e.setCancelled(true);
+        		  }
+        	  }
+          }
+          @EventHandler
+          public void onUpdate(BlockBreakEvent e) {
+        	  
+        	  if (players.contains(e.getPlayer())) {
+        		  if (!started) {
+        			  e.setCancelled(true);
+        		  }
+        	  }
+          }
           
           @EventHandler
           public void onPlayerQuit(PlayerQuitEvent e) {
@@ -264,9 +286,9 @@ if (time == 34 && !star) {
             if (players.contains(e.getPlayer())) {
               players.remove(e.getPlayer());
           	  broadcast(Main.getInstance().getConfig().getString("PlayerLeaveServer").replaceAll("&", "§").replace("%player%", e.getPlayer().getName()));
-          	 queuedPlayers();
+        	  
             }
-              if (Automatic3.this.getGameType() == Automatic3.GameType.GAMIMG && playersInPvp.contains(e.getPlayer())) {
+              if (Automatic5.this.getGameType() == Automatic5.GameType.GAMIMG && playersInPvp.contains(e.getPlayer())) {
               	  broadcast(Main.getInstance().getConfig().getString("PlayerLeaveServerDeath").replaceAll("&", "§").replace("%player%", e.getPlayer().getName())); 
                   e.getPlayer().damage(9999.0D);
                   playersInPvp.remove(e.getPlayer());
@@ -293,14 +315,13 @@ if (e.getEntity().getKiller() == null) {
                 Player p1 = e.getEntity();
               playersInPvp.remove(p1);
               players.remove(p1);
+            
               p1.spigot().respawn();
               playersInPvp.remove(p1);
               players.remove(p1);
-              
               p1.spigot().respawn();
-            
               p1.sendMessage(Main.getInstance().getConfig().getString("PlayerKilledMessage").replaceAll("&", "§").replace("%player%", p1.getName()));
-              Automatic3.this.broadcast(Main.getInstance().getConfig().getString("PlayersLeft").replaceAll("&", "§").replace("%left%", String.valueOf(players.size()))); 	  
+              Automatic5.this.broadcast(Main.getInstance().getConfig().getString("PlayersLeft").replaceAll("&", "§").replace("%left%", String.valueOf(players.size()))); 	  
               p1.chat("/sw leave");
             }
             }
@@ -314,6 +335,7 @@ if (e.getEntity().getKiller() == null) {
             	if (!iniciou) {
             		return;
             	}
+            	
               playersInPvp.remove(p);
               players.remove(p);
               p.spigot().respawn();
@@ -326,9 +348,9 @@ if (e.getEntity().getKiller() == null) {
               Main.getInstace().saveConfig();
               p.chat("/sw leave");
               p.sendMessage(Main.getInstance().getConfig().getString("PlayerKilledMessage").replaceAll("&", "§").replace("%player%", p.getName()));
-              Automatic3.this.broadcast(Main.getInstance().getConfig().getString("PlayerKilledBroadcast").replaceAll("&", "§").replace("%player%", p.getName()).replace("%killer%", d.getName()));
-              Automatic3.this.broadcast(Main.getInstance().getConfig().getString("PlayersLeft").replaceAll("&", "§").replace("%left%", String.valueOf(players.size())));
-          
+              Automatic5.this.broadcast(Main.getInstance().getConfig().getString("PlayerKilledBroadcast").replaceAll("&", "§").replace("%player%", p.getName()).replace("%killer%", d.getName()));
+              Automatic5.this.broadcast(Main.getInstance().getConfig().getString("PlayersLeft").replaceAll("&", "§").replace("%left%", String.valueOf(players.size())));
+        	  
 org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.quit.world"));
 /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
 /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
@@ -348,7 +370,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
             }
             queuedPlayers();
             VerificarWin();
-            }           
+            }   
           
           @EventHandler(priority = EventPriority.MONITOR)
           public void onEntityDamageByEntity(EntityDamageByEntityEvent e) {
@@ -368,32 +390,115 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
             if (!playersInPvp.contains(p) && MainCommand.game.contains(p.getName())) {
                 e.setCancelled(true);
               }
-            if (!Automatic3.this.isSpec((Player)e.getDamager()))
+            if (!Automatic5.this.isSpec((Player)e.getDamager()))
               return; 
            
             
             e.setCancelled(true);
           }
+          public static void throwRandomFirework(Player p) {
+        	    Firework fw = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
+        	    FireworkMeta fwm = fw.getFireworkMeta();
+
+        	    //Our random generator
+        	    Random r = new Random();
+
+        	    //Get the type
+        	    int rt = r.nextInt(5) + 1;
+        	    FireworkEffect.Type type = FireworkEffect.Type.BALL;
+        	    if (rt == 2) type = FireworkEffect.Type.BALL_LARGE;
+        	    if (rt == 3) type = FireworkEffect.Type.BURST;
+        	    if (rt == 4) type = FireworkEffect.Type.CREEPER;
+        	    if (rt == 5) type = FireworkEffect.Type.STAR;
+
+        	    //Get our random colours
+        	    int r1i = r.nextInt(17) + 1;
+        	    int r2i = r.nextInt(17) + 1;
+        	    Color c1 = Color.fromRGB(r1i);
+        	    Color c2 = Color.fromRGB(r2i);
+        	    FireworkEffect effect = FireworkEffect.builder().flicker(r.nextBoolean()).withColor(c1).withFade(c2).with(type).trail(r.nextBoolean()).build();
+
+        	    //Then apply the effect to the meta
+        	    fwm.addEffect(effect);
+
+        	    //Generate some random power and set it
+
+
+        	    //Create our effect with this   int rp = r.nextInt(2) + 1;
+        	    int rp = r.nextInt(2) + 1;
+        	    fwm.setPower(rp);
+
+        	    //Then apply this to our rocket
+        	    fw.setFireworkMeta(fwm);
+        	}
+          public void VerificarWin() {
+        	  if (players == null || players.size() == 0) {
+        		  return;
+        	  }
+        	  Player firstPlayer = players.get(0);
+        	  if (rodou) {
+        		  throwRandomFirework(firstPlayer);
+        		  return;
+        	  }
+        		  if (players.size() == 1 && star) {
+        				  
+        				    TitleAPI.sendTitle(firstPlayer, 50, 50, 50, "§6§lVITÓRIA!");
+
+        	          	  int currentDeaths = Main.getInstace().getConfig().getInt("players." + firstPlayer.getUniqueId() + ".wins", 0);
+        	                Main.getInstance().getConfig().set("players." + firstPlayer.getUniqueId() + ".wins", currentDeaths + 1);
+        	                Main.getInstace().saveConfig();
+        				  for (String ko : MainCommand.game) {
+        					Player k = Bukkit.getPlayer(ko);
+        					if (k != null) {
+        						if (k != firstPlayer) {
+        					k.chat("/sw leave");
+        				}
+        				}
+        				  for (Player oo : Bukkit.getOnlinePlayers()) {
+        				    	oo.playSound(oo.getLocation(), Sound.valueOf("NOTE_PLING"), 10f, 10f);
+        				    }
+
+        				  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Neve");
+        				  rodou = true;	
+        				  new BukkitRunnable() {
+        					  
+        					    public void run() {
+
+        			  			  firstPlayer.chat("/sw leave");
+        					    	new BukkitRunnable() {
+        		    				    public void run() {
+        				  			  ItemJoinAPI ij = new ItemJoinAPI();
+        	                          ij.getItems(firstPlayer);
+        	                          
+        	            		    	destroy();
+        	                          firstPlayer.sendMessage("Parabens por vencer a partida! :)");
+        		    		  		    }}.runTaskLater(Main.plugin, 180l);
+        		    		  		  
+        					    }}.runTaskLater(Main.plugin, 100l);
+
+        				  }}}
+        	  
           @EventHandler
           public void onPlayerCommandgPreProcess(PlayerCommandPreprocessEvent e) {
             Player p = e.getPlayer();
             if (e.getMessage().toLowerCase().startsWith("/") && (e.getMessage().toLowerCase().contains("/lobby") || e.getMessage().toLowerCase().contains("/sw leave")) && star && players.contains(p)) {
               players.remove(p);
               queuedPlayers();
-              broadcast2(new TextComponent(ChatColor.RED + p.getName() + " desistiu da partida"), Bukkit.getWorld("sw3"));
+
+              broadcast2(new TextComponent(ChatColor.RED + p.getName() + " desistiu da partida"), Bukkit.getWorld("sw5"));
           }
           }
           @EventHandler
           public void onPlayerCommandPreProcess(PlayerCommandPreprocessEvent e) {
             Player p = e.getPlayer();
-            if (!Automatic3.this.isInEvent(p))
+            if (!Automatic5.this.isInEvent(p))
               return; 
             if (e.getMessage().toLowerCase().startsWith("/") && !e.getMessage().toLowerCase().contains("/lobby") && !e.getMessage().toLowerCase().contains("/sw") && !p.hasPermission("skywars.bypass") && !star && players.contains(p)) {
                 e.setCancelled(true);
   		 	  p.sendMessage(Main.getInstance().getConfig().getString("CommandBlocked").replaceAll("&", "§"));
                 return;
               }
-            if (e.getMessage().toLowerCase().startsWith("/") && Automatic3.this.isInPvP(p) && !e.getMessage().toLowerCase().contains("/lobby") && !e.getMessage().toLowerCase().contains("/sw") && !p.hasPermission("skywars.bypass") && iniciou) {
+            if (e.getMessage().toLowerCase().startsWith("/") && Automatic5.this.isInPvP(p) && !e.getMessage().toLowerCase().contains("/lobby") && !e.getMessage().toLowerCase().contains("/sw") && !p.hasPermission("skywars.bypass") && iniciou) {
               e.setCancelled(true);
 		 	  p.sendMessage(Main.getInstance().getConfig().getString("CommandBlocked").replaceAll("&", "§"));
               return;
@@ -413,97 +518,54 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 	  }
   }
 
- public void VerificarWin() {
-	  if (players == null || players.size() == 0) {
-		  return;
-	  }
-	  Player firstPlayer = players.get(0);
-	  if (rodou) {
-		  Automatic.throwRandomFirework(firstPlayer);
-		  return;
-	  }
-		  if (players.size() == 1 && star) {
-				  
-				    TitleAPI.sendTitle(firstPlayer, 50, 50, 50, "§6§lVITÓRIA!");
-
-	          	  int currentDeaths = Main.getInstace().getConfig().getInt("players." + firstPlayer.getUniqueId() + ".wins", 0);
-	                Main.getInstance().getConfig().set("players." + firstPlayer.getUniqueId() + ".wins", currentDeaths + 1);
-	                Main.getInstace().saveConfig();
-				  for (String ko : MainCommand.game) {
-					Player k = Bukkit.getPlayer(ko);
-					if (k != null) {
-						if (k != firstPlayer) {
-					k.chat("/sw leave");
-				}
-				}
-				  for (Player oo : Bukkit.getOnlinePlayers()) {
-				    	oo.playSound(oo.getLocation(), Sound.valueOf("NOTE_PLING"), 10f, 10f);
-				    }
-
-				  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Selva");
-				  rodou = true;	
-				  new BukkitRunnable() {
-					  
-					    public void run() {
-
-			  			  firstPlayer.chat("/sw leave");
-					    	new BukkitRunnable() {
-		    				    public void run() {
-				  			  ItemJoinAPI ij = new ItemJoinAPI();
-	                          ij.getItems(firstPlayer);
-	                          
-	            		    	destroy();
-	                          firstPlayer.sendMessage("Parabens por vencer a partida! :)");
-		    		  		    }}.runTaskLater(Main.plugin, 180l);
-		    		  		  
-					    }}.runTaskLater(Main.plugin, 100l);
-
-				  }}}
   
   public void queuedPlayers() {
+	    final Player firstPlayer = players.get(0);
 	  new BukkitRunnable() {
 		    public void run() {
 
- 
-  if (players == null) {
-  	Bukkit.broadcastMessage(ChatColor.DARK_RED + "A partida SW1 foi finalizada!");
-  	
-  	destroy();
-  	return;
-  }
-  if (players.size() == 0) {
-  	Bukkit.broadcastMessage(ChatColor.DARK_GREEN + "A partida SW1 foi finalizada!");    	
-  	destroy();
-  	return;
-  }
+   
+    if (players == null) {
+    	Bukkit.broadcastMessage(ChatColor.DARK_RED + "A partida sw5 foi finalizada!");
+    	
+    	destroy();
+    	return;
+    }
+    if (players.size() == 0) {
+    	Bukkit.broadcastMessage(ChatColor.DARK_GREEN + "A partida sw5 foi finalizada!");    	
+    	destroy();
+    	return;
+    }
 
-  new BukkitRunnable() {
+    new BukkitRunnable() {
 	    public void run() {
-        Main.getInstace().CarregarBaus3();
-        for (Player p : players) {
-      	  TitleAPI.sendTitle(p, 40, 70, 40, ChatColor.GREEN + "Os báus foram reabastecidos!");
-        }
+          Main.getInstace().CarregarBaus();
+          for (Player p : players) {
+        	  TitleAPI.sendTitle(p, 40, 70, 40, ChatColor.GREEN + "Os báus foram reabastecidos!");
+          }
 	    }}.runTaskTimer(Main.plugin, 20 * 60 * 10l, 20l * 60 * 5);
-  	if (players.size() > 1 && started == false) {
-  	players.forEach(p-> playersInPvp.add(p));
-	players.forEach(p-> p.getInventory().addItem(new ItemStack(Material.WOOD_SWORD)));
+    	if (players.size() > 1 && started == false) {
+    	players.forEach(p-> playersInPvp.add(p));
 
- 	 players.forEach(p-> p.getInventory().addItem(new ItemStack(Material.STONE , 64)));
-  	 players.forEach(p-> p.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET)));
-  	 players.forEach(p-> p.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS)));
-  	 players.forEach(p-> p.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE)));
-  	 players.forEach(p-> p.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS)));
-  	 List<Player> ordered = new ArrayList<>(players);
 
-  	 Jaulas.SW3.teleportByQueueOrder(ordered);
-   	 for (Player p : ordered) {
-		    CageManager.createCage(p.getLocation());
-		    p.getWorld().getBlockAt(new Location(p.getWorld(), p.getLocation().getX(), p.getLocation().getBlockY() - 1, p.getLocation().getZ())).setType(Material.GLASS);
-		    TitleAPI.sendTitle(p, 40, 40, 40, ChatColor.GREEN + "A partida irá começar em 15 segundos");
-		    p.playSound(p.getLocation(), Sound.valueOf("CLICK"), 2f, 2f);
-		}
-	 new BukkitRunnable() {
-		    public void run() {
+    	players.forEach(p-> p.getInventory().addItem(new ItemStack(Material.WOOD_SWORD)));
+
+      	 players.forEach(p-> p.getInventory().addItem(new ItemStack(Material.STONE , 64)));
+    	 players.forEach(p-> p.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET)));
+    	 players.forEach(p-> p.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS)));
+    	 players.forEach(p-> p.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE)));
+    	 players.forEach(p-> p.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS)));
+    	 List<Player> ordered = new ArrayList<>(players);
+
+    	 Jaulas.SW5.teleportByQueueOrder(ordered);
+    	 for (Player p : ordered) {
+    		    CageManager.createCage(p.getLocation());
+    		    p.getWorld().getBlockAt(new Location(p.getWorld(), p.getLocation().getX(), p.getLocation().getBlockY() - 1, p.getLocation().getZ())).setType(Material.GLASS);
+    		    TitleAPI.sendTitle(p, 40, 40, 40, ChatColor.GREEN + "A partida irá começar em 15 segundos");
+    		    p.playSound(p.getLocation(), Sound.valueOf("CLICK"), 2f, 2f);
+    		}
+    	 new BukkitRunnable() {
+    		    public void run() {
 CageManager.removeAllCages();
 List<Player> ordered = new ArrayList<>(players);
 for (Player p : ordered) {
@@ -513,39 +575,77 @@ new BukkitRunnable() {
     public void run() {
 started = true;
     }}.runTaskLater(Main.plugin, 20 * 6l);
-  		    }
-	    }.runTaskLater(Main.plugin, 20 * 15l);
-	    }
+	    
+    	 }
+  	    }.runTaskLater(Main.plugin, 20 * 15l);
+ 	    }
 
-
-      Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + getPlayers());
+        Bukkit.getConsoleSender().sendMessage("[EVENT] Players in SKYWARS ROOM #1: " + getPlayers());
 for (Player p : getPlayers()) {
 	if (!MainCommand.game.contains(p.getName())) {
-  	    players.remove(p);
-  	    players.forEach(p2-> p2.chat("/sw leave"));
-  	    players.forEach(p2 -> p2.sendMessage("Ocorreu um erro com sua conexão ao skywars"));
-    }
+    	    players.remove(p);
+    	    players.forEach(p2-> p2.chat("/sw leave"));
+    	    players.forEach(p2 -> p2.sendMessage("Ocorreu um erro com sua conexão ao skywars"));
+      }
 }
-
   
     
+      
+  
 
+    	
+    	  
+    		  
+    		  if (players.size() == 1 && star) {
+    			  if (!rodou) {
+      			    TitleAPI.sendTitle(firstPlayer, 50, 50, 50, "§6§lVITÓRIA!");
 
-  	
-  	  
-  		  
-  	
-  		  }}.runTaskLater(Main.plugin, 20 * 5l);
-}
-  	
+                	  int currentDeaths = Main.getInstace().getConfig().getInt("players." + firstPlayer.getUniqueId() + ".wins", 0);
+                      Main.getInstance().getConfig().set("players." + firstPlayer.getUniqueId() + ".wins", currentDeaths + 1);
+                      Main.getInstace().saveConfig();
+      			  for (String ko : MainCommand.game) {
+      				Player k = Bukkit.getPlayer(ko);
+      				if (k != null) {
+      					if (k != firstPlayer) {
+      				k.chat("/sw leave");
+      			}
+      			}
+      			  for (Player oo : Bukkit.getOnlinePlayers()) {
+    			    	oo.playSound(oo.getLocation(), Sound.valueOf("NOTE_PLING"), 10f, 10f);
+    			    }
+
+      			  Bukkit.broadcastMessage(ChatColor.GREEN + "Parabéns ao jogador " + firstPlayer.getName() + " por ganhar no mapa de skywars Antartica");
+      			
+    			  new BukkitRunnable() {
+    				  
+    				    public void run() {
+
+  			  			  firstPlayer.chat("/sw leave");
+    				    	new BukkitRunnable() {
+    	    				    public void run() {
+    			  			  ItemJoinAPI ij = new ItemJoinAPI();
+                                ij.getItems(firstPlayer);
+                                
+                  		    	destroy();
+                                firstPlayer.sendMessage("Parabens por vencer a partida! :)");
+    	    		  		    }}.runTaskLater(Main.plugin, 180l);
+    	    		  		  rodou = true;	
+    				    }}.runTaskLater(Main.plugin, 100l);
+
+      			  }}
+    		  }}}.runTaskLater(Main.plugin, 20 * 5l);
+  }
+    	  
+    		  
+    	
+  
   public void broadcast(String message) {
     for (Player players2 : players) {
       players2.sendMessage(String.valueOf(Main.getInstance().getConfig().getString("Prefix").replaceAll("&", "§")) + message);
-
       if (players.size() > 1) {
-    	     TitleAPI.sendTitle(players2, 40, 40, 40, Main.getInstance().getConfig().getString("Prefix").replaceAll("&", "§"), message);
-    	    }
-    	    }
+     TitleAPI.sendTitle(players2, 40, 40, 40, Main.getInstance().getConfig().getString("Prefix").replaceAll("&", "§"), message);
+    }
+    }
     for (Player players2 : this.specs) {
       players2.sendMessage(String.valueOf((Main.getInstance().getConfig().getString("Prefix").replaceAll("&", "§")) + message));
     TitleAPI.sendTitle(players2, 40, 40, 40, Main.getInstance().getConfig().getString("Prefix").replaceAll("&", "§"), message);
@@ -590,36 +690,83 @@ for (Player p : getPlayers()) {
     	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
     	  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
       }
-      if (Bukkit.getWorld("sw3") != null) {
-          for (Player p : Bukkit.getWorld("sw3").getPlayers()) {
-        	  p.sendMessage(ChatColor.RED + "A partida foi finalizada!");
-        	  Bukkit.dispatchCommand(p, "sw leave");
-        	  org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.quit.world"));
-        	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
-        	  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
-          }
-          }
-   
+      if (Bukkit.getWorld("sw5") != null) {
+      for (Player p : Bukkit.getWorld("sw5").getPlayers()) {
+    	  p.sendMessage(ChatColor.RED + "A partida foi finalizada!");
+    	  Bukkit.dispatchCommand(p, "sw leave");
+    	  org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.quit.world"));
+    	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
+    	  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
+      }
+      }
       players.clear();
       time = 32;
       pvp = false;
+ run = false;
       rodou = false;
       started = false;
-      run = false;
       playersInPvp.clear();
       getPlayers().clear();
     HandlerList.unregisterAll(this.listener);
     
    Main.getInstance().getEventManager().setRdmAutomatic(null);
+
+	
 	new BukkitRunnable() {
 	    public void run() {
-	    	   Automatic.getMVWorldManager().deleteWorld("sw3");
-	    	Automatic.getMVWorldManager().cloneWorld("sw3copy", "sw3", "VoidGen");
-	   
-			Main.getInstace().CarregarBaus3();
+	    	getMVWorldManager().deleteWorld("sw5");
+	    	Automatic.getMVWorldManager().cloneWorld("sw5copy", "sw5", "VoidGen");
+	    	
+			Main.getInstance().CarregarBaus5();
 	    }}.runTaskLater(Main.plugin, 100l);
- }
-
+  }
+  public static boolean deleteWorld(File path) {
+      if(path.exists()) {
+          File files[] = path.listFiles();
+          for(int i=0; i<files.length; i++) {
+              if(files[i].isDirectory()) {
+                  deleteWorld(files[i]);
+              } else {
+                  files[i].delete();
+              }
+          }
+      }
+      return(path.delete());
+}
+  public static void copyWorld(World originalWorld, String newWorldName) {
+      copyFileStructure(originalWorld.getWorldFolder(), new File(Bukkit.getWorldContainer(), newWorldName));
+      new WorldCreator(newWorldName).createWorld();
+}
+  private static void copyFileStructure(File source, File target){
+	    try {
+	        ArrayList<String> ignore = new ArrayList<>(Arrays.asList("uid.dat", "session.lock"));
+	        if(!ignore.contains(source.getName())) {
+	            if(source.isDirectory()) {
+	                if(!target.exists())
+	                    if (!target.mkdirs())
+	                        throw new IOException("Couldn't create world directory!");
+	                String files[] = source.list();
+	                for (String file : files) {
+	                    File srcFile = new File(source, file);
+	                    File destFile = new File(target, file);
+	                    copyFileStructure(srcFile, destFile);
+	                }
+	            } else {
+	                FileInputStream in = new FileInputStream(source);
+	                FileOutputStream out = new FileOutputStream(target);
+	                byte[] buffer = new byte[1024];
+	                int length;
+	                while ((length = in.read(buffer)) > 0)
+	                    out.write(buffer, 0, length);
+	                in.close();
+	                out.close();
+	            }
+	        }
+	    } catch (IOException e) {
+	        throw new RuntimeException(e);
+	    }
+	}
+	 
   public void setMaxPlayers(int maxPlayers) {
     this.maxPlayers = maxPlayers;
   }
@@ -650,3 +797,4 @@ for (Player p : getPlayers()) {
     STARTING, GAMIMG , STOPPED;
   }
 }
+

@@ -1,8 +1,5 @@
 package me.rafaelauler.sw;
 
-
-
-/*     */ 
 /*     */ import java.util.ArrayList;
 /*     */ import java.util.Arrays;
 /*     */ import java.util.HashMap;
@@ -25,7 +22,7 @@ import org.bukkit.scoreboard.Scoreboard;
 
 
  
-/*     */ public class MCMD3
+/*     */ public class MCMD5
 /*     */   implements CommandExecutor, Listener
 /*     */ {
 /*  43 */   public static HashMap<String, ItemStack[]> saveinv = new HashMap();
@@ -43,7 +40,7 @@ public static HashMap<String, Integer> saveair = new HashMap();
 /*     */ 
 /*     */ 
 /*     */ 
-/*     */   public MCMD3(Main BukkitMain)
+/*     */   public MCMD5(Main BukkitMain)
 /*     */   {
 /*  62 */     plugin = BukkitMain;
 /*     */   }
@@ -64,12 +61,12 @@ public static HashMap<String, Integer> saveair = new HashMap();
 public static ArrayList<Player> player = new ArrayList();
 /*  78 */   List<String> commands = Arrays.asList(new String[] { "admin", "list", "create", "delete", "1v1", "score", "setspawn", "spawn", "join", "leave", "reset", "coins", "setchallenge", "kit", "kitunlocker", "shop", "resetkit", "stats", "reload", "update" });
 /*     */   
-/*     */   public MCMD3() {}
+/*     */   public MCMD5() {}
 /*     */   
 
 /*     */   
 /*     */   public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-/*  91 */     if (commandLabel.equalsIgnoreCase("sw3"))
+/*  91 */     if (commandLabel.equalsIgnoreCase("sw5"))
 /*     */     {
 /*  93 */       if (args.length == 0)
 /*     */       {
@@ -88,31 +85,29 @@ public static ArrayList<Player> player = new ArrayList();
 	sender.sendMessage(ChatColor.YELLOW + "Skywars spawn is not seted yet!");
 	return true;
 }
-if (Automatic3.players.size() >= 12) {
+if (Automatic.players.size() >= 12) {
 	sender.sendMessage(ChatColor.RED + "Essa partida está lotada! Escolha outra!");
 	return true;
 }
-if (Automatic3.star) {
+if (Automatic.star) {
 	sender.sendMessage(ChatColor.RED + "Essa partida já foi iniciada! Escolha outra!");
 	return true;
 }
-
-/*     */ Automatic3 a3 = new Automatic3();
 /*     */ Player p = (Player)sender;
-/*     */ 
+/*     */ Automatic a1 = new Automatic();
 /* 179 */           p.sendMessage(Main.getInstance().getConfig().getString("Joined").replaceAll("&", "§"));
 p.playSound(p.getLocation(), Sound.valueOf("LEVEL_UP"), 10f, 10f);
 /*     */ TitleAPI.sendTitle(p, 80, 80, 80, "§b§lSKYWARS", "§fVocê entrou em uma sala!");
-          a3.putInEvent(p);
-          if (a3.getGameType() == Automatic3.GameType.STOPPED) {
-        	  a3.setGameType(Automatic3.GameType.STARTING);
-        	  }
-
+          a1.putInEvent(p);
+if (a1.getGameType() == Automatic.GameType.STOPPED) {
+a1.setGameType(Automatic.GameType.STARTING);
+}
           p.setAllowFlight(false);
           p.setFlying(false);
+
           p.getInventory().setArmorContents(null);
           p.getInventory().clear();
-          p.teleport(new Location(Bukkit.getWorld("swlobby"), 5169, 67, 2447));
+          p.teleport(new Location(Bukkit.getWorld("swlobby"), 15630, 76, 1145));
 /*     */ 
 /*     */ 
 /*     */ 
@@ -120,6 +115,5 @@ p.playSound(p.getLocation(), Sound.valueOf("LEVEL_UP"), 10f, 10f);
 return false;
 }
 }
-
 
 

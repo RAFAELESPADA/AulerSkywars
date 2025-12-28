@@ -94,6 +94,54 @@ public void CarregarBaus2() {
 	  }
 	   
 }
+public void CarregarBaus4() {
+	
+	   Random random = new Random();
+	   int itemsAmount = random.nextInt(chestItemMaxAmount + 1 - chestItemMinAmount) + chestItemMaxAmount;
+	   for(Chunk c2 : Bukkit.getWorld("sw4").getLoadedChunks()){
+	          for(BlockState b2 : c2.getTileEntities()){
+	              if(b2 instanceof Chest){            	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
+	              
+	              Chest chest = (Chest) b2;
+	              chest.getInventory().clear();
+	              for (int i2 = 0; i2 < itemsAmount; i2++) {
+	                  int slot = random.nextInt(inventory.getSize());
+
+	                  int randomItemIndex = random.nextInt(Jaulas.items.size());
+	                  ItemStack randomItem = Jaulas.items.get(randomItemIndex);
+	                  
+
+	chest.getInventory().setItem( slot, randomItem);
+	}                                           
+	              }
+	          }
+	  }
+	   
+}
+public void CarregarBaus5() {
+	
+	   Random random = new Random();
+	   int itemsAmount = random.nextInt(chestItemMaxAmount + 1 - chestItemMinAmount) + chestItemMaxAmount;
+	   for(Chunk c2 : Bukkit.getWorld("sw5").getLoadedChunks()){
+	          for(BlockState b2 : c2.getTileEntities()){
+	              if(b2 instanceof Chest){            	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
+	              
+	              Chest chest = (Chest) b2;
+	              chest.getInventory().clear();
+	              for (int i2 = 0; i2 < itemsAmount; i2++) {
+	                  int slot = random.nextInt(inventory.getSize());
+
+	                  int randomItemIndex = random.nextInt(Jaulas.items.size());
+	                  ItemStack randomItem = Jaulas.items.get(randomItemIndex);
+	                  
+
+	chest.getInventory().setItem( slot, randomItem);
+	}                                           
+	              }
+	          }
+	  }
+	   
+}
 public void CarregarBaus3() {
 
 	   Random random = new Random();
@@ -181,18 +229,35 @@ Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #2 DESCARREGADOS");
 }  
 
 Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #3 DESCARREGADOS");
+for(Chunk c2 : Bukkit.getWorld("sw4").getLoadedChunks()){
+    for(BlockState b2 : c2.getTileEntities()){
+        if(b2 instanceof Chest){            	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
+        inventory.clear();
+        }
+    }
+}  
+
+Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #4 DESCARREGADOS");
+for(Chunk c2 : Bukkit.getWorld("sw5").getLoadedChunks()){
+    for(BlockState b2 : c2.getTileEntities()){
+        if(b2 instanceof Chest){            	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
+        inventory.clear();
+        }
+    }
+}  
+
+Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #5 DESCARREGADOS");
     Bukkit.getConsoleSender().sendMessage("TODOS OS BAUS DAS PARTIDAS LIMPADOS!");
 }
 /*     */   public void onEnable()
 /*     */   {
 	  
 	getCommand("sw").setExecutor(new MainCommand());
-
 	getCommand("sw1").setExecutor(new MCMD1());
-
 	getCommand("sw2").setExecutor(new MCMD2());
-
 	getCommand("sw3").setExecutor(new MCMD3());
+	getCommand("sw4").setExecutor(new MCMD4());
+	getCommand("sw5").setExecutor(new MCMD5());
 	if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
 		/* 151 */       Bukkit.getConsoleSender().sendMessage("§e[AulerSkywars] §aPlaceHolderAPI is found!");
 		/* 151 */       Bukkit.getConsoleSender().sendMessage("§e[AulerSkywars] §aHooking into it!");
@@ -272,9 +337,15 @@ Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #3 DESCARREGADOS");
 
 	Automatic.getMVWorldManager().deleteWorld("sw3");
 	Automatic.getMVWorldManager().cloneWorld("sw3copy", "sw3", "VoidGen");
+	Automatic.getMVWorldManager().deleteWorld("sw4");
+	Automatic.getMVWorldManager().cloneWorld("sw4copy", "sw4", "VoidGen");
+	Automatic.getMVWorldManager().deleteWorld("sw5");
+	Automatic.getMVWorldManager().cloneWorld("sw5copy", "sw5", "VoidGen");
 	CarregarBaus();
 	CarregarBaus2();
 	CarregarBaus3();
+	CarregarBaus4();
+	CarregarBaus5();
  	Bukkit.getConsoleSender().sendMessage("AULERSKYWARS HAS BEEN ENABLED!");
 
 }

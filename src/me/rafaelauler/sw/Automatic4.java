@@ -550,7 +550,7 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
 
     new BukkitRunnable() {
 	    public void run() {
-          Main.getInstace().CarregarBaus();
+          Main.getInstace().CarregarBaus4();
           for (Player p : players) {
         	  TitleAPI.sendTitle(p, 40, 70, 40, ChatColor.GREEN + "Os báus foram reabastecidos!");
           }
@@ -582,6 +582,8 @@ List<Player> ordered = new ArrayList<>(players);
 for (Player p : ordered) {
 p.getWorld().getBlockAt(new Location(p.getWorld(), p.getLocation().getX(), p.getLocation().getBlockY() - 1, p.getLocation().getZ())).setType(Material.AIR);
 }
+
+Main.getInstace().CarregarBaus4();
 new BukkitRunnable() {
     public void run() {
 started = true;

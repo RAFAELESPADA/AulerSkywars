@@ -582,6 +582,8 @@ List<Player> ordered = new ArrayList<>(players);
 for (Player p : ordered) {
 p.getWorld().getBlockAt(new Location(p.getWorld(), p.getLocation().getX(), p.getLocation().getBlockY() - 1, p.getLocation().getZ())).setType(Material.AIR);
 }
+
+Main.getInstace().CarregarBaus();
 new BukkitRunnable() {
     public void run() {
 started = true;

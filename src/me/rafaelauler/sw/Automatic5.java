@@ -34,6 +34,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -396,6 +397,15 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
             
             e.setCancelled(true);
           }
+          @EventHandler
+          public void onUpdate(PlayerMoveEvent e) {
+        	  
+        	  if (players.contains(e.getPlayer())) {
+        		  if (!started && star) {
+        			  e.setCancelled(true);
+        		  }
+        	  }
+          }
           public static void throwRandomFirework(Player p) {
         	    Firework fw = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
         	    FireworkMeta fwm = fw.getFireworkMeta();
@@ -574,7 +584,7 @@ p.getWorld().getBlockAt(new Location(p.getWorld(), p.getLocation().getX(), p.get
 new BukkitRunnable() {
     public void run() {
 started = true;
-    }}.runTaskLater(Main.plugin, 20 * 6l);
+    }}.runTaskLater(Main.plugin, 20 * 2l);
 	    
     	 }
   	    }.runTaskLater(Main.plugin, 20 * 15l);

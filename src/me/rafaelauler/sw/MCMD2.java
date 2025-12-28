@@ -103,12 +103,14 @@ if (Automatic2.star) {
 p.playSound(p.getLocation(), Sound.valueOf("LEVEL_UP"), 10f, 10f);
 /*     */ TitleAPI.sendTitle(p, 80, 80, 80, "§b§lSKYWARS", "§fVocê entrou em uma sala!");
           Automatic2.players.add(p);
-          a1.putInEvent(p);
-
+      
+          if (!MainCommand.game.contains(p.getName())) {
+        		MainCommand.game.add(p.getName());
+        	}
           if (a1.getGameType() == Automatic2.GameType.STOPPED) {
         	  a1.setGameType(Automatic2.GameType.STARTING);
         	  }
-
+          a1.putInEvent(p);
           p.setAllowFlight(false);
           p.setFlying(false);
 

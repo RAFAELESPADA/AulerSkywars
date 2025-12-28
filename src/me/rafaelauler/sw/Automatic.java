@@ -34,6 +34,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -267,11 +268,21 @@ if (time == 34 && !star) {
         		  }
         	  }
           }
+          
           @EventHandler
           public void onUpdate(BlockBreakEvent e) {
         	  
         	  if (players.contains(e.getPlayer())) {
         		  if (!started) {
+        			  e.setCancelled(true);
+        		  }
+        	  }
+          }
+          @EventHandler
+          public void onUpdate(PlayerMoveEvent e) {
+        	  
+        	  if (players.contains(e.getPlayer())) {
+        		  if (!started  && star) {
         			  e.setCancelled(true);
         		  }
         	  }
@@ -574,7 +585,7 @@ p.getWorld().getBlockAt(new Location(p.getWorld(), p.getLocation().getX(), p.get
 new BukkitRunnable() {
     public void run() {
 started = true;
-    }}.runTaskLater(Main.plugin, 20 * 6l);
+    }}.runTaskLater(Main.plugin, 20 * 2l);
 	    
     	 }
   	    }.runTaskLater(Main.plugin, 20 * 15l);

@@ -99,13 +99,16 @@ if (Automatic4.star) {
 /* 179 */           p.sendMessage(Main.getInstance().getConfig().getString("Joined").replaceAll("&", "§"));
 p.playSound(p.getLocation(), Sound.valueOf("LEVEL_UP"), 10f, 10f);
 /*     */ TitleAPI.sendTitle(p, 80, 80, 80, "§b§lSKYWARS", "§fVocê entrou em uma sala!");
-          a1.putInEvent(p);
+         
 if (a1.getGameType() == Automatic4.GameType.STOPPED) {
 a1.setGameType(Automatic4.GameType.STARTING);
 }
           p.setAllowFlight(false);
           p.setFlying(false);
-
+          if (!MainCommand.game.contains(p.getName())) {
+        		MainCommand.game.add(p.getName());
+        	}
+          a1.putInEvent(p);
           p.getInventory().setArmorContents(null);
           p.getInventory().clear();
           p.teleport(new Location(Bukkit.getWorld("swlobby"), 15628, 76, 6145));

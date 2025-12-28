@@ -98,10 +98,14 @@ if (Automatic.star) {
 /* 179 */           p.sendMessage(Main.getInstance().getConfig().getString("Joined").replaceAll("&", "§"));
 p.playSound(p.getLocation(), Sound.valueOf("LEVEL_UP"), 10f, 10f);
 /*     */ TitleAPI.sendTitle(p, 80, 80, 80, "§b§lSKYWARS", "§fVocê entrou em uma sala!");
-          a1.putInEvent(p);
+        
+          if (!MainCommand.game.contains(p.getName())) {  
+        		MainCommand.game.add(p.getName());
+          }
 if (a1.getGameType() == Automatic.GameType.STOPPED) {
 a1.setGameType(Automatic.GameType.STARTING);
 }
+a1.putInEvent(p);
           p.setAllowFlight(false);
           p.setFlying(false);
 

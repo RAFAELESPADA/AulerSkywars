@@ -559,7 +559,9 @@ org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coord
     	players.forEach(p-> playersInPvp.add(p));
 
 
-    	players.forEach(p-> p.getInventory().addItem(new ItemStack(Material.WOOD_SWORD)));
+    	players.forEach(p-> p.getInventory().setItem(0, new ItemStack(Material.WOOD_SWORD)));
+
+      	 players.forEach(p-> p.getInventory().setItem(1, new ItemStack(Material.STONE , 64)));
 
       	 players.forEach(p-> p.getInventory().addItem(new ItemStack(Material.STONE , 64)));
     	 players.forEach(p-> p.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET)));

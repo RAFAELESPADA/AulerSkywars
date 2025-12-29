@@ -24,6 +24,8 @@ import org.bukkit.metadata.FixedMetadataValue;
 /*     */ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import com.onarandombox.MultiverseCore.MultiverseCore;
+
 
 
 
@@ -36,15 +38,13 @@ import org.bukkit.scheduler.BukkitRunnable;
 /*     */   implements Listener
 /*     */ {
 
-	 private EventManager eventmanager;
 
-	 private EventManager2 eventmanager2;
 
 	    private final int chestItemMinAmount = 3;
 	    private final int chestItemMaxAmount = 8;
-	 private EventManager3 eventmanager3;
 	 /*     */ /*     */   public static Plugin plugin;
 /*     */   public static Main instance;
+private SkywarsManager manager;
 
 /*     */   private File cf1;
 /*  77 */   public static String pluginName = "AulerSkywars";
@@ -65,15 +65,6 @@ public static Main getInstace23()
 /*     */   {
 /*  87 */     return instance;
 /*     */   }
-public EventManager getEventManager() {
-    return this.eventmanager;
-  }
-public EventManager2 getEventManager2() {
-    return this.eventmanager2;
-  }
-public EventManager3 getEventManager3() {
-    return this.eventmanager3;
-  }
 public boolean isInvEmpty(Inventory inv) {
     for (ItemStack item : inv.getContents()) {
         if (item != null) {
@@ -473,21 +464,17 @@ Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #5 DESCARREGADOS");
 }
 /*     */   public void onEnable()
 /*     */   {
-		    
-	getCommand("sw").setExecutor(new MainCommand());
-	getCommand("sw1").setExecutor(new MCMD1());
-	getCommand("sw2").setExecutor(new MCMD2());
-	getCommand("sw3").setExecutor(new MCMD3());
-	getCommand("sw4").setExecutor(new MCMD4());
-	getCommand("sw5").setExecutor(new MCMD5());
+	/* 121 */     instance = this;
+	/* 122 */     plugin = this;
+	this.getCommand("sw").setExecutor(new MainCommand(this));
 	if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
 		/* 151 */       Bukkit.getConsoleSender().sendMessage("§e[AulerSkywars] §aPlaceHolderAPI is found!");
 		/* 151 */       Bukkit.getConsoleSender().sendMessage("§e[AulerSkywars] §aHooking into it!");
 	    new PvPRounds(this).register();
 		/* 151 */       Bukkit.getConsoleSender().sendMessage("§e[AulerSkywars] §aPlaceHolderAPI has hooked sucefully!");
 	}
-	getCommand("setswlobby").setExecutor(new MainCommand());
-	 Bukkit.getPluginManager().registerEvents(new Eventos(), this);
+	Configs.loadLobbySpawn();
+	Configs.loadMainSpawn();
 	 /* 109 */     Metrics metrics = new Metrics(this);
 	 metrics.addCustomChart(new Metrics.DrilldownPie("serverAddress", () -> {
 			Map<String, Map<String, Integer>> map = new HashMap<>();
@@ -499,25 +486,26 @@ Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #5 DESCARREGADOS");
 			
 			return map;
 		}));
-	 Bukkit.getPluginManager().registerEvents(new Automatic(), this);
 
-	 Bukkit.getPluginManager().registerEvents(new Automatic2(), this);
+	 Bukkit.getPluginManager().registerEvents(new Eventos(manager), this);
+     manager = new SkywarsManager();
+     manager.createGame(Jaulas.SW1).setSpawnLocation(Configs.LOBBY_SPAWN);
 
-	 Bukkit.getPluginManager().registerEvents(new Automatic3(), this);
+     manager.createGame(Jaulas.SW2).setSpawnLocation(Configs.LOBBY_SPAWN);
 
-	 Bukkit.getPluginManager().registerEvents(new Automatic4(), this);
+     manager.createGame(Jaulas.SW3).setSpawnLocation(Configs.LOBBY_SPAWN);
 
-	 Bukkit.getPluginManager().registerEvents(new Automatic5(), this);
-	 ;
+     manager.createGame(Jaulas.SW4).setSpawnLocation(Configs.LOBBY_SPAWN);
 
-
-                 
-                 
-         
+     manager.createGame(Jaulas.SW5).setSpawnLocation(Configs.LOBBY_SPAWN);
+	 Bukkit.getScheduler().runTaskTimer(this, () -> {
+         for (SkyWarsGame game : manager.getGames()) {
+             game.tick();
+             game.checkWin();
+         }
+     }, 20, 20);
 	getCommand("setswlobby").setExecutor(new SetRounds());
 	/*     */     
-/* 121 */     instance = this;
-/* 122 */     plugin = this;
 new BukkitRunnable() {
     public void run() {
     Bukkit.getConsoleSender().sendMessage("SETADO BAUS PARA TODAS AS SALAS");	
@@ -539,11 +527,6 @@ new BukkitRunnable() {
     		                  ItemStack randomItem = Jaulas.items.get(randomItemIndex);
     		chest.getInventory().setItem( slot, randomItem);                              		          
     }}}}}}}}.runTaskTimer(getInstace(), 20 * 10l, 100 * 20l * 5);
-(getInstance()).eventmanager = new EventManager();
-
-(getInstance()).eventmanager2 = new EventManager2();
-
-(getInstance()).eventmanager3 = new EventManager3();
   instance = this;
    plugin = this;
 	ConsoleCommandSender cmd = Bukkit.getConsoleSender();
@@ -576,18 +559,18 @@ new BukkitRunnable() {
 		e.printStackTrace();
 	}
 
-	Automatic.getMVWorldManager().deleteWorld("sw1");
-	Automatic.getMVWorldManager().cloneWorld("sw1copy", "sw1", "VoidGen");
+	getMVWorldManager().deleteWorld("sw1");
+	getMVWorldManager().cloneWorld("sw1copy", "sw1", "VoidGen");
 
-	Automatic.getMVWorldManager().deleteWorld("sw2");
-	Automatic.getMVWorldManager().cloneWorld("sw2copy", "sw2", "VoidGen");
+	getMVWorldManager().deleteWorld("sw2");
+	getMVWorldManager().cloneWorld("sw2copy", "sw2", "VoidGen");
 
-	Automatic.getMVWorldManager().deleteWorld("sw3");
-	Automatic.getMVWorldManager().cloneWorld("sw3copy", "sw3", "VoidGen");
-	Automatic.getMVWorldManager().deleteWorld("sw4");
-	Automatic.getMVWorldManager().cloneWorld("sw4copy", "sw4", "VoidGen");
-	Automatic.getMVWorldManager().deleteWorld("sw5");
-	Automatic.getMVWorldManager().cloneWorld("sw5copy", "sw5", "VoidGen");
+	getMVWorldManager().deleteWorld("sw3");
+	getMVWorldManager().cloneWorld("sw3copy", "sw3", "VoidGen");
+	getMVWorldManager().deleteWorld("sw4");
+	getMVWorldManager().cloneWorld("sw4copy", "sw4", "VoidGen");
+	getMVWorldManager().deleteWorld("sw5");
+	getMVWorldManager().cloneWorld("sw5copy", "sw5", "VoidGen");
 	CarregarBaus();
 	CarregarBaus2();
 	CarregarBaus3();
@@ -602,8 +585,13 @@ new BukkitRunnable() {
 
 }
 
-              }
-
+public static MultiverseCore getMVWorldManager() {
+    return JavaPlugin.getPlugin(MultiverseCore.class);
+}              
+public SkywarsManager getManager() {
+    return manager;
+}
+}
 
 
 

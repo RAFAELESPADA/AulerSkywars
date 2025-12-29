@@ -1,286 +1,169 @@
 package me.rafaelauler.sw;
 
-/*     */ 
-/*     */ import java.util.ArrayList;
-/*     */ import java.util.Arrays;
-/*     */ import java.util.HashMap;
-/*     */ import java.util.List;
-
 import org.bukkit.Bukkit;
-/*     */ import org.bukkit.ChatColor;
-/*     */ import org.bukkit.GameMode;
-/*     */ import org.bukkit.Location;
-/*     */ import org.bukkit.command.Command;
-/*     */ import org.bukkit.command.CommandExecutor;
-/*     */ import org.bukkit.command.CommandSender;
-/*     */ import org.bukkit.entity.Player;
-/*     */ import org.bukkit.event.Listener;
-/*     */ import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.Scoreboard;
 
 import me.RockinChaos.itemjoin.api.ItemJoinAPI;
 
-
-
- 
-/*     */ public class MainCommand
-/*     */   implements CommandExecutor, Listener
-/*     */ {
-/*  43 */   public static HashMap<String, ItemStack[]> saveinv = new HashMap();
-/*  44 */   public static HashMap<String, ItemStack[]> savearmor = new HashMap();
-/*  45 */   public static HashMap<String, Location> saveworld = new HashMap();
-/*  46 */   public static HashMap<String, GameMode> savegamemode = new HashMap();
-public static HashMap<String, Scoreboard> savescore = new HashMap();
-public static HashMap<String, Integer> savelevel = new HashMap();
-public static HashMap<String, Integer> savehunger = new HashMap();
-public static HashMap<String, PotionEffect> saveeffect = new HashMap();
-public static HashMap<String, Integer> saveair = new HashMap();
-
-/*     */   static Main plugin;
-/*     */   
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */   public MainCommand(Main BukkitMain)
-/*     */   {
-/*  62 */     plugin = BukkitMain;
-/*     */   }
-/*     */   
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*     */ 
-/*  76 */   HashMap<String, Location> maps = new HashMap();
-/*  77 */   public static ArrayList<String> game = new ArrayList();
-public static ArrayList<Player> player = new ArrayList();
-/*  78 */   List<String> commands = Arrays.asList(new String[] { "admin", "list" , "forcechest", "create", "delete", "1v1", "score", "setspawn", "spawn", "join", "leave", "reset", "coins", "setchallenge", "kit", "kitunlocker", "shop", "resetkit", "stats", "reload", "update" });
-/*     */   
-/*     */   public MainCommand() {}
-/*     */   
-
-/*     */   
-/*     */   public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-/*  91 */     if (commandLabel.equalsIgnoreCase("sw"))
-/*     */     {
-/*  93 */       if (args.length == 0)
-/*     */       {
-
-/* 106 */         sender.sendMessage(ChatColor.DARK_AQUA + "§m-----------" + ChatColor.AQUA + " AULERSKYWARS COMMANDS " + ChatColor.DARK_AQUA + ChatColor.STRIKETHROUGH + "-------------");
-/* 107 */         sender.sendMessage(ChatColor.DARK_AQUA + "§eCreated by Rafael Auler");
-/* 108 */         sender.sendMessage("");
-/* 109 */         sender.sendMessage(ChatColor.DARK_AQUA + " - " + ChatColor.AQUA + "/" + commandLabel + ChatColor.DARK_AQUA + " - " + ChatColor.GRAY + "Main command");
-/* 110 */         sender.sendMessage(ChatColor.DARK_AQUA + " - " + ChatColor.AQUA + "/" + commandLabel + " " + ChatColor.GREEN + "join" + ChatColor.DARK_AQUA + " - " + ChatColor.GRAY + "Join the SKYWARS LOBBY!");
-/* 111 */         sender.sendMessage(ChatColor.DARK_AQUA + " - " + ChatColor.AQUA + "/" + commandLabel + " " + ChatColor.GREEN + "leave" + ChatColor.DARK_AQUA + " - " + ChatColor.GRAY + "Leave the SKYWARS LOBBY!");   
-/* 111 */         sender.sendMessage(ChatColor.DARK_AQUA + " - " + ChatColor.AQUA + "/" + commandLabel + " " + ChatColor.GREEN + "leave" + ChatColor.DARK_AQUA + " - " + ChatColor.GRAY + "STOP ALL SKYWARS GAMES INSTANCES!");
-/* 111 */         sender.sendMessage(ChatColor.DARK_AQUA + " - " + ChatColor.AQUA + "/" + commandLabel + " " + ChatColor.GREEN + "list" + ChatColor.DARK_AQUA + " - " + ChatColor.GRAY + "List PLAYERS ON SKYWARS!");
-/* 116 */         sender.sendMessage(ChatColor.DARK_AQUA + " - " + ChatColor.AQUA + "/" + commandLabel + " " + ChatColor.GREEN + "info" + ChatColor.DARK_AQUA + " - " + ChatColor.GRAY + "Shows plugin info");
-/* 120 */         sender.sendMessage(ChatColor.DARK_AQUA + "§m------------------------------------------");
-/* 102 */         return true;
-/*     */       }
-if (args[0].equalsIgnoreCase("stop"))
-/*     */       {
-	if (sender.hasPermission("skywars.stop")) {
-	/* 27 */       sender.sendMessage("§4§l\u274C You stopped all skywars games");
-	               Automatic r2 = new Automatic();
-	            		   r2.destroy();
-	            		   Automatic2 r3 = new Automatic2();
-	            		   r3.destroy();
-	            		   Automatic3 r4 = new Automatic3();
-	            		   r4.destroy();
-	            		   Automatic4 r41 = new Automatic4();
-	            		   r41.destroy();
-
-	            		   Automatic5 r411 = new Automatic5();
-	            		   r411.destroy();
-/* 121 */         return true;
-/*     */       }
-}
-if (args[0].equalsIgnoreCase("forcechest"))
-/*     */       {
-	if (sender.hasPermission("skywars.stop")) {
-	/* 27 */       sender.sendMessage("§4§l\u274C Você preencheu os baus da ilhas");
-	               Main.getInstace().CarregarTodos();
-/* 121 */         return true;
-/*     */       }
-}
-/* 104 */       if (args[0].equalsIgnoreCase("info"))
-/*     */       {
-	/* 27 */       sender.sendMessage("§4§l\u274C §2§lCREDITS §f§lAND §e§lINFORMATION §4§l \u274C");
-	/* 28 */       sender.sendMessage("§6\u279C §cPlugin Name: §eAulerSkywars");
-	/* 29 */       sender.sendMessage("§6\u279C §cPlugin Version: §e " + Main.getInstance().getDescription().getVersion());
-	/* 30 */       sender.sendMessage("§6\u279C §cAuthor: §eRafael_Auler or Rafael Auler");
-	/* 32 */       sender.sendMessage("§6\u279C §cSpigot Profile: http://bit.ly/2j5qvnM");
-	/* 33 */       sender.sendMessage("§6\u279C §cPlugin Page: COMMING SOON");
-	/* 34 */       sender.sendMessage("§cThanks for use this plugin i really appreaciate IT");
-	/* 35 */       sender.sendMessage("§cIf you like it consider giving a §e§l\u2605\u2605\u2605\u2605\u2605 §cReview");
-	/* 36 */       sender.sendMessage("§cPS: §eSubscribe to my channel and follow me on Spigot Thanks! §9§l=)");
-/* 121 */         return true;
-/*     */       }
-/* 167 */       if (args[0].equalsIgnoreCase("join"))
-/*     */       {
-/* 169 */         if ((sender instanceof Player))
-/*     */         {
-/* 171 */           if (game.contains(sender.getName()))
-/*     */           {
-/* 173 */sender.sendMessage(ChatColor.RED + "Você já está em um lobby de Skywars");            
-	return true;
-/*     */           }
-/*     */           if (Main.cfg_x1.getString("x1.coords.spawn.world") == null) {
-	sender.sendMessage(ChatColor.YELLOW + "Skywars spawn is not seted yet!");
-	return true;
-}
-/*     */ Player p = (Player)sender;
-/*     */ 
-/* 179 */           p.sendMessage(Main.getInstance().getConfig().getString("Joined").replaceAll("&", "§"));
-
-/*     */ TitleAPI.sendTitle(p, 80, 80, 80, Main.getInstance().getConfig().getString("JoinTitle").replaceAll("&", "§"), Main.getInstance().getConfig().getString("JoinSubTitle").replaceAll("&", "§"));
-/*     */ 
-/*     */ 
-/* 185 */           game.add(p.getName());
-/*     */ 
-/*     */ 
-
-/*     */ 
-;
-org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.spawn.world"));
-/*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.spawn.x"), 
-/*  99 */       Main.cfg_x1.getDouble("x1.coords.spawn.y"), Main.cfg_x1.getDouble("x1.coords.spawn.z")));
-		/* 205 */           saveworld.put(p.getName(), p.getLocation());
-		                    savescore.put(p.getName(), p.getScoreboard());
-		/* 206 */           saveinv.put(p.getName(), p.getInventory().getContents());
-		/* 207 */           savearmor.put(p.getName(), p.getInventory().getArmorContents());
-		/* 208 */           savegamemode.put(p.getName(), p.getGameMode());
-		/*     */           savelevel.put(p.getName(), p.getLevel());
-		savehunger.put(p.getName(), p.getFoodLevel());
-		saveair.put(p.getName(), p.getRemainingAir());
-/*     */        /*     */ 
-		/*     */  ItemJoinAPI itemAPI = new ItemJoinAPI();
-		new BukkitRunnable() {
-		    
-		    public void run() {
-
-		 	   if (Bukkit.getPluginManager().getPlugin("ItemJoin") != null) {
-		 	   p.getInventory().clear();
-		     itemAPI.getItems(p);
-		 	   }}}.runTaskLater(Main.plugin, 5l);
+public class MainCommand implements CommandExecutor {
+	private final Main plugin;
+private final SkywarsManager manager = new SkywarsManager();
+	   public MainCommand(Main plugin) {
+		    this.plugin = plugin;
 		}
-		/*     */ 
-		/*     */ 
-		/*     */ 
 
-		}
-		/*     */ 
-		/*     */ 
-		/*     */ 
-		/*     */ 
-		/*     */ Player p = (Player)sender;   
-/*     */ 
-/* 219 */           p.getInventory().clear();
-p.getInventory().setArmorContents(null);
-/* 107 */       p.updateInventory();
-/*     */           
-/*     */ 
+    @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    	if (!(sender instanceof Player player)) {
+            sender.sendMessage("Apenas jogadores podem usar este comando.");
+            return true;
+        }
+        
+        if (args.length == 0) {
+            player.sendMessage(ChatColor.AQUA + "Use /sw join | joinspawn | leave | list | info");
+            return true;
+        }
 
-/*     */ 
-/* 235 */           p.setExp(0.0F);
-/* 236 */           p.setExhaustion(20.0F);
-/* 237 */           p.setFireTicks(0);
-/* 238 */           p.setFoodLevel(20000);
+        switch (args[0].toLowerCase()) {
 
-}
-if (args[0].equalsIgnoreCase("list"))
-/*     */       {
-	Player p = (Player)sender;
-	if (!sender.hasPermission("skywars.list")) {
-		sender.sendMessage("SEM PERMISSÃO!");
-		return true;
-	}
-	if (Automatic.players.size() + Automatic2.players.size() + Automatic3.players.size() + Automatic4.players.size() + Automatic5.players.size() == 0) {
-		p.sendMessage(ChatColor.RED + "Não há jogadores nas salas de Skywars");
-		return true;
-	}
-	for (Player p1 : Automatic.players) {
-		p.sendMessage(ChatColor.GREEN + "Sala #1 Jogadores: " + ChatColor.YELLOW + p1.getName());
-	}
-	for (Player p1 : Automatic2.players) {
-		p.sendMessage(ChatColor.GREEN + "Sala #2 Jogadores: " + ChatColor.YELLOW + p1.getName());
-	}
-	for (Player p1 : Automatic3.players) {
-		p.sendMessage(ChatColor.GREEN + "Sala #3 Jogadores: " + ChatColor.YELLOW + p1.getName());
-	}
-	for (Player p1 : Automatic4.players) {
-		p.sendMessage(ChatColor.GREEN + "Sala #4 Jogadores: " + ChatColor.YELLOW + p1.getName());
-	}
-	for (Player p1 : Automatic5.players) {
-		p.sendMessage(ChatColor.GREEN + "Sala #5 Jogadores: " + ChatColor.YELLOW + p1.getName());
-	}
-	
-		return true;
-	}
-if (args[0].equalsIgnoreCase("leave"))
-/*     */       {
-	Player p = (Player)sender;
-	if ((!game.contains(p.getName()))) {
-		
-			p.sendMessage(ChatColor.RED + "Você não está em um lobby de skywars.");
-		return true;
-	}
-	
-	/*     */       
+            case "join" -> joinGame(player);
 
-	/*     */ Automatic3.players.remove(p);
-	/*     */ Automatic2.players.remove(p);
-	/*     */ Automatic.players.remove(p);
+            case "leave" -> leaveGame(player);
+            
 
-	/*     */ Automatic5.players.remove(p);
-	/*     */ Automatic4.players.remove(p);
-	/*     */ 
-	/* 283 */       game.remove(p.getName());
-	/* 284 */       game.remove(p.getName());
-	/* 285 */       game.remove(p.getName());
-	/* 286 */       game.remove(p.getName());
-	/* 287 */       game.remove(p.getName());
-	/* 288 */       game.remove(p.getName());
-	/* 289 */       game.remove(p.getName());
-	/* 290 */       game.remove(p.getName());
-	/* 291 */       game.remove(p.getName());
-	/* 292 */       game.remove(p.getName());
-	/* 293 */       game.remove(p.getName());
-	/* 294 */       game.remove(p.getName());game.remove(p.getName());
-	/* 295 */       game.remove(p.getName());
-	/* 296 */       game.remove(p.getName());
-	/* 297 */       game.remove(p.getName());
-    p.sendMessage(ChatColor.RED + Main.getInstace().getConfig().getString("TournamentLeave"));
-	/* 304 */       p.getInventory().clear();
-	/* 305 */       p.teleport((Location)saveworld.get(p.getName()));
-	/* 306 */       p.getInventory().setContents((ItemStack[])saveinv.get(p.getName()));
-	/* 307 */       p.setGameMode((GameMode)savegamemode.get(p.getName()));
-	p.setScoreboard(savescore.get(p.getName()));
-	p.setLevel(savelevel.get(p.getName()));
-	p.setFoodLevel(savehunger.get(p.getName()));
-	p.setRemainingAir(saveair.get(p.getName()));
-	  org.bukkit.World w = Bukkit.getServer().getWorld(Main.cfg_x1.getString("x1.coords.quit.world"));
-	  /*  98 */     p.teleport(new Location(w, Main.cfg_x1.getDouble("x1.coords.quit.x"), 
-	  /*  99 */       Main.cfg_x1.getDouble("x1.coords.quit.y"), Main.cfg_x1.getDouble("x1.coords.quit.z")));
-  
-	/* 308 */       p.getInventory().setArmorContents((ItemStack[])savearmor.get(p.getName()));
+            case "joinspawn" -> joinSpawn(player);
 
-	/*     */   
-	/* 311 */       p.updateInventory();
+            case "list" -> listPlayers(player);
 
-	/*     */     }
+            case "info" -> showInfo(player);
 
-/*     */       
+            default -> player.sendMessage(ChatColor.RED + "Comando inválido.");
+        }
 
-return false;
-}
+        return true;
+    }
+
+    private void joinSpawn(Player player) {
+    	String worldName = Main.cfg_x1.getString("x1.coords.spawn.world");
+        Location quitLocation = new Location(
+                Bukkit.getWorld(worldName),
+                Main.cfg_x1.getDouble("x1.coords.spawn.x"),
+                Main.cfg_x1.getDouble("x1.coords.spawn.y"),
+                Main.cfg_x1.getDouble("x1.coords.spawn.z")
+        );
+        player.teleport(quitLocation);
+    }
+    private void joinGame(Player player) {
+
+        SkyWarsGame game = manager.getGame(player);
+        if (game != null) {
+            player.sendMessage(ChatColor.RED + "Você já está em uma sala de SkyWars!");
+            return;
+        }
+
+        SkyWarsGame available = manager.findAvailableGame();
+
+        if (available == null) {
+            manager.createGame(Jaulas.SW1).setSpawnLocation(Configs.LOBBY_SPAWN);
+            manager.createGame(Jaulas.SW2).setSpawnLocation(Configs.LOBBY_SPAWN);
+            manager.createGame(Jaulas.SW3).setSpawnLocation(Configs.LOBBY_SPAWN);
+
+            manager.createGame(Jaulas.SW4).setSpawnLocation(Configs.LOBBY_SPAWN);
+
+            manager.createGame(Jaulas.SW5).setSpawnLocation(Configs.LOBBY_SPAWN);
+
+            // 🔥 BUSCA DE NOVO
+            available = manager.findAvailableGame();
+        }
+
+        if (available == null) {
+            player.sendMessage("§cNenhuma sala disponível.");
+            return;
+        }
+
+        // 🔥 PRIMEIRO entra na sala
+        available.join(player);
+
+        // 🔥 DEPOIS atualiza visibilidade
+        available.updatePlayerVisibility();
+
+        player.getInventory().clear();
+        player.sendMessage("§aVocê entrou na sala #" + available.getId());
+    }
+
+    private void leaveGame(Player player) {
+        SkyWarsGame game = manager.getGame(player);
+
+        if (game == null) {
+            player.sendMessage(ChatColor.RED + "Você não está em nenhuma sala de SkyWars.");
+            return;
+        }
+
+        manager.removePlayer(player);
+
+        // Restaura inventário, gamemode e localização
+        Utils.restorePlayerState(player);
+
+        // Teleporta apenas se o jogador não estiver no lobby
+        String worldName = Main.cfg_x1.getString("x1.coords.quit.world");
+        World quitWorld = Bukkit.getWorld(worldName);
+        if (quitWorld != null && player.getWorld() != quitWorld) {
+        	if (player.getWorld() != Bukkit.getWorld("spawn")) {
+            Location quitLocation = new Location(
+                quitWorld,
+                Main.cfg_x1.getDouble("x1.coords.quit.x"),
+                Main.cfg_x1.getDouble("x1.coords.quit.y"),
+                Main.cfg_x1.getDouble("x1.coords.quit.z")
+            );
+            player.teleport(quitLocation);
+        }
+        }
+        game.updatePlayerVisibility();
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (Bukkit.getPluginManager().getPlugin("ItemJoin") != null) {
+                    new ItemJoinAPI().getItems(player);
+                }
+            }
+        }.runTaskLater(Main.getInstace(), 5L);
+
+        player.sendMessage(ChatColor.RED + "Você saiu da sala de SkyWars.");
+    }
+
+    private void listPlayers(Player player) {
+    	
+        boolean hasPlayers = false;
+
+        for (SkyWarsGame game : manager.getGames()) {
+        	player.sendMessage("salas: " + manager.getGames());
+            if (game.getPlayers().isEmpty()) continue;
+
+            hasPlayers = true;
+            player.sendMessage(ChatColor.GREEN + "Sala " + ChatColor.YELLOW + game.getId()
+                    + ChatColor.GREEN + " (" + game.getPlayers().size() + " jogadores):");
+
+            for (Player p : game.getPlayers()) {
+                player.sendMessage(ChatColor.GRAY + " - " + ChatColor.YELLOW + p.getName());
+            }
+        }
+
+        if (!hasPlayers) {
+            player.sendMessage(ChatColor.RED + "Não há jogadores nas salas de SkyWars.");
+        }
+    }
+
+    private void showInfo(Player player) {
+        player.sendMessage(ChatColor.AQUA + "Plugin: AulerSkyWars");
+        player.sendMessage(ChatColor.AQUA + "Versão: " + Main.getInstace().getDescription().getVersion());
+        player.sendMessage(ChatColor.AQUA + "Autor: Rafael Auler");
+    }
 }

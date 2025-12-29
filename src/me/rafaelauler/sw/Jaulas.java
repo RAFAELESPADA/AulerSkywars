@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.bukkit.Bukkit;
@@ -135,13 +136,15 @@ public enum Jaulas {
         }
         return locations;
     }
-    public void teleportByQueueOrder(List<? extends Player> players) {
+    public void teleportByQueueOrder(List<? extends UUID> players) {
         if (players == null || players.isEmpty()) return;
 
         World world = requireWorld();
 
         for (int i = 0; i < players.size(); i++) {
-            Player p = players.get(i);
+            UUID uuid = players.get(i); // pega o UUID correto
+            Player p = Bukkit.getPlayer(uuid); // busca o Player online
+
             if (p == null) continue;
 
             Location target;

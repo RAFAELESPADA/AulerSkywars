@@ -358,9 +358,25 @@ if (players.size() < 2) {
                ij.getItems(p);
             }, 20L * 4);
         }
+     // ================= MULTIVERSE RESET =================
+        if (world != null) {
+            String worldNameBackup = worldName + "copy"; // nome do backup
+            // Descarrega o mundo
+            Bukkit.unloadWorld(world, false);
+
+            // Carrega o backup via Multiverse-Core
+            try {
+
+            	Main.getMVWorldManager().deleteWorld(world.getName());
+            	Main.getMVWorldManager().cloneWorld(worldNameBackup, world.getName(), "VoidGen");
+                Bukkit.getServer().getLogger().info("[SkyWars] Mundo " + worldName + " reiniciado a partir do backup.");
+            } catch (Exception e) {
+                Bukkit.getServer().getLogger().warning("[SkyWars] Falha ao reiniciar o mundo " + worldName + ": " + e.getMessage());
+            }
         players.clear();   
         playersInPvp.clear();
         HandlerList.unregisterAll(this);
     }
+}
 }
 

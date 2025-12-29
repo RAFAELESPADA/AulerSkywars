@@ -19,7 +19,7 @@ import org.bukkit.util.Vector;
 
 public enum Jaulas {
 
-    SW1("sw1", new double[][]{
+    sw1("sw1", new double[][]{
         { -31, 64, 32  },
         { -42, 66, 23 },
         { -41, 66, -22 },
@@ -34,7 +34,7 @@ public enum Jaulas {
         { -22.170, 64.55, 42.443 }
     }),
 
-    SW2("sw2", new double[][]{
+    sw2("sw2", new double[][]{
         { -17, 41, 50 },
         { -35, 41, 44 },
         { -41, 41, 25 },
@@ -49,7 +49,7 @@ public enum Jaulas {
         { 16, 41, 49 }
     }),
 
-    SW3("sw3", new double[][]{
+    sw3("sw3", new double[][]{
         { -41, 74, -21 },
         { -1, 74, -70 },
         { 24, 74, -43 },
@@ -63,7 +63,7 @@ public enum Jaulas {
         { -69, 70, 1 },
         { -43, 70, -21 }
     }),
-    SW4("sw4", new double[][]{
+    sw4("sw4", new double[][]{
         { -1, 78, 57},
         { -14, 78, 43 },
         { -44, 78, 13 },
@@ -77,7 +77,7 @@ public enum Jaulas {
         { 44, 81, 13 },
         { 14, 81, 44 }
     }),
-    SW5("sw5", new double[][]{
+    sw5("sw5", new double[][]{
         { 66, 68, 3 },
         { 49, 66, -25 },
         { 25, 66, -42 },

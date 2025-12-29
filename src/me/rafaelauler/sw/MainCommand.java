@@ -27,7 +27,7 @@ private final SkywarsManager manager = new SkywarsManager();
         }
         
         if (args.length == 0) {
-            player.sendMessage(ChatColor.AQUA + "Use /sw join | joinspawn | leave | list | info");
+            player.sendMessage(ChatColor.AQUA + "Use /sw join | joingame | leave | list | info");
             return true;
         }
 
@@ -39,6 +39,7 @@ private final SkywarsManager manager = new SkywarsManager();
             
 
             case "joinspawn" -> joinSpawn(player);
+            case "joingame" -> joinSpecificGame(player, args);
 
             case "list" -> listPlayers(player);
 
@@ -60,6 +61,50 @@ private final SkywarsManager manager = new SkywarsManager();
         );
         player.teleport(quitLocation);
     }
+    public static boolean isNumeric(String str) {
+        try {
+           Integer.parseInt(str);
+           return true;
+        } catch (NumberFormatException var2) {
+           return false;
+        }
+     }
+    
+    private void joinSpecificGame(Player player, String[] args) {
+
+        SkyWarsGame game = manager.getGame(player);
+        if (game != null) {
+            player.sendMessage(ChatColor.RED + "Você já está em uma sala de SkyWars!");
+            return;
+        }
+        if (args.length != 2) {
+        	 player.sendMessage(ChatColor.RED + "Utilize: /sw joingame <ID>");
+             return;
+        }
+        if (!isNumeric(args[1])) {
+        	player.sendMessage("O argumento número dois deve ser um número de 1 ao 5!");
+        	return;
+        }
+        SkyWarsGame id = manager.getGames(Integer.valueOf(args[1]));
+        if (id == null) {
+            manager.createGame(Jaulas.sw1).setSpawnLocation(Configs.LOBBY_SPAWN);
+            manager.createGame(Jaulas.sw2).setSpawnLocation(Configs.LOBBY_SPAWN);
+            manager.createGame(Jaulas.sw3).setSpawnLocation(Configs.LOBBY_SPAWN);
+
+            manager.createGame(Jaulas.sw4).setSpawnLocation(Configs.LOBBY_SPAWN);
+
+            manager.createGame(Jaulas.sw5).setSpawnLocation(Configs.LOBBY_SPAWN);
+
+            // 🔥 BUSCA DE NOVO
+
+            id = manager.getGames(Integer.valueOf(args[1]));
+        }
+        id.join(player);  
+       id.updatePlayerVisibility();
+
+        player.getInventory().clear();
+    }
+        
     private void joinGame(Player player) {
 
         SkyWarsGame game = manager.getGame(player);
@@ -71,13 +116,13 @@ private final SkywarsManager manager = new SkywarsManager();
         SkyWarsGame available = manager.findAvailableGame();
 
         if (available == null) {
-            manager.createGame(Jaulas.SW1).setSpawnLocation(Configs.LOBBY_SPAWN);
-            manager.createGame(Jaulas.SW2).setSpawnLocation(Configs.LOBBY_SPAWN);
-            manager.createGame(Jaulas.SW3).setSpawnLocation(Configs.LOBBY_SPAWN);
+            manager.createGame(Jaulas.sw1).setSpawnLocation(Configs.LOBBY_SPAWN);
+            manager.createGame(Jaulas.sw2).setSpawnLocation(Configs.LOBBY_SPAWN);
+            manager.createGame(Jaulas.sw3).setSpawnLocation(Configs.LOBBY_SPAWN);
 
-            manager.createGame(Jaulas.SW4).setSpawnLocation(Configs.LOBBY_SPAWN);
+            manager.createGame(Jaulas.sw4).setSpawnLocation(Configs.LOBBY_SPAWN);
 
-            manager.createGame(Jaulas.SW5).setSpawnLocation(Configs.LOBBY_SPAWN);
+            manager.createGame(Jaulas.sw5).setSpawnLocation(Configs.LOBBY_SPAWN);
 
             // 🔥 BUSCA DE NOVO
             available = manager.findAvailableGame();
@@ -144,7 +189,6 @@ private final SkywarsManager manager = new SkywarsManager();
         boolean hasPlayers = false;
 
         for (SkyWarsGame game : manager.getGames()) {
-        	player.sendMessage("salas: " + manager.getGames());
             if (game.getPlayers().isEmpty()) continue;
 
             hasPlayers = true;

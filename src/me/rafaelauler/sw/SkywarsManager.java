@@ -37,6 +37,9 @@ public class SkywarsManager {
     public List<SkyWarsGame> getGames() {
         return new ArrayList<>(games.values());
     }
+    public SkyWarsGame getGames(int id) {
+        return games.get(id);
+    }
 
     /** Retorna a partida em que um jogador está, ou null */
     public SkyWarsGame getGame(Player player) {

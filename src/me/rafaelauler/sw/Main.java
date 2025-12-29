@@ -489,15 +489,15 @@ Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #5 DESCARREGADOS");
 
 	 Bukkit.getPluginManager().registerEvents(new Eventos(manager), this);
      manager = new SkywarsManager();
-     manager.createGame(Jaulas.SW1).setSpawnLocation(Configs.LOBBY_SPAWN);
+     manager.createGame(Jaulas.sw1).setSpawnLocation(Configs.LOBBY_SPAWN);
 
-     manager.createGame(Jaulas.SW2).setSpawnLocation(Configs.LOBBY_SPAWN);
+     manager.createGame(Jaulas.sw2).setSpawnLocation(Configs.LOBBY_SPAWN);
 
-     manager.createGame(Jaulas.SW3).setSpawnLocation(Configs.LOBBY_SPAWN);
+     manager.createGame(Jaulas.sw3).setSpawnLocation(Configs.LOBBY_SPAWN);
 
-     manager.createGame(Jaulas.SW4).setSpawnLocation(Configs.LOBBY_SPAWN);
+     manager.createGame(Jaulas.sw4).setSpawnLocation(Configs.LOBBY_SPAWN);
 
-     manager.createGame(Jaulas.SW5).setSpawnLocation(Configs.LOBBY_SPAWN);
+     manager.createGame(Jaulas.sw5).setSpawnLocation(Configs.LOBBY_SPAWN);
 	 Bukkit.getScheduler().runTaskTimer(this, () -> {
          for (SkyWarsGame game : manager.getGames()) {
              game.tick();

@@ -3,13 +3,18 @@ package me.rafaelauler.sw;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
@@ -22,6 +27,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.meta.FireworkMeta;
 
 import me.RockinChaos.itemjoin.api.ItemJoinAPI;
 import net.md_5.bungee.api.ChatColor;
@@ -105,7 +111,9 @@ public class SkyWarsGame implements Listener {
     public void join(Player player) {
     	 if (players.contains(player.getUniqueId())) return;
     	    players.add(player.getUniqueId());
-
+           player.setAllowFlight(false);
+           player.setFlying(false);
+           player.setGameMode(GameMode.SURVIVAL);
     	    // Registrar evento se ainda não registrado
     	    if (!Bukkit.getPluginManager().isPluginEnabled(Main.getInstace())) {
     	        Bukkit.getPluginManager().registerEvents(this, Main.getInstace());
@@ -197,16 +205,27 @@ public class SkyWarsGame implements Listener {
         Player k = e.getEntity().getKiller();
         String path2 = "players." + k.getUniqueId();
         
-            Main.getInstace().getConfig().set(path2 + ".kills", (path2 + ".kills") + 1);
 
-            Main.getInstace().getConfig().set(path + ".deaths", (path + ".deaths") + 1);
+        int kills = Main.getInstace().getConfig().getInt("players." + k.getUniqueId() + ".kills");
+        int deaths = Main.getInstace().getConfig().getInt("players." + p.getUniqueId() + ".kills");
+        int wins = Main.getInstace().getConfig().getInt("players." + k.getUniqueId() + ".wins");
+        
+            Main.getInstace().getConfig().set(path2 + ".kills", kills + 1);
 
-            Main.getInstace().getConfig().set(path2 + ".wins", (path2 + ".wins") + 1);
+            Main.getInstace().getConfig().set(path + ".deaths", deaths + 1);
+
+            Main.getInstace().getConfig().set(path2 + ".wins", wins + 1);
         }
+        
         p.sendMessage("§cVocê foi eliminado!");
         broadcast("§e" + p.getName() + " foi eliminado da partida!");
         Bukkit.dispatchCommand(p, "sw leave");
         Bukkit.getScheduler().runTaskLater(Main.plugin, () -> p.performCommand("sw leave"), 5L);
+        Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
+        	p.getInventory().clear();
+        	ItemJoinAPI ij = new ItemJoinAPI();
+           ij.getItems(p);
+        }, 20L * 2);
         checkWin();
         }
     
@@ -291,13 +310,15 @@ if (players.size() < 2) {
         Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
             Cage.removeAll(map);
             cagesClosed = false;
-            started = true;
+            
             broadcast("§aA partida começou!");
             for (UUID u : ordered) {
             	Player u2 = Bukkit.getPlayer(u);
             	 playersInPvp.add(u2.getUniqueId());
             }
-           
+            Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
+started = true;
+            }, 20L * 18);
         }, 20L * 15);
     }
 
@@ -315,7 +336,43 @@ if (players.size() < 2) {
              }, 20L * 7);
          }
         }
-    
+    public static void throwRandomFirework(Player p) {
+        Firework fw = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
+        FireworkMeta fwm = fw.getFireworkMeta();
+
+        //Our random generator
+        Random r = new Random();
+
+        //Get the type
+        int rt = r.nextInt(5) + 1;
+        FireworkEffect.Type type = FireworkEffect.Type.BALL;
+        if (rt == 2) type = FireworkEffect.Type.BALL_LARGE;
+        if (rt == 3) type = FireworkEffect.Type.BURST;
+        if (rt == 4) type = FireworkEffect.Type.CREEPER;
+        if (rt == 5) type = FireworkEffect.Type.STAR;
+
+        //Get our random colours
+        int r1i = r.nextInt(17) + 1;
+        int r2i = r.nextInt(17) + 1;
+        Color c1 = Color.fromRGB(r1i);
+        Color c2 = Color.fromRGB(r2i);
+        FireworkEffect effect = FireworkEffect.builder().flicker(r.nextBoolean()).withColor(c1).withFade(c2).with(type).trail(r.nextBoolean()).build();
+
+        //Then apply the effect to the meta
+        fwm.addEffect(effect);
+
+        //Generate some random power and set it
+
+
+        //Create our effect with this   int rp = r.nextInt(2) + 1;
+        int rp = r.nextInt(2) + 1;
+        fwm.setPower(rp);
+
+        //Then apply this to our rocket
+        fw.setFireworkMeta(fwm);
+        
+    }
+
     public void playVictoryAnimation(Player winner) {
         if (winner == null) return;
 
@@ -329,14 +386,13 @@ if (players.size() < 2) {
                 }
 
                 // Spawn de partículas coloridas ao redor do jogador
-                winner.getWorld().spawnParticle(Particle.FLAME, winner.getLocation().add(0, 1, 0), 10, 0.5, 1, 0.5, 0.1);
-
+                throwRandomFirework(winner);
                 // Som de comemoração
                 winner.getWorld().playSound(winner.getLocation(), Sound.valueOf("NOTE_PLING"), 1.0f, 1.0f);
 
                 ticks++;
             }
-        }, 0L, 2L); // executa a cada 2 ticks
+        }, 0L, 10L); // executa a cada 2 ticks
     }
     // ================== UTILS ==================
     public void broadcast(String msg) {
@@ -355,6 +411,7 @@ if (players.size() < 2) {
             p.spigot().respawn();
             ItemJoinAPI ij = new ItemJoinAPI();
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
+            	p.getInventory().clear();
                ij.getItems(p);
             }, 20L * 4);
         }

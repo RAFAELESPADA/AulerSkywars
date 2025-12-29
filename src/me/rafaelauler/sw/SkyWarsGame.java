@@ -222,7 +222,7 @@ public class SkyWarsGame implements Listener {
             p.sendMessage("§cComando bloqueado durante a partida");
             return;
         }
-
+if (msg.startsWith("/lobby") && started) {
         leave(p);
         p.teleport(Configs.MAIN_SPAWN);
         ItemJoinAPI ij = new ItemJoinAPI();
@@ -232,6 +232,7 @@ public class SkyWarsGame implements Listener {
     
         broadcast("§c" + p.getName() + " saiu da partida");
         checkWin();
+    }
     }
 
     // ================== GAME FLOW ==================

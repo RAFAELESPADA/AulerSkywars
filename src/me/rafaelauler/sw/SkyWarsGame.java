@@ -112,6 +112,10 @@ public class SkyWarsGame implements Listener {
     // ================== PLAYER ACTIONS ==================
     public void join(Player player) {
     	 if (players.contains(player.getUniqueId())) return;
+    	 if (getState() != GameState.WAITING && getState() != GameState.COUNTDOWN) {
+    		 player.sendMessage(ChatColor.RED + "Essa partida está em andamento. Escolha outra!");
+    		 return;
+    	 }
     	    players.add(player.getUniqueId());
            player.setAllowFlight(false);
            player.setFlying(false);

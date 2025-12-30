@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 public class Cage {
@@ -30,7 +31,7 @@ public class Cage {
 
             p.teleport(target);
 
-            createCage(target.getWorld(), (int)target.getX(), (int)target.getY(), (int)target.getZ());
+            createCage(p, Material.GLASS);
         }
     }
 
@@ -39,41 +40,47 @@ public class Cage {
         if (player == null || map == null) return;
         Location loc = map.getRandomLocation();
         player.teleport(loc);
-        createCage(loc.getWorld(), (int)loc.getX(), (int)loc.getY(), (int)loc.getZ());
+        createCage(player, Material.GLASS);
     }
 
     // =================== JAULAS ===================
-    public static void createCage(World world, int cx, int cy, int cz) {
+    public static void createCage(Player player, Material cageMaterial) {
+        Location loc = player.getLocation();
+        World world = loc.getWorld();
+        int x = loc.getBlockX();
+        int y = loc.getBlockY();
+        int z = loc.getBlockZ();
 
-    	for(int x = 0; x < 12; x++){
-    	    for(int y = 0; y < 4; y++){
-    	        for(int z = 0; z < 12; z++){
-    	             Location l = new Location(world, x, y, z);
-    	             l.getBlock().setType(Material.GLASS);
-    	        }
-    	    }
-    	}
-    	for(int x = 0; x < 10; x++){
-    	    for(int y = 0; y < 3; y++){
-    	        for(int z = 0; z < 10; z++){
-    	             Location l = new Location(world, x, y, z);
-    	             l.getBlock().setType(Material.AIR);
-    	        }
-    	    }
-    	}
+        // Create a 3x3x3 cage
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = 0; dy <= 2; dy++) { // Cage height of 3
+                for (int dz = -1; dz <= 1; dz++) {
+                    if (dx == 0 && dz == 0 && dy > 0) continue; // Keep center air
+                    Block block = world.getBlockAt(x + dx, y + dy, z + dz);
+                    block.setType(cageMaterial);
                 }
-          
-        
-    
-    public static void removeAll(Jaulas map) {
-        if (map == null) return;
-        World world = Bukkit.getWorld(map.name());
-        if (world == null) return;
+            }}
+            
+        }
 
-        for (Location loc : map.getShuffledLocations()) {
-            if (loc.getBlock().getType() == Material.GLASS) {
-                loc.getBlock().setType(Material.AIR);
+        // Method to remove the cage
+        public static void removeCage(Location loc, Material cageMaterial) {
+            int x = loc.getBlockX();
+            int y = loc.getBlockY();
+            int z = loc.getBlockZ();
+
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dy = 0; dy <= 2; dy++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        Block block = loc.getWorld().getBlockAt(x + dx, y + dy, z + dz);
+                        if (block.getType() == cageMaterial) {
+                            block.setType(Material.AIR);
+                        }
+                    }
+                }
             }
         }
     }
-}
+    
+        
+    

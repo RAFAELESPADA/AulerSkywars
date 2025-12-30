@@ -11,6 +11,7 @@ import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
@@ -313,27 +314,28 @@ txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "sw joingame " +
        for (UUID u : ordered) {
     	   Player p = Bukkit.getPlayer(u);
     	   if (p.getWorld() != Bukkit.getWorld("swlobby")) {
-        Cage.createCage(p.getLocation().getWorld(), (int)p.getLocation().getX(), (int)p.getLocation().getY(), (int)p.getLocation().getZ());
-
+        Cage.createCage(p, Material.GLASS);
         broadcast("§aA partida vai começar em 15 segundos!");
         p.playSound(p.getLocation(), Sound.valueOf("CLICK"), 10f, 10f);
        }
        }
         Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
-            Cage.removeAll(map);
             cagesClosed = false;
             
-            broadcast("§aA partida começou!");
-
             for (UUID u : ordered) {
             	Player u2 = Bukkit.getPlayer(u);
+
+Cage.removeCage(u2.getLocation(), Material.GLASS);
             	 playersInPvp.add(u2.getUniqueId());
             	 u2.playSound(u2.getLocation(), Sound.valueOf("CLICK"), 10f, 10f);
                  
             }
+            
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
 started = true;
             }, 20L * 18);
+
+            broadcast("§aA partida começou!");
         }, 20L * 15);
     }
 

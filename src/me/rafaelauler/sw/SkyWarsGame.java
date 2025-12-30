@@ -427,7 +427,7 @@ started = true;
     }
 
     public void destroy() {
-        state = GameState.STOPPED;
+        state = GameState.STARTING;
          
         for (UUID u : new ArrayList<>(players)) {
             Player p = Bukkit.getPlayer(u);

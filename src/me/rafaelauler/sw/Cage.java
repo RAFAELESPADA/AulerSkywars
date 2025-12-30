@@ -29,7 +29,8 @@ public class Cage {
                     : map.getRandomLocation();
 
             p.teleport(target);
-            createCage(target);
+
+            createCage(target.getWorld(), (int)target.getX(), (int)target.getY(), (int)target.getZ());
         }
     }
 
@@ -38,36 +39,49 @@ public class Cage {
         if (player == null || map == null) return;
         Location loc = map.getRandomLocation();
         player.teleport(loc);
-        createCage(loc);
+        createCage(loc.getWorld(), (int)loc.getX(), (int)loc.getY(), (int)loc.getZ());
     }
 
     // =================== JAULAS ===================
-    public static void createCage(Location loc) {
-        if (loc == null || loc.getWorld() == null) return;
+    public static void createCage(World world, int cx, int cy, int cz) {
 
-        World world = loc.getWorld();
+        // Primeiro limpa tudo (3x3x3)
+        for (int x = -1; x <= 1; x++) {
+            for (int y = 0; y <= 2; y++) {
+                for (int z = -1; z <= 1; z++) {
+                world.getBlockAt(cx + x, cy + y, cz + z)
+                     .setType(Material.AIR);
+                }
+            }
+        }
 
-        int cx = loc.getBlockX();
-        int cy = loc.getBlockY();
-        int cz = loc.getBlockZ();
-
+        // Agora constrói a jaula
         for (int x = -1; x <= 1; x++) {
             for (int y = 0; y <= 2; y++) {
                 for (int z = -1; z <= 1; z++) {
 
-                    // centro fica vazio (onde o jogador fica)
+                    // centro (onde o player fica)
                     if (x == 0 && y == 1 && z == 0) continue;
 
-                    // só bordas (paredes, teto e chão)
-                    boolean border =
-                            x == -1 || x == 1 ||
-                            z == -1 || z == 1 ||
-                            y == 0 || y == 2;
+                    // chão
+                    if (y == 0) {
+                        world.getBlockAt(cx + x, cy + y, cz + z)
+                             .setType(Material.IRON_BLOCK);
+                        continue;
+                    }
 
-                    if (!border) continue;
+                    // teto
+                    if (y == 2) {
+                        world.getBlockAt(cx + x, cy + y, cz + z)
+                             .setType(Material.GLASS);
+                        continue;
+                    }
 
-                    world.getBlockAt(cx + x, cy + y, cz + z)
-                            .setType(Material.GLASS);
+                    // paredes
+                    if (x == -1 || x == 1 || z == -1 || z == 1) {
+                        world.getBlockAt(cx + x, cy + y, cz + z)
+                             .setType(Material.GLASS);
+                    }
                 }
             }
         }

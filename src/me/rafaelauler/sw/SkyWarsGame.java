@@ -312,16 +312,24 @@ txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "sw joingame " +
         Cage.teleportByQueueOrder(ordered, map);
        for (UUID u : ordered) {
     	   Player p = Bukkit.getPlayer(u);
-        Cage.createCage(p.getLocation());
+    	   if (p.getWorld() != Bukkit.getWorld("swlobby")) {
+        Cage.createCage(p.getLocation().getWorld(), (int)p.getLocation().getX(), (int)p.getLocation().getY(), (int)p.getLocation().getZ());
+
+        broadcast("§aA partida vai começar em 15 segundos!");
+        p.playSound(p.getLocation(), Sound.valueOf("CLICK"), 10f, 10f);
+       }
        }
         Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
             Cage.removeAll(map);
             cagesClosed = false;
             
             broadcast("§aA partida começou!");
+
             for (UUID u : ordered) {
             	Player u2 = Bukkit.getPlayer(u);
             	 playersInPvp.add(u2.getUniqueId());
+            	 u2.playSound(u2.getLocation(), Sound.valueOf("CLICK"), 10f, 10f);
+                 
             }
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
 started = true;

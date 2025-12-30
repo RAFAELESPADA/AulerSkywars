@@ -54,7 +54,7 @@ public class SkywarsManager {
                 .filter(game ->
                         (game.getState() == GameState.WAITING
                         || game.getState() == GameState.STARTING)
-                        && game.getPlayers().size() < maxPlayersPerGame
+                        && game.getPlayers().size() < maxPlayersPerGame && game.getPlayers().size() >= 2
                 )
                 .findFirst()
                 .orElse(null);

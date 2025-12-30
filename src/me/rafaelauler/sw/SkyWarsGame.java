@@ -31,6 +31,8 @@ import org.bukkit.inventory.meta.FireworkMeta;
 
 import me.RockinChaos.itemjoin.api.ItemJoinAPI;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.wavemc.core.bukkit.api.HelixActionBar;
 
 public class SkyWarsGame implements Listener {
@@ -281,7 +283,9 @@ if (players.size() < 2) {
         World lobbyWorld = Bukkit.getWorld("spawn");
         if (lobbyWorld == null) return;
 
-        String msg = "§eA partida da Sala §a#" + id + " §evai começar em " + countdown + " segundos! Use /sw join para entrar!";
+        String msg = "§eA partida da Sala §a#" + id + " §evai começar em " + countdown + " segundos! Clique aqui para entrar nela!";
+TextComponent txt = new TextComponent(msg);
+txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "sw joingame " + id));
 
         // Envia para todos os jogadores do lobby
         for (Player p : lobbyWorld.getPlayers()) {
@@ -291,6 +295,7 @@ if (players.size() < 2) {
         // Opcional: também pode enviar ActionBar
         for (Player p : lobbyWorld.getPlayers()) {
             HelixActionBar.send(p, msg);
+            p.playSound(p.getLocation(), Sound.valueOf("ARROW_HIT"), 10f, 1f);
         }
     }
 

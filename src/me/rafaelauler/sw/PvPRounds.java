@@ -53,19 +53,16 @@ public class PvPRounds extends PlaceholderExpansion {
                     if (game.getId() == roomNumber) {
                         return String.valueOf(game.getPlayers().size());
                     }
-                }
-
-                return "0"; // não encontrou a sala
-            } catch (Exception e) {
+                }}    
+             catch (Exception e) {
                 return "0"; // erro no parse
             }
         }
         if (identifier.equals("total_players")) {
-            int total = 0;
             for (SkyWarsGame game : manager.getGames()) {
-                total += game.getPlayers().size();
+               int total = game.getPlayers().size();
+               return String.valueOf(total);
             }
-            return String.valueOf(total);
         }
 
         

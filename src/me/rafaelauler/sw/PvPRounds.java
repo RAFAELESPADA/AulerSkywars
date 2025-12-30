@@ -39,44 +39,67 @@ public class PvPRounds extends PlaceholderExpansion {
 
     @Override
     public String onPlaceholderRequest(Player player, String identifier) {
-        if (player == null) return "";
+
+        if (identifier == null) {
+            return "";
+        }
 
         SkywarsManager manager = plugin.getManager();
 
+        /*
+         * %aulerskywars_players_room_1%
+         * %aulerskywars_players_room_2%
+         */
         if (identifier.startsWith("players_room_")) {
-            String number = identifier.replace("players_room_", "");
-            int numero = Integer.valueOf(number);
-            for (SkyWarsGame game : manager.getGames()) {
-                if (game.getId() == numero) {
-                    return String.valueOf(game.getPlayers().size());
+            try {
+                int id = Integer.parseInt(identifier.substring("players_room_".length()));
+
+                for (SkyWarsGame game : manager.getGames()) {
+                    if (game.getId() == id) {
+                        return String.valueOf(game.getPlayerCount());
+                    }
                 }
-            
-        }
-
-        if (identifier.equals("total_players")) {
-            
-            for (SkyWarsGame game : manager.getGames()) {
-                return String.valueOf(game.getPlayers().size());
+            } catch (NumberFormatException ignored) {
             }
+            return "0";
         }
 
-     
+        /*
+         * %aulerskywars_total_players%
+         */
+        if (identifier.equalsIgnoreCase("total_players")) {
+            int total = 0;
 
+            for (SkyWarsGame game : manager.getGames()) {
+            	
+                total += game.getPlayerCount();
+            }
 
-        
+            return String.valueOf(total);
+        }
 
-        // Estatísticas do jogador
+        if (player == null) {
+            return "0";
+        }
+
+        String basePath = "players." + player.getUniqueId() + ".";
+
+        /*
+         * %aulerskywars_kills%
+         * %aulerskywars_deaths%
+         * %aulerskywars_wins%
+         */
         switch (identifier.toLowerCase()) {
             case "kills":
-                return String.valueOf(plugin.getConfig().getInt("players." + player.getUniqueId() + ".kills", 0));
+                return String.valueOf(plugin.getConfig().getInt(basePath + "kills", 0));
+
             case "deaths":
-                return String.valueOf(plugin.getConfig().getInt("players." + player.getUniqueId() + ".deaths", 0));
+                return String.valueOf(plugin.getConfig().getInt(basePath + "deaths", 0));
+
             case "wins":
-                return String.valueOf(plugin.getConfig().getInt("players." + player.getUniqueId() + ".wins", 0));
+                return String.valueOf(plugin.getConfig().getInt(basePath + "wins", 0));
         }
 
-        // Retorna o placeholder original se não for reconhecido
-        return identifier;
+        return "";
     }
-}
 }

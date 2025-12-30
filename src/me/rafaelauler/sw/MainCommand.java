@@ -27,7 +27,7 @@ private final SkywarsManager manager = new SkywarsManager();
         }
         
         if (args.length == 0) {
-            player.sendMessage(ChatColor.AQUA + "Use /sw join | joingame | leave | list | info");
+            player.sendMessage(ChatColor.AQUA + "Use /sw join | joingame | listgames | leave | list | info");
             return true;
         }
 
@@ -42,6 +42,8 @@ private final SkywarsManager manager = new SkywarsManager();
             case "joingame" -> joinSpecificGame(player, args);
 
             case "list" -> listPlayers(player);
+
+            case "listgames" -> listGames(player);
 
             case "info" -> showInfo(player);
 
@@ -77,31 +79,40 @@ private final SkywarsManager manager = new SkywarsManager();
             player.sendMessage(ChatColor.RED + "Você já está em uma sala de SkyWars!");
             return;
         }
+
         if (args.length != 2) {
-        	 player.sendMessage(ChatColor.RED + "Utilize: /sw joingame <ID>");
-             return;
+            player.sendMessage(ChatColor.RED + "Utilize: /sw joingame <ID>");
+            return;
         }
+
         if (!isNumeric(args[1])) {
-        	player.sendMessage("O argumento número dois deve ser um número de 1 ao 5!");
-        	return;
+            player.sendMessage(ChatColor.RED + "O argumento número dois deve ser um número de 1 ao 5!");
+            return;
         }
-        SkyWarsGame id = manager.getGames(Integer.valueOf(args[1]));
-        if (id == null) {
-            manager.createGame(Jaulas.sw1).setSpawnLocation(Configs.LOBBY_SPAWN);
-            manager.createGame(Jaulas.sw2).setSpawnLocation(Configs.LOBBY_SPAWN);
-            manager.createGame(Jaulas.sw3).setSpawnLocation(Configs.LOBBY_SPAWN);
 
-            manager.createGame(Jaulas.sw4).setSpawnLocation(Configs.LOBBY_SPAWN);
+        int gameId = Integer.parseInt(args[1]);
+        SkyWarsGame targetGame = manager.getGames(gameId);
 
-            manager.createGame(Jaulas.sw5).setSpawnLocation(Configs.LOBBY_SPAWN);
-
-            // 🔥 BUSCA DE NOVO
-
-            id = manager.getGames(Integer.valueOf(args[1]));
+        // 4️⃣ Verifica se a sala existe
+        if (targetGame == null) {
+        	 for (Jaulas jaula : Jaulas.values()) {
+     	        try {
+     	            SkyWarsGame game2 = manager.createGame(jaula);
+     	            game2.setSpawnLocation(Configs.LOBBY_SPAWN);
+     	            Bukkit.getLogger().info("Sala criada para o mapa " + jaula.name());
+     	            player.sendMessage(ChatColor.RED + "Criando salas...");
+     	            player.sendMessage(ChatColor.RED +"Tente novamente!");
+return;
+     	        } catch (IllegalStateException e) {
+     	            Bukkit.getLogger().warning("Não foi possível criar sala para " + jaula.name() + ": " + e.getMessage());
+     	        }
+     	       targetGame = manager.findAvailableGame();           	        
+     	 }
         }
-        id.join(player);  
-       id.updatePlayerVisibility();
 
+        // 🔹 Agora podemos entrar no jogo com segurança
+        targetGame.join(player);
+        targetGame.updatePlayerVisibility();
         player.getInventory().clear();
     }
         
@@ -115,22 +126,23 @@ private final SkywarsManager manager = new SkywarsManager();
 
         SkyWarsGame available = manager.findAvailableGame();
 
-        if (available == null) {
-            manager.createGame(Jaulas.sw1).setSpawnLocation(Configs.LOBBY_SPAWN);
-            manager.createGame(Jaulas.sw2).setSpawnLocation(Configs.LOBBY_SPAWN);
-            manager.createGame(Jaulas.sw3).setSpawnLocation(Configs.LOBBY_SPAWN);
-
-            manager.createGame(Jaulas.sw4).setSpawnLocation(Configs.LOBBY_SPAWN);
-
-            manager.createGame(Jaulas.sw5).setSpawnLocation(Configs.LOBBY_SPAWN);
-
-            // 🔥 BUSCA DE NOVO
-            available = manager.findAvailableGame();
-        }
+        
 
         if (available == null) {
-            player.sendMessage("§cNenhuma sala disponível.");
-            return;
+            	 for (Jaulas jaula : Jaulas.values()) {
+            	        try {
+            	            SkyWarsGame game2 = manager.createGame(jaula);
+            	            game2.setSpawnLocation(Configs.LOBBY_SPAWN);
+            	            Bukkit.getLogger().info("Sala criada para o mapa " + jaula.name());
+            	            player.sendMessage(ChatColor.RED + "Criando salas...");
+            	            player.sendMessage(ChatColor.RED +"Tente novamente!");
+return;
+            	        } catch (IllegalStateException e) {
+            	            Bukkit.getLogger().warning("Não foi possível criar sala para " + jaula.name() + ": " + e.getMessage());
+            	        }
+            	        available = manager.findAvailableGame();           	        
+            	 }
+            
         }
 
         // 🔥 PRIMEIRO entra na sala
@@ -183,12 +195,25 @@ private final SkywarsManager manager = new SkywarsManager();
 
         player.sendMessage(ChatColor.RED + "Você saiu da sala de SkyWars.");
     }
-
+    private void listGames(Player player) {
+    	 for (SkyWarsGame game : manager.getGames()) {
+         	if (manager.getGames().size() > 0 && manager.getGames() != null) {
+         	player.sendMessage(ChatColor.GREEN + "Jogos ativos: " + ChatColor.YELLOW + game.getId());
+         	}	else {
+         		player.sendMessage(ChatColor.RED + "Não há salas ativas no momento.");
+         	}
+    	 }
+    }
     private void listPlayers(Player player) {
     	
         boolean hasPlayers = false;
 
         for (SkyWarsGame game : manager.getGames()) {
+        	if (manager.getGames().size() > 0) {
+        	player.sendMessage(ChatColor.GREEN + "Jogos ativos: " + ChatColor.YELLOW + game.getId());
+        	}	else {
+        		player.sendMessage(ChatColor.RED + "Não há salas ativas no momento.");
+        	}
             if (game.getPlayers().isEmpty()) continue;
 
             hasPlayers = true;

@@ -23,14 +23,18 @@ public class SkywarsManager {
     public SkyWarsGame createGame(Jaulas map) {
         int id = nextId++;
         SkyWarsGame game = new SkyWarsGame(id, map);
+        
+        // Coloca o jogo no mapa imediatamente
         games.put(id, game);
-        Main.getInstace().CarregarTodos();
-        Bukkit.getLogger().info("Sala " + id + " world: " + map);
-        Bukkit.getLogger().info("JOGO " + game + " com o ID? #" + id + " CRIADO!");     
+
+        // Log claro
+        Bukkit.getLogger().info("Sala " + id + " criada para o mundo: " + map);
+
+        // Registra eventos e inicia task
         Bukkit.getPluginManager().registerEvents(game, Main.getInstace());
         game.startTask();
+
         return game;
-        
     }
 
     /** Retorna todas as partidas ativas */

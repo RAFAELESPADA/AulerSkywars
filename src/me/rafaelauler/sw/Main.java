@@ -466,13 +466,9 @@ Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #5 DESCARREGADOS");
 /*     */   {
 	/* 121 */     instance = this;
 	/* 122 */     plugin = this;
+
+    manager = new SkywarsManager();
 	this.getCommand("sw").setExecutor(new MainCommand(this));
-	if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
-		/* 151 */       Bukkit.getConsoleSender().sendMessage("§e[AulerSkywars] §aPlaceHolderAPI is found!");
-		/* 151 */       Bukkit.getConsoleSender().sendMessage("§e[AulerSkywars] §aHooking into it!");
-	    new PvPRounds(this).register();
-		/* 151 */       Bukkit.getConsoleSender().sendMessage("§e[AulerSkywars] §aPlaceHolderAPI has hooked sucefully!");
-	}
 	Configs.loadLobbySpawn();
 	Configs.loadMainSpawn();
 	 /* 109 */     Metrics metrics = new Metrics(this);
@@ -488,22 +484,6 @@ Bukkit.getConsoleSender().sendMessage("BAUS DA SALA #5 DESCARREGADOS");
 		}));
 
 	 Bukkit.getPluginManager().registerEvents(new Eventos(manager), this);
-     manager = new SkywarsManager();
-     manager.createGame(Jaulas.sw1).setSpawnLocation(Configs.LOBBY_SPAWN);
-
-     manager.createGame(Jaulas.sw2).setSpawnLocation(Configs.LOBBY_SPAWN);
-
-     manager.createGame(Jaulas.sw3).setSpawnLocation(Configs.LOBBY_SPAWN);
-
-     manager.createGame(Jaulas.sw4).setSpawnLocation(Configs.LOBBY_SPAWN);
-
-     manager.createGame(Jaulas.sw5).setSpawnLocation(Configs.LOBBY_SPAWN);
-	 Bukkit.getScheduler().runTaskTimer(this, () -> {
-         for (SkyWarsGame game : manager.getGames()) {
-             game.tick();
-             game.checkWin();
-         }
-     }, 20, 20);
 	getCommand("setswlobby").setExecutor(new SetRounds());
 	/*     */     
 new BukkitRunnable() {
@@ -558,7 +538,21 @@ new BukkitRunnable() {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
-
+	World sw1 = Bukkit.getWorld("sw1");
+	if (sw1 == null) {
+	    Bukkit.getConsoleSender().sendMessage("Erro: mundo sw1 não existe!");
+	    return;
+	}
+	World sw2 = Bukkit.getWorld("sw2");
+	if (sw2 == null) {
+	    Bukkit.getConsoleSender().sendMessage("Erro: mundo sw2 não existe!");
+	    return;
+	}
+	World sw3 = Bukkit.getWorld("sw3");
+	if (sw3 == null) {
+	    Bukkit.getConsoleSender().sendMessage("Erro: mundo sw3 não existe!");
+	    return;
+	}
 	getMVWorldManager().deleteWorld("sw1");
 	getMVWorldManager().cloneWorld("sw1copy", "sw1", "VoidGen");
 
@@ -571,6 +565,7 @@ new BukkitRunnable() {
 	getMVWorldManager().cloneWorld("sw4copy", "sw4", "VoidGen");
 	getMVWorldManager().deleteWorld("sw5");
 	getMVWorldManager().cloneWorld("sw5copy", "sw5", "VoidGen");
+	Bukkit.getScheduler().runTaskLater(this, () -> {
 	CarregarBaus();
 	CarregarBaus2();
 	CarregarBaus3();
@@ -581,8 +576,33 @@ new BukkitRunnable() {
 	CarregarBaus222();
 	CarregarBaus2222();
 	CarregarBaus22222();
+    if (Jaulas.sw1 == null || Jaulas.sw2 == null  || Jaulas.sw3 == null  || Jaulas.sw4 == null  || Jaulas.sw5 == null) {
+        Bukkit.getConsoleSender().sendMessage("❌ Algum mapa não foi carregado!");
+        return;
+    }
+    for (Jaulas jaula : Jaulas.values()) {
+        try {
+            SkyWarsGame game = manager.createGame(jaula);
+            game.setSpawnLocation(Configs.LOBBY_SPAWN);
+            Bukkit.getLogger().info("Sala criada para o mapa " + jaula.name());
+        } catch (IllegalStateException e) {
+            Bukkit.getLogger().warning("Não foi possível criar sala para " + jaula.name() + ": " + e.getMessage());
+        }
+    }
+    if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
+		/* 151 */       Bukkit.getConsoleSender().sendMessage("§e[AulerSkywars] §aPlaceHolderAPI is found!");
+		/* 151 */       Bukkit.getConsoleSender().sendMessage("§e[AulerSkywars] §aHooking into it!");
+	    new PvPRounds(this).register();
+		/* 151 */       Bukkit.getConsoleSender().sendMessage("§e[AulerSkywars] §aPlaceHolderAPI has hooked sucefully!");
+	}
+	}, 150L);
  	Bukkit.getConsoleSender().sendMessage("AULERSKYWARS HAS BEEN ENABLED!");
-
+	 Bukkit.getScheduler().runTaskTimer(this, () -> {
+         for (SkyWarsGame game : manager.getGames()) {
+             game.tick();
+             game.checkWin();
+         }
+     }, 20, 20);
 }
 
 public static MultiverseCore getMVWorldManager() {

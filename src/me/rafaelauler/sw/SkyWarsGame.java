@@ -210,13 +210,11 @@ public class SkyWarsGame implements Listener {
 
         int kills = Main.getInstace().getConfig().getInt("players." + k.getUniqueId() + ".kills");
         int deaths = Main.getInstace().getConfig().getInt("players." + p.getUniqueId() + ".kills");
-        int wins = Main.getInstace().getConfig().getInt("players." + k.getUniqueId() + ".wins");
         
             Main.getInstace().getConfig().set(path2 + ".kills", kills + 1);
 
             Main.getInstace().getConfig().set(path + ".deaths", deaths + 1);
-
-            Main.getInstace().getConfig().set(path2 + ".wins", wins + 1);
+           
         }
         
         p.sendMessage("§cVocê foi eliminado!");
@@ -336,11 +334,18 @@ started = true;
                 TitleAPI.sendTitle(winner, 80, 80, 80, ChatColor.GOLD + " VITÓRIA!");
                 // chama a animação de vitória
             }
+ int wins = Main.getInstace().getConfig().getInt("players." + winner.getUniqueId() + ".wins");
+            
+            Main.getInstace().getConfig().set("players." + winner.getUniqueId() + ".wins", wins + 1);
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
                destroy();
              }, 20L * 7);
          }
         }
+    /** Contagem de jogadores em uma partida */
+    public int getPlayerCount() {
+        return players.size();
+    }
     public static void throwRandomFirework(Player p) {
         Firework fw = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
         FireworkMeta fwm = fw.getFireworkMeta();

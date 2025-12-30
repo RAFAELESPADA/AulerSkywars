@@ -41,29 +41,27 @@ public class PvPRounds extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player player, String identifier) {
         if (player == null) return "";
 
-        SkywarsManager manager = plugin.getManager(); // pega o manager do novo sistema
+        SkywarsManager manager = plugin.getManager();
 
-        // Placeholder players_room_X
         if (identifier.startsWith("players_room_")) {
-            try {
-                int roomNumber = Integer.parseInt(identifier.split("_")[2]); // pega o número da sala
-
-                // Busca a partida pelo ID da sala
-                for (SkyWarsGame game : manager.getGames()) {
-                    if (game.getId() == roomNumber) {
-                        return String.valueOf(game.getPlayers().size());
-                    }
-                }}    
-             catch (Exception e) {
-                return "0"; // erro no parse
-            }
-        }
-        if (identifier.equals("total_players")) {
+            String number = identifier.replace("players_room_", "");
+            int numero = Integer.valueOf(number);
             for (SkyWarsGame game : manager.getGames()) {
-               int total = game.getPlayers().size();
-               return String.valueOf(total);
+                if (game.getId() == numero) {
+                    return String.valueOf(game.getPlayers().size());
+                }
+            
+        }
+
+        if (identifier.equals("total_players")) {
+            
+            for (SkyWarsGame game : manager.getGames()) {
+                return String.valueOf(game.getPlayers().size());
             }
         }
+
+     
+
 
         
 
@@ -80,4 +78,5 @@ public class PvPRounds extends PlaceholderExpansion {
         // Retorna o placeholder original se não for reconhecido
         return identifier;
     }
+}
 }

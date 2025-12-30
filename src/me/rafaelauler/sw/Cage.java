@@ -45,47 +45,26 @@ public class Cage {
     // =================== JAULAS ===================
     public static void createCage(World world, int cx, int cy, int cz) {
 
-        // Primeiro limpa tudo (3x3x3)
-        for (int x = -1; x <= 1; x++) {
-            for (int y = 0; y <= 2; y++) {
-                for (int z = -1; z <= 1; z++) {
-                world.getBlockAt(cx + x, cy + y, cz + z)
-                     .setType(Material.AIR);
+    	for(int x = 0; x < 12; x++){
+    	    for(int y = 0; y < 4; y++){
+    	        for(int z = 0; z < 12; z++){
+    	             Location l = new Location(world, x, y, z);
+    	             l.getBlock().setType(Material.GLASS);
+    	        }
+    	    }
+    	}
+    	for(int x = 0; x < 10; x++){
+    	    for(int y = 0; y < 3; y++){
+    	        for(int z = 0; z < 10; z++){
+    	             Location l = new Location(world, x, y, z);
+    	             l.getBlock().setType(Material.AIR);
+    	        }
+    	    }
+    	}
                 }
-            }
-        }
-
-        // Agora constrói a jaula
-        for (int x = -1; x <= 1; x++) {
-            for (int y = 0; y <= 2; y++) {
-                for (int z = -1; z <= 1; z++) {
-
-                    // centro (onde o player fica)
-                    if (x == 0 && y == 1 && z == 0) continue;
-
-                    // chão
-                    if (y == 0) {
-                        world.getBlockAt(cx + x, cy + y, cz + z)
-                             .setType(Material.IRON_BLOCK);
-                        continue;
-                    }
-
-                    // teto
-                    if (y == 2) {
-                        world.getBlockAt(cx + x, cy + y, cz + z)
-                             .setType(Material.GLASS);
-                        continue;
-                    }
-
-                    // paredes
-                    if (x == -1 || x == 1 || z == -1 || z == 1) {
-                        world.getBlockAt(cx + x, cy + y, cz + z)
-                             .setType(Material.GLASS);
-                    }
-                }
-            }
-        }
-    }
+          
+        
+    
     public static void removeAll(Jaulas map) {
         if (map == null) return;
         World world = Bukkit.getWorld(map.name());

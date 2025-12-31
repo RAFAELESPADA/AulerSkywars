@@ -138,6 +138,9 @@ public enum Jaulas {
         }
         return locations;
     }
+    public String getWorldName() {
+        return worldName;
+    }
     public void teleportByQueueOrder(List<? extends UUID> players) {
         if (players == null || players.isEmpty()) return;
 

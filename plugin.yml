@@ -15,7 +15,12 @@ commands:
    sw3: 
    sw4:
    sw5:
-   
+   spec:
+    description: Assistir um jogador da partida
+    usage: /spec <player>
+   specgui:
+    description: Abrir menu de espectadores
+    
    
    
    

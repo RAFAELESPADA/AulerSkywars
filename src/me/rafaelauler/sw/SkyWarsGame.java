@@ -2,7 +2,9 @@ package me.rafaelauler.sw;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -18,17 +20,19 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import me.RockinChaos.itemjoin.api.ItemJoinAPI;
 import net.md_5.bungee.api.ChatColor;
@@ -41,23 +45,26 @@ public class SkyWarsGame implements Listener {
     private final int id;
     private final List<UUID> players = new ArrayList<>();
     private final List<UUID> playersInPvp = new ArrayList<>();
+    private final Map<UUID, UUID> specTarget = new HashMap<>();
 
     private final String worldName;
     private World world;
     private Location spawn;
     private final Jaulas map;
-
+    private final List<UUID> spectators = new ArrayList<>();
     private GameState state = GameState.WAITING;
     private int countdown = 30;
     private boolean started = false;
     private boolean cagesClosed = false;
+    private final List<UUID> spectatorsWithGUI = new ArrayList<>();
+    private boolean guiBlink = false;
+
 
     public SkyWarsGame(int id, Jaulas map) {
         this.id = id;
         this.map = map;
-        this.worldName = map.name();
-       
-        this.world = Bukkit.getWorld(worldName);
+        this.worldName = map.getWorldName();
+        this.world = Bukkit.getWorld(this.worldName);
         if (this.world == null) {
             Bukkit.getServer().getLogger().warning("Mundo " + worldName + " não carregado!");
             return;
@@ -86,6 +93,8 @@ public class SkyWarsGame implements Listener {
                 return;
             }
             tick();
+            startSpectatorGUITask();
+            startCompassUpdater();
         }, 20L, 20L).getTaskId();
     }
     public List<Player> getPlayers() {
@@ -135,6 +144,9 @@ public class SkyWarsGame implements Listener {
     public void leave(Player player) {
         players.remove(player.getUniqueId());
         playersInPvp.remove(player.getUniqueId());
+        specTarget.remove(player.getUniqueId());
+        spectators.remove(player.getUniqueId());
+        player.setGameMode(GameMode.SURVIVAL);
         player.sendMessage("§cVocê saiu da sala " + id);
     }
 
@@ -204,8 +216,6 @@ public class SkyWarsGame implements Listener {
         if (!isInGame(p)) return;
 
         e.setDeathMessage(null);
-        players.remove(p.getUniqueId());
-        playersInPvp.remove(p.getUniqueId());
 
         String path = "players." + p.getUniqueId();
         if (e.getEntity().getKiller() instanceof Player) {
@@ -224,8 +234,20 @@ public class SkyWarsGame implements Listener {
         
         p.sendMessage("§cVocê foi eliminado!");
         broadcast("§e" + p.getName() + " foi eliminado da partida!");
-        Bukkit.dispatchCommand(p, "sw leave");
-        Bukkit.getScheduler().runTaskLater(Main.plugin, () -> p.performCommand("sw leave"), 5L);
+        playersInPvp.remove(p.getUniqueId());
+        spectators.add(p.getUniqueId());
+        updateVisibility();
+        Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
+            p.spigot().respawn();
+
+            p.setGameMode(GameMode.SPECTATOR);
+            p.setAllowFlight(true);
+            p.setFlying(true);
+
+            giveSpectatorItem(p);
+            p.teleport(p.getLocation().add(0, 2, 0));
+            p.sendMessage("§7Você agora é um §fESPECTADOR§7.");
+        }, 2L);
         Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
         	p.getInventory().clear();
         	ItemJoinAPI ij = new ItemJoinAPI();
@@ -233,14 +255,150 @@ public class SkyWarsGame implements Listener {
         }, 20L * 2);
         checkWin();
         }
-    
+    @EventHandler
+    public void onInventoryClick(org.bukkit.event.inventory.InventoryClickEvent e) {
+        Player p = (Player) e.getWhoClicked();
 
+        if (spectators.contains(p.getUniqueId())) {
+            if (e.getCurrentItem() != null &&
+                e.getCurrentItem().getType() == Material.COMPASS) {
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onItemDrop(org.bukkit.event.player.PlayerDropItemEvent e) {
+        Player p = e.getPlayer();
+
+        if (spectators.contains(p.getUniqueId()) &&
+            e.getItemDrop().getItemStack().getType() == Material.COMPASS) {
+            e.setCancelled(true);
+        }
+    }
+    @EventHandler
+    public void onSpectatorInteract(org.bukkit.event.player.PlayerInteractEvent e) {
+        Player p = e.getPlayer();
+
+        if (!spectators.contains(p.getUniqueId())) return;
+
+        if (e.getItem() == null) return;
+        if (e.getItem().getType() == Material.COMPASS) {
+            openSpectatorGUI(p);
+            e.setCancelled(true);
+        }
+    }
+    public void giveSpectatorItem(Player p) {
+        p.getInventory().clear();
+        p.getInventory().setArmorContents(null);
+
+        ItemStack compass = new ItemStack(Material.COMPASS);
+        ItemMeta meta = compass.getItemMeta();
+        meta.setDisplayName("§aAbrir seleção de jogadores");
+        compass.setItemMeta(meta);
+
+        p.getInventory().setItem(0, compass);
+    }
+    @EventHandler
+    public void onSpectatorBreak(BlockBreakEvent e) {
+        if (spectators.contains(e.getPlayer().getUniqueId())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onSpectatorDamage(EntityDamageEvent e) {
+        if (e.getEntity() instanceof Player) {
+            Player p = (Player) e.getEntity();
+            if (spectators.contains(p.getUniqueId())) {
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onSpectatorCommand(PlayerCommandPreprocessEvent e) {
+        if (spectators.contains(e.getPlayer().getUniqueId())) {
+            if (!e.getMessage().toLowerCase().startsWith("/sw") || !e.getMessage().toLowerCase().startsWith("/lobby")) {
+                e.setCancelled(true);
+                e.getPlayer().sendMessage("§cEspectadores não podem usar comandos.");
+            }
+        }
+    }
+    @EventHandler
+    public void onSpecGUIClick(InventoryClickEvent e) {
+        if (!(e.getWhoClicked() instanceof Player)) return;
+
+        Player spec = (Player) e.getWhoClicked();
+
+        if (!spectators.contains(spec.getUniqueId())) return;
+        if (e.getView().getTitle().equals("§8Espectadores")) {
+            e.setCancelled(true);
+
+            if (e.getCurrentItem() == null) return;
+            if (!e.getCurrentItem().hasItemMeta()) return;
+
+            String name = ChatColor.stripColor(
+                    e.getCurrentItem().getItemMeta().getDisplayName());
+
+            Player target = Bukkit.getPlayer(name);
+            if (target == null) {
+                spec.sendMessage("§cJogador não encontrado.");
+                return;
+            }
+
+            // Guarda o alvo
+            specTarget.put(spec.getUniqueId(), target.getUniqueId());
+
+            spec.sendMessage("§aAgora assistindo §f" + target.getName());
+            spec.closeInventory();
+        }
+    }
+    public void startCompassUpdater() {
+        Bukkit.getScheduler().runTaskTimer(Main.plugin, () -> {
+            for (UUID u : specTarget.keySet()) {
+                Player spec = Bukkit.getPlayer(u);
+                if (spec == null || !spec.isOnline()) continue;
+
+                UUID targetUUID = specTarget.get(u);
+                Player target = Bukkit.getPlayer(targetUUID);
+
+                if (target == null || !target.isOnline()) {
+                    spec.sendMessage("§cO alvo saiu do jogo!");
+                    continue;
+                }
+
+                spec.setCompassTarget(target.getLocation());
+            }
+        }, 0L, 10L);
+    }
+    @EventHandler
+    public void onSpecGUIDrag(org.bukkit.event.inventory.InventoryDragEvent e) {
+        if (e.getView().getTitle().equals("§8Espectadores")) {
+            e.setCancelled(true);
+        }
+    }
     @EventHandler
     public void onCommand(PlayerCommandPreprocessEvent e) {
         Player p = e.getPlayer();
-        if (!isInGame(p)) return;
-
         String msg = e.getMessage().toLowerCase();
+       
+        if (!isInGame(p)) return;
+        if (msg.startsWith("/spec")) {
+            e.setCancelled(true);
+
+            String[] args = msg.split(" ");
+            String[] realArgs = new String[args.length - 1];
+            System.arraycopy(args, 1, realArgs, 0, realArgs.length);
+
+            handleSpecCommand(p, realArgs);
+            return;
+        }
+        if (msg.startsWith("/specgui")) {
+            e.setCancelled(true);
+            openSpectatorGUI(p);
+            return;
+        }
         if (!started && !msg.startsWith("/sw") && !msg.startsWith("/lobby")) {
             e.setCancelled(true);
             p.sendMessage("§cComando bloqueado durante a partida");
@@ -264,7 +422,140 @@ if (msg.startsWith("/lobby") && started) {
         state = GameState.STARTING;
         countdown = 30;
     }
+    @EventHandler
+    public void onSpecTeleport(org.bukkit.event.player.PlayerTeleportEvent e) {
+        if (spectators.contains(e.getPlayer().getUniqueId())) {
+            if (e.getCause() == org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.SPECTATE) {
+                e.setCancelled(true);
+            }
+        }
+    }
+    public void openSpectatorGUI(Player spectator) {
+        if (!spectators.contains(spectator.getUniqueId())) {
+            spectator.sendMessage("§cApenas espectadores podem usar este menu.");
+            return;
+        }
 
+        List<Player> vivos = new ArrayList<>();
+        for (UUID u : players) {
+            if (!spectators.contains(u)) {
+                Player p = Bukkit.getPlayer(u);
+                if (p != null) vivos.add(p);
+            }
+        }
+
+        if (vivos.isEmpty()) {
+            spectator.sendMessage("§cNenhum jogador vivo no momento.");
+            return;
+        }
+
+        int size = ((vivos.size() - 1) / 9 + 1) * 9;
+        org.bukkit.inventory.Inventory inv =
+                Bukkit.createInventory(null, size, "§8Espectadores");
+
+        for (Player p : vivos) {
+            org.bukkit.inventory.ItemStack head =
+                    new org.bukkit.inventory.ItemStack(Material.SKULL_ITEM, 1, (short) 3);
+
+            org.bukkit.inventory.meta.SkullMeta meta =
+                    (org.bukkit.inventory.meta.SkullMeta) head.getItemMeta();
+
+            meta.setOwner(p.getName());
+            String color = guiBlink ? "§a" : "§e";
+            meta.setDisplayName(color + p.getName());
+
+            List<String> lore = new ArrayList<>();
+            lore.add(guiBlink ? "§a✔ Vivo" : "§e⚔ Em jogo");
+            lore.add("§7Vida: §c" + Math.ceil(p.getHealth()) + " ❤");
+
+            meta.setLore(lore);
+            meta.setLore(Collections.singletonList("§7Clique para assistir"));
+
+            head.setItemMeta(meta);
+            inv.addItem(head);
+        }
+
+        spectator.openInventory(inv);
+        spectator.playSound(spectator.getLocation(),
+                Sound.valueOf("CLICK"), 1.0f, 1.0f);
+        spectatorsWithGUI.add(spectator.getUniqueId());
+    }
+    @EventHandler
+    public void onGUIClose(org.bukkit.event.inventory.InventoryCloseEvent e) {
+        if (e.getView().getTitle().equals("§8Espectadores")) {
+            spectatorsWithGUI.remove(e.getPlayer().getUniqueId());
+        }
+    }
+    public void startSpectatorGUITask() {
+        Bukkit.getScheduler().runTaskTimer(Main.plugin, () -> {
+
+            if (spectatorsWithGUI.isEmpty()) return;
+
+            for (UUID u : new ArrayList<>(spectatorsWithGUI)) {
+                Player spec = Bukkit.getPlayer(u);
+
+                if (spec == null || !spec.isOnline()) {
+                    spectatorsWithGUI.remove(u);
+                    continue;
+                }
+
+                if (!spectators.contains(u)) {
+                    spec.closeInventory();
+                    spectatorsWithGUI.remove(u);
+                    continue;
+                }
+
+                updateSpectatorGUI(spec);
+            }
+
+        }, 0L, 20L); // atualiza a cada 1 segundo
+    }
+    public void updateSpectatorGUI(Player spectator) {
+        if (!spectator.getOpenInventory().getTitle().equals("§8Espectadores")) {
+            spectatorsWithGUI.remove(spectator.getUniqueId());
+            return;
+        }
+        guiBlink = !guiBlink;
+        org.bukkit.inventory.Inventory inv = spectator.getOpenInventory().getTopInventory();
+        inv.clear();
+
+        List<Player> vivos = new ArrayList<>();
+        for (UUID u : players) {
+            if (!spectators.contains(u)) {
+                Player p = Bukkit.getPlayer(u);
+                if (p != null) vivos.add(p);
+            }
+        }
+
+        if (vivos.isEmpty()) {
+        	spectator.playSound(spectator.getLocation(),
+                    Sound.valueOf("VILLAGER_NO"), 1.0f, 1.0f);
+            spectator.sendMessage("§cNão há mais jogadores vivos.");
+            spectator.closeInventory();
+            spectatorsWithGUI.remove(spectator.getUniqueId());
+            return;
+        }
+
+        for (Player p : vivos) {
+            org.bukkit.inventory.ItemStack head =
+                    new org.bukkit.inventory.ItemStack(Material.SKULL_ITEM, 1, (short) 3);
+
+            org.bukkit.inventory.meta.SkullMeta meta =
+                    (org.bukkit.inventory.meta.SkullMeta) head.getItemMeta();
+
+            meta.setOwner(p.getName());
+            meta.setDisplayName("§a" + p.getName());
+            meta.setLore(Collections.singletonList(
+                    "§7Vida: §c" + Math.ceil(p.getHealth()) + " ❤"
+            ));
+            spectator.playSound(spectator.getLocation(),
+                    Sound.valueOf("LEVEL_UP"), 1.0f, 1.0f);
+            head.setItemMeta(meta);
+            inv.addItem(head);
+        }
+
+        spectator.updateInventory();
+    }
     public void tick() {
         if (state != GameState.STARTING) return;
 if (players.size() < 2) {
@@ -310,21 +601,21 @@ txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "sw joingame " +
         Collections.shuffle(ordered);
 
         // Usa Cage + Jaulas
+        Bukkit.getLogger().info("Teleportando para mundo: " + map.getWorldName());
         Cage.teleportByQueueOrder(ordered, map);
        for (UUID u : ordered) {
     	   Player p = Bukkit.getPlayer(u);
-    	   if (p.getWorld() != Bukkit.getWorld("swlobby")) {
         Cage.createCage(p, Material.GLASS);
         broadcast("§aA partida vai começar em 15 segundos!");
         p.playSound(p.getLocation(), Sound.valueOf("CLICK"), 10f, 10f);
-       }
+       
        }
         Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
             cagesClosed = false;
             
             for (UUID u : ordered) {
             	Player u2 = Bukkit.getPlayer(u);
-
+            	updateVisibility();
 Cage.removeCage(u2.getLocation(), Material.GLASS);
             	 playersInPvp.add(u2.getUniqueId());
             	 u2.playSound(u2.getLocation(), Sound.valueOf("CLICK"), 10f, 10f);
@@ -338,10 +629,49 @@ started = true;
             broadcast("§aA partida começou!");
         }, 20L * 15);
     }
+    @EventHandler
+    public void onChat(org.bukkit.event.player.AsyncPlayerChatEvent e) {
+        Player sender = e.getPlayer();
+
+        // Não está nessa partida
+        if (!isInGame(sender) && !spectators.contains(sender.getUniqueId())) {
+            return;
+        }
+        if (e.getMessage().startsWith("!")) {
+            e.setCancelled(false); // deixa o Bukkit tratar
+            e.setMessage(e.getMessage().substring(1));
+            return;
+        }
+        e.setCancelled(true); // cancelamos o chat padrão
+
+        boolean isSpectator = spectators.contains(sender.getUniqueId());
+
+        String prefix = isSpectator
+                ? "§8[ESPECTADOR] §7"
+                : "§a[JOGO] §f";
+
+        String msg = prefix + sender.getName() + "§7: §f" + e.getMessage();
+
+        if (isSpectator) {
+            // espectador fala só com espectador
+            for (UUID u : spectators) {
+                Player p = Bukkit.getPlayer(u);
+                if (p != null) p.sendMessage(msg);
+            }
+        } else {
+            // vivo fala só com vivos
+            for (UUID u : players) {
+                Player p = Bukkit.getPlayer(u);
+                if (p != null && !spectators.contains(u)) {
+                    p.sendMessage(msg);
+                }
+            }
+        }
+    }
 
     public void checkWin() {
-        if (players.size() == 1 && state == GameState.RUNNING) {
-            Player winner = Bukkit.getPlayer(players.get(0));
+        if (playersInPvp.size() == 1 && state == GameState.RUNNING) {
+            Player winner = Bukkit.getPlayer(playersInPvp.get(0));
             if (winner != null) {
                 Bukkit.broadcastMessage(ChatColor.GOLD + winner.getName() + " venceu a partida da Sala #" + id);
                 playVictoryAnimation(winner);
@@ -352,7 +682,9 @@ started = true;
             
             Main.getInstace().getConfig().set("players." + winner.getUniqueId() + ".wins", wins + 1);
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
-               destroy();
+            	Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
+            	    resetWorldAndRestart();
+            	}, 20L * 6);
              }, 20L * 7);
          }
         }
@@ -431,11 +763,11 @@ started = true;
          
         for (UUID u : new ArrayList<>(players)) {
             Player p = Bukkit.getPlayer(u);
-            if (p != null) Bukkit.dispatchCommand(p, "sw leave");
             p.spigot().respawn();
             ItemJoinAPI ij = new ItemJoinAPI();
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
             	p.getInventory().clear();
+            	p.getInventory().setArmorContents(null);
                ij.getItems(p);
             }, 20L * 4);
         }
@@ -454,10 +786,137 @@ started = true;
             } catch (Exception e) {
                 Bukkit.getServer().getLogger().warning("[SkyWars] Falha ao reiniciar o mundo " + worldName + ": " + e.getMessage());
             }
+            Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
+                this.world = Bukkit.getWorld(worldName);
+
+                if (this.world == null) {
+                    Bukkit.getLogger().severe("[SkyWars] Falha ao recarregar o mundo " + worldName);
+                    return;
+                }
+
+                this.spawn = new Location(world, 0.5, 100, 0.5);
+            }, 20L * 2);
         players.clear();   
         playersInPvp.clear();
-        HandlerList.unregisterAll(this);
     }
 }
+    public void resetGame() {
+        started = false;
+        cagesClosed = false;
+        countdown = 30;
+        state = GameState.WAITING;
+        specTarget.clear();
+        playersInPvp.clear();
+        spectatorsWithGUI.clear();
+        // Limpa players
+        for (UUID u : players) {
+            Player p = Bukkit.getPlayer(u);
+            if (p == null) continue;
+                    for (Player all : Bukkit.getOnlinePlayers()) {
+                        p.showPlayer(Main.plugin, all);
+                    }
+            p.getInventory().clear();
+            p.getInventory().setArmorContents(null);
+            p.setHealth(20.0);
+            p.setFoodLevel(20);
+            p.setFireTicks(0);
+            p.setGameMode(GameMode.SURVIVAL);
+            spectators.clear();
+            p.teleport(spawn);
+        }
+        }
+    public boolean handleSpecCommand(Player sender, String[] args) {
+        if (!spectators.contains(sender.getUniqueId())) {
+            sender.sendMessage("§cApenas espectadores podem usar este comando.");
+            return true;
+        }
+
+        if (args.length != 1) {
+            sender.sendMessage("§eUso correto: §f/spec <player>");
+            return true;
+        }
+
+        Player target = Bukkit.getPlayer(args[0]);
+
+        if (target == null) {
+            sender.sendMessage("§cJogador não encontrado.");
+            return true;
+        }
+
+        if (!players.contains(target.getUniqueId()) || spectators.contains(target.getUniqueId())) {
+            sender.sendMessage("§cEste jogador não está vivo na partida.");
+            return true;
+        }
+
+        sender.teleport(target.getLocation().add(0, 2, 0));
+        sender.sendMessage("§aAgora assistindo §f" + target.getName());
+
+        return true;
+    }
+    public void updateVisibility() {
+        List<Player> vivos = new ArrayList<>();
+        List<Player> specs = new ArrayList<>();
+
+        for (UUID u : players) {
+            Player p = Bukkit.getPlayer(u);
+            if (p == null) continue;
+
+            if (spectators.contains(u)) {
+                specs.add(p);
+            } else {
+                vivos.add(p);
+            }
+        }
+
+        // vivos NÃO veem espectadores
+        for (Player vivo : vivos) {
+            for (Player spec : specs) {
+                vivo.hidePlayer(Main.plugin, spec);
+            }
+        }
+
+        // espectadores veem todo mundo
+        for (Player spec : specs) {
+            for (Player vivo : vivos) {
+                spec.showPlayer(Main.plugin, vivo);
+            }
+            for (Player otherSpec : specs) {
+                spec.showPlayer(Main.plugin, otherSpec);
+            }
+        }
+
+        // vivos veem vivos
+        for (Player p1 : vivos) {
+            for (Player p2 : vivos) {
+                p1.showPlayer(Main.plugin, p2);
+            }
+        }
+    }
+    public void resetWorldAndRestart() {
+        World oldWorld = this.world;
+
+        Bukkit.getScheduler().runTask(Main.plugin, () -> {
+            Bukkit.unloadWorld(oldWorld, false);
+
+            String backup = worldName + "copy";
+
+            Main.getMVWorldManager().deleteWorld(worldName);
+            Main.getMVWorldManager().cloneWorld(backup, worldName, "VoidGen");
+
+            Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
+                this.world = Bukkit.getWorld(worldName);
+
+                if (this.world == null) {
+                    Bukkit.getLogger().severe("[SkyWars] Falha ao recarregar mundo " + worldName);
+                    return;
+                }
+
+                this.spawn = new Location(world, 0.5, 100, 0.5);
+
+                resetGame();
+                startTask(); // reinicia o tick
+            }, 40L);
+        });
+    }
 }
 

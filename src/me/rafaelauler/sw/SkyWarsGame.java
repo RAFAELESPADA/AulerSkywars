@@ -741,6 +741,8 @@ started = true;
                      	  sp.getInventory().clear();
                      	  sp.getInventory().setArmorContents(null);
                      	  ij.getItems(sp);
+                     	  sp.setFlying(false);
+                     	  sp.setAllowFlight(false);
                     }
             	    SkywarsManager manager = new SkywarsManager();
             	    SkyWarsGame r = manager.findAvailableGame2();

@@ -279,6 +279,14 @@ public class SkyWarsGame implements Listener {
         }
     }
     @EventHandler
+    public void onItemDrop(org.bukkit.event.player.PlayerPickupItemEvent e) {
+        Player p = e.getPlayer();
+
+        if (spectators.contains(p.getUniqueId())) {
+            e.setCancelled(true);
+        }
+    }
+    @EventHandler
     public void onSpectatorInteract(org.bukkit.event.player.PlayerInteractEvent e) {
         Player p = e.getPlayer();
 
@@ -864,7 +872,7 @@ started = true;
         playersInPvp.clear();
         spectatorsWithGUI.clear();
         // Limpa players
-        for (UUID u : players) {
+        for (UUID u : new ArrayList<>(players)) {
             Player p = Bukkit.getPlayer(u);
             if (p == null) continue;
                     for (Player all : Bukkit.getOnlinePlayers()) {
@@ -878,6 +886,14 @@ started = true;
             p.setAllowFlight(false);
             p.setFireTicks(0);
             p.setGameMode(GameMode.SURVIVAL);
+            for (UUID u2 : new ArrayList<>(spectators)) {
+            	Player arr = Bukkit.getPlayer(u2);
+            	 Bukkit.dispatchCommand(arr, "sw leave");
+           	  ItemJoinAPI ij = new ItemJoinAPI();
+           	  arr.getInventory().clear();
+           	  arr.getInventory().setArmorContents(null);
+           	  ij.getItems(arr);
+            }
             spectators.clear();  
             SkywarsManager manager = new SkywarsManager();
           SkyWarsGame r = manager.findAvailableGame2();

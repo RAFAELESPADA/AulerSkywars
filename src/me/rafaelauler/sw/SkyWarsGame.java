@@ -251,9 +251,9 @@ public class SkyWarsGame implements Listener {
 
             Main.getInstace().getConfig().set(path + ".deaths", deaths + 1);
            
-        }
-        
+        }    
         p.sendMessage("§cVocê foi eliminado!");
+        TitleAPI.sendTitle(p, 20, 120, 20, "§c§lDERROTADO");
         broadcast("§e" + p.getName() + " foi eliminado da partida!");
         playersInPvp.remove(p.getUniqueId());
         spectators.add(p.getUniqueId());
@@ -638,7 +638,7 @@ txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "sw joingame " +
 
         // Envia para todos os jogadores do lobby
         for (Player p : lobbyWorld.getPlayers()) {
-            p.sendMessage(msg);
+            p.spigot().sendMessage(txt);
         }
 
         // Opcional: também pode enviar ActionBar
@@ -825,6 +825,7 @@ startSpectatorGUITask();
 
     public void playVictoryAnimation(Player winner) {
         if (winner == null) return;
+        TitleAPI.sendTitle(winner, 20, 120, 20, "§6§lVITÓRIA");
         victoryTask = Bukkit.getScheduler().runTaskTimer(
         	    Main.plugin,
         	    new Runnable() {
@@ -838,6 +839,7 @@ startSpectatorGUITask();
         	                return;
         	            }
         	            throwRandomFirework(winner);
+        	            
         	            winner.getWorld().playSound(winner.getLocation(), Sound.valueOf("NOTE_PLING"), 1.0f, 1.0f);
 
         	        }

@@ -7,12 +7,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
+
+import me.RockinChaos.itemjoin.api.ItemJoinAPI;
 
 public class SkywarsManager {
 
 	private final Map<Integer, SkyWarsGame> games = new LinkedHashMap<>();
     private int nextId = 1;
+    private BukkitTask victoryTask;
     private final int maxPlayersPerGame = 16;
     private int lastIndex = 0;
     // ================== CREATE / GET ==================
@@ -74,11 +79,26 @@ public class SkywarsManager {
         for (Player p : new ArrayList<>(game.getPlayers())) {
             sendToLobby(p);
         }
-
+          
         game.resetInternal();
     }
     private void sendToLobby(Player p) {
-        // implementar depois
+      p.getInventory().clear();
+      p.getInventory().setArmorContents(null);
+      ItemJoinAPI ij = new ItemJoinAPI();
+      ij.getItems(p);
+      victoryTask = Bukkit.getScheduler().runTaskLater(
+      	    Main.plugin,
+      	    new Runnable() {
+
+      	        @Override
+      	        public void run() {
+      	            
+      	            ij.getItems(p);
+      	            p.playSound(p.getLocation(), Sound.valueOf("ARROW_HIT"), 10f, 10f);
+      	        }
+      	    }, 30L);
+      p.teleport(Configs.MAIN_SPAWN);
     }
     public SkyWarsGame findAvailableGame2() {
         List<SkyWarsGame> list = new ArrayList<>(games.values());

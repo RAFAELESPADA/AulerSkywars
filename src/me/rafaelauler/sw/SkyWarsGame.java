@@ -362,6 +362,7 @@ public class SkyWarsGame implements Listener {
             specTarget.put(spec.getUniqueId(), target.getUniqueId());
 
             spec.sendMessage("§aAgora assistindo §f" + target.getName());
+            spec.teleport(target);
             spec.closeInventory();
         }
     }

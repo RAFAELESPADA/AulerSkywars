@@ -638,7 +638,7 @@ if (players.size() < 2) {
 
         String msg = "§eA partida da Sala §a#" + id + " §evai começar em " + countdown + " segundos! Clique aqui para entrar nela!";
 TextComponent txt = new TextComponent(msg);
-txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "sw joingame " + id));
+txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sw joingame " + id));
 
         // Envia para todos os jogadores do lobby
         for (Player p : lobbyWorld.getPlayers()) {

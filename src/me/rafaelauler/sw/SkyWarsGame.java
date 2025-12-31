@@ -119,8 +119,12 @@ public class SkyWarsGame implements Listener {
     // ================== PLAYER ACTIONS ==================
     public void join(Player player) {
     	 if (players.contains(player.getUniqueId())) return;
-    	 if (getState() != GameState.WAITING && getState() != GameState.COUNTDOWN) {
+    	 if (getState() != GameState.WAITING && getState() != GameState.COUNTDOWN && getState() != GameState.STARTING) {
     		 player.sendMessage(ChatColor.RED + "Essa partida está em andamento. Escolha outra!");
+    		 ItemJoinAPI api = new ItemJoinAPI();
+    		 if (player.getInventory().getContents() == null) {
+    			 api.getItems(player);
+    		 }
     		 return;
     	 }
     	    players.add(player.getUniqueId());
@@ -714,6 +718,7 @@ Cage.removeCage(u2.getLocation(), Material.GLASS);
                  
             }
 
+            Main.getInstance().CarregarTodos();
             broadcast("§aA partida começou!");
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
 started = true;

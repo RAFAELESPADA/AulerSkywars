@@ -39,7 +39,7 @@ public class SkywarsManager {
         // Registra eventos e inicia task
         Bukkit.getPluginManager().registerEvents(game, Main.getInstace());
         game.startTask();
-
+        Main.getInstance().CarregarTodos();
         return game;
     }
 

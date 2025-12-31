@@ -726,6 +726,19 @@ started = true;
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
             	Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
             	    resetWorldAndRestart();
+            	    SkywarsManager manager = new SkywarsManager();
+            	    SkyWarsGame r = manager.findAvailableGame2();
+                    if (r != null) {
+                    r.join(winner);
+                    }
+                    else {
+                  	  Bukkit.dispatchCommand(winner, "sw leave");
+                  	  ItemJoinAPI ij = new ItemJoinAPI();
+                  	  winner.getInventory().clear();
+                  	  winner.getInventory().setArmorContents(null);
+                  	  ij.getItems(winner);
+                  	  players.clear();
+                    }
             	}, 20L * 15);
              }, 20L * 7);
          }

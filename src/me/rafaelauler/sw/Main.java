@@ -72,7 +72,7 @@ public boolean isInvEmpty(Inventory inv) {
     }
     return true;
 }
-public void carregarTodos() {
+public void CarregarTodos() {
 
     Random random = new Random();
 

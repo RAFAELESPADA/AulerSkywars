@@ -734,12 +734,20 @@ started = true;
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
             	Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
             	    resetWorldAndRestart();
+            	    for (UUID spec : new ArrayList<>(spectators)) {
+                    	Player sp = Bukkit.getPlayer(spec);
+                    	 Bukkit.dispatchCommand(sp, "sw leave");
+                     	  ItemJoinAPI ij = new ItemJoinAPI();
+                     	  sp.getInventory().clear();
+                     	  sp.getInventory().setArmorContents(null);
+                     	  ij.getItems(sp);
+                    }
             	    SkywarsManager manager = new SkywarsManager();
             	    SkyWarsGame r = manager.findAvailableGame2();
                     if (r != null) {
                     r.join(winner);
                     }
-                    else {
+            	 else {
                   	  Bukkit.dispatchCommand(winner, "sw leave");
                   	  ItemJoinAPI ij = new ItemJoinAPI();
                   	  winner.getInventory().clear();
@@ -747,10 +755,12 @@ started = true;
                   	  ij.getItems(winner);
                   	  players.clear();
                     }
+            
+                   
             	}, 20L * 15);
              }, 20L * 7);
          }
-        }
+}
     /** Contagem de jogadores em uma partida */
     public int getPlayerCount() {
         return players.size();

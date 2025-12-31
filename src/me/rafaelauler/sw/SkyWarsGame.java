@@ -47,10 +47,9 @@ public class SkyWarsGame implements Listener {
     private final List<UUID> playersInPvp = new ArrayList<>();
     private final Map<UUID, UUID> specTarget = new HashMap<>();
 
-    private final String worldName;
     private World world;
     private Location spawn;
-    private final Jaulas map;
+    private SkyWarsMap map;
     private final List<UUID> spectators = new ArrayList<>();
     private GameState state = GameState.WAITING;
     private int countdown = 30;
@@ -64,23 +63,14 @@ public class SkyWarsGame implements Listener {
     private int victoryTask = -1;
 
 
-    public SkyWarsGame(int id, Jaulas map) {
+    public SkyWarsGame(int id, SkyWarsMap map) {
         this.id = id;
         this.map = map;
-        this.worldName = map.getWorldName();
-        this.world = Bukkit.getWorld(this.worldName);
-        if (this.world == null) {
-            Bukkit.getServer().getLogger().warning("Mundo " + worldName + " não carregado!");
-            return;
-        }
-        this.spawn = new Location(world, 0.5, 100, 0.5);
     }
 
     // ================== GETTERS ==================
     public int getId() { return id; }
     public GameState getState() { return state; }
-    public String getWorldName() { return worldName; }
-    public World getWorld() { return world; }
     public Location getSpawnLocation() { return Configs.LOBBY_SPAWN; }
     public void setSpawnLocation(Location spawn) { this.spawn = spawn; }
     public void setState(GameState state) {
@@ -277,19 +267,12 @@ public class SkyWarsGame implements Listener {
 
             giveSpectatorItem(p);
             	
-            {
-            	if (playersInPvp.isEmpty()) {
-            	    p.chat("/sw leave");
-            	    return;
-            	}
+
             Player p2 = Bukkit.getPlayer(playersInPvp.get(0));
-            if (p2 != null) {
             p.teleport(p2.getLocation().add(0, 2, 0));
             p.sendMessage("§7Você agora é um §fESPECTADOR§7.");
-            } else {
-            p.chat("/sw leave");	
-            }
-            }}, 2L);
+            
+            }, 2L);
         checkWin();
         }
     @EventHandler
@@ -679,6 +662,25 @@ txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "sw joingame " +
         // fallback: respawn da arena
             return new Location(world, 10, 82, 10);
 }
+    public void teleportPlayersToCages() {
+        List<Location> cages = map.getCages();
+        List<Player> vivos = new ArrayList<>(getPlayers());
+        Collections.shuffle(vivos);
+        if (vivos.size() > cages.size()) {
+            Bukkit.getLogger().warning("[SkyWars] Jogadores demais para o mapa " + map.name());
+            return;
+        }
+
+        for (int i = 0; i < vivos.size(); i++) {
+            Player p = vivos.get(i);
+            Location cage = cages.get(i);
+
+            p.teleport(cage);
+            p.setGameMode(GameMode.SURVIVAL);
+            p.setAllowFlight(false);
+            p.setFlying(false);
+        }
+    }
     private void startGame() {
         state = GameState.RUNNING;
         cagesClosed = true;
@@ -687,11 +689,15 @@ txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "sw joingame " +
         Collections.shuffle(ordered);
 
         // Usa Cage + Jaulas
-        Bukkit.getLogger().info("Teleportando para mundo: " + map.getWorldName());
-        Cage.teleportByQueueOrder(ordered, map);
+        
+
+        List<Player> vivos = new ArrayList<>(getPlayers());
+        Collections.shuffle(vivos);
+        teleportPlayersToCages();
        for (UUID u : ordered) {
     	   Player p = Bukkit.getPlayer(u);
-        Cage.createCage(p, Material.GLASS);
+    	      Cage.createCage(p, Material.GLASS);
+    		
         broadcast("§aA partida vai começar em 15 segundos!");
         p.playSound(p.getLocation(), Sound.valueOf("CLICK"), 10f, 10f);
        
@@ -759,49 +765,23 @@ startSpectatorGUITask();
     }
 
     public void checkWin() {
-        if (playersInPvp.size() == 1 && state == GameState.RUNNING) {
-            Player winner = Bukkit.getPlayer(playersInPvp.get(0));
-            if (winner != null) {
-                Bukkit.broadcastMessage(ChatColor.GOLD + winner.getName() + " venceu a partida da Sala #" + id);
-                playVictoryAnimation(winner);
-                TitleAPI.sendTitle(winner, 120, 120, 120, ChatColor.GOLD + " VITÓRIA!");
-                // chama a animação de vitória
-            }
- int wins = Main.getInstace().getConfig().getInt("players." + winner.getUniqueId() + ".wins");
-            
-            Main.getInstace().getConfig().set("players." + winner.getUniqueId() + ".wins", wins + 1);
-            Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
-            	Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
-            	    resetWorldAndRestart();
-            	    for (UUID spec : new ArrayList<>(spectators)) {
-                    	Player sp = Bukkit.getPlayer(spec);
-                    	 Bukkit.dispatchCommand(sp, "sw leave");
-                     	  ItemJoinAPI ij = new ItemJoinAPI();
-                     	  sp.getInventory().clear();
-                     	  sp.getInventory().setArmorContents(null);
-                     	  ij.getItems(sp);
-                     	  sp.setFlying(false);
-                     	  sp.setAllowFlight(false);
-                    }
-            	    SkywarsManager manager = new SkywarsManager();
-            	    SkyWarsGame r = manager.findAvailableGame2();
-                    if (r != null) {
-                    r.join(winner);
-                    }
-            	 else {
-                  	  Bukkit.dispatchCommand(winner, "sw leave");
-                  	  ItemJoinAPI ij = new ItemJoinAPI();
-                  	  winner.getInventory().clear();
-                  	  winner.getInventory().setArmorContents(null);
-                  	  ij.getItems(winner);
-                  	  players.clear();
-                    }
-            
-                   
-            	}, 20L * 15);
-             }, 20L * 7);
-         }
-}
+        if (state != GameState.RUNNING) return;
+        if (playersInPvp.size() != 1) return;
+
+        Player winner = Bukkit.getPlayer(playersInPvp.get(0));
+        if (winner == null) return;
+
+        state = GameState.ENDING;
+
+        Bukkit.broadcastMessage("§6" + winner.getName() + " venceu a Sala #" + id);
+        playVictoryAnimation(winner);
+
+        Bukkit.getScheduler().runTaskLater(
+            Main.getInstace(),
+            () -> Main.getInstace().getManager().endGame(this),
+            20L * 8
+        );
+    }
     /** Contagem de jogadores em uma partida */
     public int getPlayerCount() {
         return players.size();
@@ -874,48 +854,29 @@ startSpectatorGUITask();
         }
     }
 
-    public void destroy() {
-        state = GameState.WAITING;
-         
-        for (UUID u : new ArrayList<>(players)) {
-            Player p = Bukkit.getPlayer(u);
-            p.spigot().respawn();
-            ItemJoinAPI ij = new ItemJoinAPI();
-            Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
-            	p.getInventory().clear();
-            	p.getInventory().setArmorContents(null);
-               ij.getItems(p);
-            }, 20L * 4);
-        }
-     // ================= MULTIVERSE RESET =================
-        if (world != null) {
-            String worldNameBackup = worldName + "copy"; // nome do backup
-            // Descarrega o mundo
-            Bukkit.unloadWorld(world, false);
+    
 
-            // Carrega o backup via Multiverse-Core
-            try {
-
-            	Main.getMVWorldManager().deleteWorld(world.getName());
-            	Main.getMVWorldManager().cloneWorld(worldNameBackup, world.getName(), "VoidGen");
-                Bukkit.getServer().getLogger().info("[SkyWars] Mundo " + worldName + " reiniciado a partir do backup.");
-            } catch (Exception e) {
-                Bukkit.getServer().getLogger().warning("[SkyWars] Falha ao reiniciar o mundo " + worldName + ": " + e.getMessage());
-            }
-            Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
-                this.world = Bukkit.getWorld(worldName);
-
-                if (this.world == null) {
-                    Bukkit.getLogger().severe("[SkyWars] Falha ao recarregar o mundo " + worldName);
-                    return;
-                }
-
-                this.spawn = new Location(world, 0.5, 100, 0.5);
-            }, 20L * 2);
-        players.clear();   
+    public void resetInternal() {
+        players.clear();
         playersInPvp.clear();
+        spectators.clear();
+        specTarget.clear();
+        spectatorsWithGUI.clear();
+
+        started = false;
+        cagesClosed = false;
+        countdown = 30;
+        state = GameState.WAITING;
+
+        stopCompassUpdater();
+        stopSpectatorGUITask();
+        stopGameTask();
+
+        if (victoryTask != -1) {
+            Bukkit.getScheduler().cancelTask(victoryTask);
+            victoryTask = -1;
+        }
     }
-}
     public void resetGame() {
         started = false;
         cagesClosed = false;
@@ -949,27 +910,19 @@ startSpectatorGUITask();
             p.setGameMode(GameMode.SURVIVAL);
             for (UUID u2 : new ArrayList<>(spectators)) {
             	Player arr = Bukkit.getPlayer(u2);
-            	 Bukkit.dispatchCommand(arr, "sw leave");
            	  ItemJoinAPI ij = new ItemJoinAPI();
            	  arr.getInventory().clear();
            	  arr.getInventory().setArmorContents(null);
            	  ij.getItems(arr);
             }
             spectators.clear();  
-            SkywarsManager manager = new SkywarsManager();
-          SkyWarsGame r = manager.findAvailableGame2();
-          if (r != null) {
-          r.join(p);
-          }
-          else {
-        	  Bukkit.dispatchCommand(p, "sw leave");
         	  ItemJoinAPI ij = new ItemJoinAPI();
         	  p.getInventory().clear();
         	  p.getInventory().setArmorContents(null);
         	  ij.getItems(p);
         	  players.clear();
           }
-        }
+        
         }
     public boolean handleSpecCommand(Player sender, String[] args) {
         if (!spectators.contains(sender.getUniqueId())) {
@@ -1042,27 +995,37 @@ startSpectatorGUITask();
         World oldWorld = this.world;
 
         Bukkit.getScheduler().runTask(Main.plugin, () -> {
+
+            // Descarrega o mundo atual
             Bukkit.unloadWorld(oldWorld, false);
 
-            String backup = worldName + "copy";
+            String worldName = map.getWorldName();
+            String backupWorld = worldName + "copy";
 
+            // Multiverse reset
             Main.getMVWorldManager().deleteWorld(worldName);
-            Main.getMVWorldManager().cloneWorld(backup, worldName, "VoidGen");
+            Main.getMVWorldManager().cloneWorld(backupWorld, worldName, "VoidGen");
 
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
+
                 this.world = Bukkit.getWorld(worldName);
 
                 if (this.world == null) {
-                    Bukkit.getLogger().severe("[SkyWars] Falha ao recarregar mundo " + worldName);
+                    Bukkit.getLogger().severe(
+                        "[SkyWars] Falha ao recarregar mundo " + worldName
+                    );
                     return;
                 }
 
                 this.spawn = new Location(world, 0.5, 100, 0.5);
+
                 stopCompassUpdater();
                 resetGame();
                 startTask();
+
             }, 40L);
         });
     }
+
 }
 

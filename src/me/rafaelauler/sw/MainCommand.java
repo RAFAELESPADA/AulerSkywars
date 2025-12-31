@@ -95,7 +95,7 @@ private final SkywarsManager manager = new SkywarsManager();
 
         // 4️⃣ Verifica se a sala existe
         if (targetGame == null) {
-        	 for (Jaulas jaula : Jaulas.values()) {
+        	 for (SkyWarsMap jaula : SkyWarsMap.values()) {
      	        try {
      	            SkyWarsGame game2 = manager.createGame(jaula);
      	            game2.setSpawnLocation(Configs.LOBBY_SPAWN);
@@ -129,7 +129,7 @@ return;
         
 
         if (available == null) {
-            	 for (Jaulas jaula : Jaulas.values()) {
+            	 for (SkyWarsMap jaula : SkyWarsMap.values()) {
             	        try {
             	            SkyWarsGame game2 = manager.createGame(jaula);
             	            game2.setSpawnLocation(Configs.LOBBY_SPAWN);

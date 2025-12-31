@@ -2,7 +2,7 @@ package me.rafaelauler.sw;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,18 +11,19 @@ import org.bukkit.entity.Player;
 
 public class SkywarsManager {
 
-    private final Map<Integer, SkyWarsGame> games = new HashMap<>();
+	private final Map<Integer, SkyWarsGame> games = new LinkedHashMap<>();
     private int nextId = 1;
     private final int maxPlayersPerGame = 16;
-
+    private int lastIndex = 0;
     // ================== CREATE / GET ==================
 
     /**
      * Cria uma nova partida com ID automático e um mapa específico
      */
-    public SkyWarsGame createGame(Jaulas map) {
+    public SkyWarsGame createGame(SkyWarsMap map) {
         int id = nextId++;
         SkyWarsGame game = new SkyWarsGame(id, map);
+
         
         // Coloca o jogo no mapa imediatamente
         games.put(id, game);
@@ -54,24 +55,46 @@ public class SkywarsManager {
     }
 
     public SkyWarsGame findAvailableGame() {
-        return games.values().stream()
-                .filter(game ->
-                        (game.getState() == GameState.WAITING
-                        || game.getState() == GameState.STARTING)
-                        && game.getPlayers().size() < maxPlayersPerGame && game.getPlayers().size() >= 2
-                )
-                .findFirst()
-                .orElse(null);
+        List<SkyWarsGame> list = new ArrayList<>(games.values());
+        if (list.isEmpty()) return null;
+
+        for (int i = 0; i < list.size(); i++) {
+            SkyWarsGame game = list.get(lastIndex % list.size());
+            lastIndex++;
+
+            if ((game.getState() == GameState.WAITING
+                || game.getState() == GameState.STARTING)
+                && game.getPlayers().size() < maxPlayersPerGame) {
+                return game;
+            }
+        }
+        return null;
+    }
+    public void endGame(SkyWarsGame game) {
+        for (Player p : new ArrayList<>(game.getPlayers())) {
+            sendToLobby(p);
+        }
+
+        game.resetInternal();
+    }
+    private void sendToLobby(Player p) {
+        // implementar depois
     }
     public SkyWarsGame findAvailableGame2() {
-        return games.values().stream()
-                .filter(game ->
-                        (game.getState() == GameState.WAITING
-                        || game.getState() == GameState.STARTING)
-                        && game.getPlayers().size() < maxPlayersPerGame
-                )
-                .findFirst()
-                .orElse(null);
+        List<SkyWarsGame> list = new ArrayList<>(games.values());
+        if (list.isEmpty()) return null;
+
+        for (int i = 0; i < list.size(); i++) {
+            SkyWarsGame game = list.get(lastIndex % list.size());
+            lastIndex++;
+
+            if ((game.getState() == GameState.WAITING
+                || game.getState() == GameState.STARTING)
+                && game.getPlayers().size() < maxPlayersPerGame) {
+                return game;
+            }
+        }
+        return null;
     }
 
     // ================== PLAYER MANAGEMENT ==================
@@ -97,6 +120,6 @@ public class SkywarsManager {
     /** Remove e destrói uma partida pelo ID */
     public void removeGame(int gameId) {
         SkyWarsGame game = games.remove(gameId);
-        if (game != null) game.destroy();
+        if (game != null) game.resetGame();
     }
 }

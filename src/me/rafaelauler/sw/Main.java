@@ -576,11 +576,7 @@ new BukkitRunnable() {
 	CarregarBaus222();
 	CarregarBaus2222();
 	CarregarBaus22222();
-    if (Jaulas.sw1 == null || Jaulas.sw2 == null  || Jaulas.sw3 == null  || Jaulas.sw4 == null  || Jaulas.sw5 == null) {
-        Bukkit.getConsoleSender().sendMessage("❌ Algum mapa não foi carregado!");
-        return;
-    }
-    for (Jaulas jaula : Jaulas.values()) {
+    for (SkyWarsMap jaula : SkyWarsMap.values()) {
         try {
             SkyWarsGame game = manager.createGame(jaula);
             game.setSpawnLocation(Configs.LOBBY_SPAWN);

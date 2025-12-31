@@ -903,7 +903,7 @@ started = true;
         List<Player> vivos = new ArrayList<>();
         List<Player> specs = new ArrayList<>();
 
-        for (UUID u : players) {
+        for (UUID u : new ArrayList<>(players)) {
             Player p = Bukkit.getPlayer(u);
             if (p == null) continue;
 

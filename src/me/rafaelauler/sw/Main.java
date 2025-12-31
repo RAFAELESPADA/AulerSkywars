@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Level;
 
 /*     */ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -73,31 +72,54 @@ public boolean isInvEmpty(Inventory inv) {
     }
     return true;
 }
-public void CarregarTodos() {
-    for (World w : Bukkit.getWorlds()) {
-    	for(Chunk c2 : w.getLoadedChunks()){
-    		for(BlockState b2 : c2.getTileEntities()){
-    			if (b2 instanceof Chest) {
-    				if (w.getName().startsWith("sw")) {
-    					  Chest chest = (Chest) b2;
-    					   Random random = new Random();
-    					   int itemsAmount = random.nextInt(chestItemMaxAmount + 1 - chestItemMinAmount) + chestItemMaxAmount;
+public void carregarTodos() {
 
-    		         	   Inventory inventory = ((Chest)b2.getBlock().getState()).getInventory();
-    		    	      chest.setMetadata("SW", new FixedMetadataValue(Main.getInstance(), Boolean.valueOf(true)));
-    		              chest.getInventory().clear();
-    		              for (int i2 = 0; i2 < itemsAmount; i2++) {
-    		                  int slot = random.nextInt(inventory.getSize());
-    		                  int randomItemIndex = random.nextInt(Jaulas.items.size());
-    		                  ItemStack randomItem = Jaulas.items.get(randomItemIndex);
-    		chest.getInventory().setItem( slot, randomItem); 
-    		              }
-    				}
-    			}
-    		}
-    	}}
-	Bukkit.getLogger().log(Level.INFO, "o bau de todos os mapas foram setados!");
+    Random random = new Random();
+
+    for (World world : Bukkit.getWorlds()) {
+
+        // Só mundos SkyWars
+        if (!world.getName().startsWith("sw")) continue;
+
+        for (Chunk chunk : world.getLoadedChunks()) {
+
+            for (BlockState state : chunk.getTileEntities()) {
+
+                if (!(state instanceof Chest)) continue;
+
+                Chest chest = (Chest) state;
+
+                int itemsAmount = random.nextInt(
+                        chestItemMaxAmount - chestItemMinAmount + 1
+                ) + chestItemMinAmount;
+
+                Inventory inv = chest.getInventory();
+                inv.clear();
+
+                chest.setMetadata(
+                        "SW",
+                        new FixedMetadataValue(Main.getInstance(), true)
+                );
+
+                for (int i = 0; i < itemsAmount; i++) {
+
+                    int slot = random.nextInt(inv.getSize());
+                    ItemStack item = Jaulas.items.get(
+                            random.nextInt(Jaulas.items.size())
+                    );
+
+                    // Evita sobrescrever item
+                    if (inv.getItem(slot) == null) {
+                        inv.setItem(slot, item.clone());
+                    }
+                }
+            }
+        }
+    }
+
+    Bukkit.getLogger().info("Os baús de todos os mapas foram setados!");
 }
+
 public void CarregarBaus22() {
 	
 	   Random random = new Random();

@@ -30,6 +30,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -50,6 +51,8 @@ public class SkyWarsGame implements Listener {
     private final List<UUID> players = new ArrayList<>();
     private final List<UUID> playersInPvp = new ArrayList<>();
     private final Map<UUID, UUID> specTarget = new HashMap<>();
+
+    private final Map<Chest, Boolean> abriu = new HashMap<>();
 
     private World world;
     private Location spawn;
@@ -236,6 +239,35 @@ public class SkyWarsGame implements Listener {
             Main.getInstace().setarLoot(chest);
         }
     }
+    @EventHandler
+    public void onChunkLoad(InventoryOpenEvent e) {
+
+        World world = e.getPlayer().getWorld();
+
+        if (!world.getName().startsWith("sw")) return;
+
+for (Chunk c : world.getLoadedChunks()) {
+        for (BlockState state : c.getTileEntities()) {
+
+            if (!(state instanceof Chest)) continue;
+
+            Chest chest = (Chest) state;
+  
+                if (!(state instanceof Chest)) continue;
+
+                 if (abriu.containsKey(chest)) continue;
+                // Evita resetar baú já configurado
+                if (chest.hasMetadata("SW")) continue;
+                if (abriu.containsKey(chest)) {
+                abriu.put(chest, true);
+                }
+            // Evita resetar baú já configurado
+            if (chest.hasMetadata("SW")) continue;
+            Main.getInstace().setarLoot(chest);
+        }
+}
+}
+    
     @EventHandler
     public void onBreak(BlockBreakEvent e) {
         Player p = e.getPlayer();
@@ -1030,7 +1062,7 @@ startSpectatorGUITask();
 
             // Descarrega o mundo atual
             Bukkit.unloadWorld(oldWorld, false);
-
+ abriu.clear();
             String worldName = map.getWorldName();
             String backupWorld = worldName + "copy";
 

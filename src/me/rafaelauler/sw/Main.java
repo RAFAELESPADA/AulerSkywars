@@ -2,12 +2,17 @@ package me.rafaelauler.sw;
  
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 /*     */ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
@@ -44,7 +49,7 @@ import com.onarandombox.MultiverseCore.MultiverseCore;
 	 /*     */ /*     */   public static Plugin plugin;
 /*     */   public static Main instance;
 private SkywarsManager manager;
-
+private static final double RARE_CHANCE = 0.25;       // 25%
 /*     */   private File cf1;
 /*  77 */   public static String pluginName = "AulerSkywars";
 /*     */   
@@ -72,13 +77,32 @@ public boolean isInvEmpty(Inventory inv) {
     }
     return true;
 }
+public static final List<ItemStack> LEGENDARY_ITEMS = Arrays.asList(
+        new ItemStack(Material.DIAMOND_SWORD),
+        new ItemStack(Material.DIAMOND_CHESTPLATE),
+        new ItemStack(Material.DIAMOND_HELMET),
+        new ItemStack(Material.DIAMOND_BOOTS),
+        new ItemStack(Material.DIAMOND_AXE),
+        new ItemStack(Material.GOLDEN_APPLE, 2)
+);
+public static ItemStack getRandomItem(Random random) {
+
+    double chance = random.nextDouble();
+
+
+        if (chance <= RARE_CHANCE) {
+            return LEGENDARY_ITEMS.get(random.nextInt(LEGENDARY_ITEMS.size())).clone();
+        }
+    
+
+    return Jaulas.items.get(random.nextInt(Jaulas.items.size())).clone();
+}
 public void CarregarTodos() {
 
     Random random = new Random();
 
     for (World world : Bukkit.getWorlds()) {
 
-        // Só mundos SkyWars
         if (!world.getName().startsWith("sw")) continue;
 
         for (Chunk chunk : world.getLoadedChunks()) {
@@ -88,11 +112,6 @@ public void CarregarTodos() {
                 if (!(state instanceof Chest)) continue;
 
                 Chest chest = (Chest) state;
-
-                int itemsAmount = random.nextInt(
-                        chestItemMaxAmount - chestItemMinAmount + 1
-                ) + chestItemMinAmount;
-
                 Inventory inv = chest.getInventory();
                 inv.clear();
 
@@ -101,23 +120,56 @@ public void CarregarTodos() {
                         new FixedMetadataValue(Main.getInstance(), true)
                 );
 
-                for (int i = 0; i < itemsAmount; i++) {
+                int itemsAmount = random.nextInt(
+                        chestItemMaxAmount - chestItemMinAmount + 1
+                ) + chestItemMinAmount;
 
-                    int slot = random.nextInt(inv.getSize());
-                    ItemStack item = Jaulas.items.get(
-                            random.nextInt(Jaulas.items.size())
-                    );
+                List<Integer> slots = new ArrayList<>();
+                for (int i = 0; i < inv.getSize(); i++) {
+                    slots.add(i);
+                }
 
-                    // Evita sobrescrever item
-                    if (inv.getItem(slot) == null) {
-                        inv.setItem(slot, item.clone());
-                    }
+                Collections.shuffle(slots, random);
+
+                int maxItems = Math.min(itemsAmount, slots.size());
+                for (int i = 0; i < maxItems; i++) {
+                    ItemStack item = getRandomItem(random);
+                    inv.setItem(slots.get(i), item);
                 }
             }
         }
     }
 
     Bukkit.getLogger().info("Os baús de todos os mapas foram setados!");
+}
+public void setarLoot(Chest chest) {
+
+    Random random = new Random();
+    Inventory inv = chest.getInventory();
+    inv.clear();
+
+    chest.setMetadata(
+            "SW",
+            new FixedMetadataValue(Main.getInstance(), true)
+    );
+
+    int itemsAmount = random.nextInt(
+            chestItemMaxAmount - chestItemMinAmount + 1
+    ) + chestItemMinAmount;
+
+    List<Integer> slots = new ArrayList<>();
+    for (int i = 0; i < inv.getSize(); i++) {
+        slots.add(i);
+    }
+
+    Collections.shuffle(slots, random);
+
+    int maxItems = Math.min(itemsAmount, slots.size());
+
+    for (int i = 0; i < maxItems; i++) {
+        ItemStack item = getRandomItem(random);
+        inv.setItem(slots.get(i), item);
+    }
 }
 
 public void CarregarBaus22() {

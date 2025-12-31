@@ -9,6 +9,7 @@ import java.util.Random;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.GameMode;
@@ -16,6 +17,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Chest;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
@@ -30,6 +33,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -209,6 +213,27 @@ public class SkyWarsGame implements Listener {
                     p.showPlayer(target);
                 }
             }
+        }
+    }
+    @EventHandler
+    public void onChunkLoad(ChunkLoadEvent e) {
+
+        World world = e.getWorld();
+
+        if (!world.getName().startsWith("sw")) return;
+
+        Chunk chunk = e.getChunk();
+
+        for (BlockState state : chunk.getTileEntities()) {
+
+            if (!(state instanceof Chest)) continue;
+
+            Chest chest = (Chest) state;
+
+            // Evita resetar baú já configurado
+            if (chest.hasMetadata("SW")) continue;
+
+            Main.getInstace().setarLoot(chest);
         }
     }
     @EventHandler

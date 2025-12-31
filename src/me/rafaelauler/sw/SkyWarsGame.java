@@ -240,7 +240,7 @@ public class SkyWarsGame implements Listener {
         Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
             p.spigot().respawn();
 
-            p.setGameMode(GameMode.SPECTATOR);
+            p.setGameMode(GameMode.SURVIVAL);
             p.setAllowFlight(true);
             p.setFlying(true);
 
@@ -313,6 +313,15 @@ public class SkyWarsGame implements Listener {
         if (e.getEntity() instanceof Player) {
             Player p = (Player) e.getEntity();
             if (spectators.contains(p.getUniqueId())) {
+                e.setCancelled(true);
+            }
+        }
+    }
+    @EventHandler
+    public void onSpectatorDamage(EntityDamageByEntityEvent e) {
+        if (e.getEntity() instanceof Player) {
+            Player p = (Player) e.getEntity();
+            if (spectators.contains(e.getDamager().getUniqueId())) {
                 e.setCancelled(true);
             }
         }

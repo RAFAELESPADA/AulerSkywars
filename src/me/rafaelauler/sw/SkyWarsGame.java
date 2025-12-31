@@ -58,6 +58,10 @@ public class SkyWarsGame implements Listener {
     private boolean cagesClosed = false;
     private final List<UUID> spectatorsWithGUI = new ArrayList<>();
     private boolean guiBlink = false;
+    private int gameTask = -1;
+    private int spectatorGUITask = -1;
+    private int compassTask = -1;
+    private int victoryTask = -1;
 
 
     public SkyWarsGame(int id, Jaulas map) {
@@ -69,7 +73,6 @@ public class SkyWarsGame implements Listener {
             Bukkit.getServer().getLogger().warning("Mundo " + worldName + " não carregado!");
             return;
         }
-
         this.spawn = new Location(world, 0.5, 100, 0.5);
     }
 
@@ -80,22 +83,26 @@ public class SkyWarsGame implements Listener {
     public World getWorld() { return world; }
     public Location getSpawnLocation() { return Configs.LOBBY_SPAWN; }
     public void setSpawnLocation(Location spawn) { this.spawn = spawn; }
-    public void setState(GameState spawn) { this.state = state; }
+    public void setState(GameState state) {
+        this.state = state;
+    }
     private int taskId = -1;
 
     public void startTask() {
-        if (taskId != -1) return;
+        if (gameTask != -1) return;
 
-        taskId = Bukkit.getScheduler().runTaskTimer(Main.getInstace(), () -> {
-            if (state == GameState.STOPPED) {
-                Bukkit.getScheduler().cancelTask(taskId);
-                taskId = -1;
-                return;
-            }
-            tick();
-            startSpectatorGUITask();
-            startCompassUpdater();
-        }, 20L, 20L).getTaskId();
+        gameTask = Bukkit.getScheduler().runTaskTimer(
+            Main.plugin,
+            this::tick,
+            20L,
+            20L
+        ).getTaskId();
+    }
+    public void stopGameTask() {
+        if (gameTask != -1) {
+            Bukkit.getScheduler().cancelTask(gameTask);
+            gameTask = -1;
+        }
     }
     public List<Player> getPlayers() {
         List<Player> result = new ArrayList<>();
@@ -130,12 +137,9 @@ public class SkyWarsGame implements Listener {
            player.setAllowFlight(false);
            player.setFlying(false);
            player.setGameMode(GameMode.SURVIVAL);
-    	    // Registrar evento se ainda não registrado
-    	    if (!Bukkit.getPluginManager().isPluginEnabled(Main.getInstace())) {
-    	        Bukkit.getPluginManager().registerEvents(this, Main.getInstace());
-    	    }
         if (players.size() >= 2 && state == GameState.WAITING) {
             startCountdown();
+            startTask();
         }
         Bukkit.getLogger().info("[SkyWars] Player entrou. Sala " + id + " | Players=" + players.size());
         player.teleport(spawn);
@@ -162,10 +166,37 @@ public class SkyWarsGame implements Listener {
     }
 
     @EventHandler
-    public void onMove(PlayerMoveEvent e) {
+    public void onPlayerMove(PlayerMoveEvent e) {
+        if (e.getTo() == null) return;
+
+        // 🔥 Ignora movimentos irrelevantes (câmera, head rotation)
+        if (e.getFrom().getBlockX() == e.getTo().getBlockX()
+         && e.getFrom().getBlockY() == e.getTo().getBlockY()
+         && e.getFrom().getBlockZ() == e.getTo().getBlockZ()) {
+            return;
+        }
+
         Player p = e.getPlayer();
-        if (!isInGame(p)) return;
-        if (!started && cagesClosed) e.setTo(e.getFrom());
+        UUID uuid = p.getUniqueId();
+
+        boolean isPlayer = players.contains(uuid);
+        boolean isSpectator = spectators.contains(uuid);
+
+        if (!isPlayer && !isSpectator) return;
+
+        // 🚫 Trava jogador antes do início (jaulas)
+        if (isPlayer && !started && cagesClosed) {
+            e.setTo(e.getFrom());
+            return;
+        }
+
+        // ☠️ Espectador caiu no void
+        if (isSpectator && p.getLocation().getY() <= 0) {
+            Location safe = getSpectatorSafeLocation(p);
+            if (safe != null) {
+                p.teleport(safe);
+            }
+        }
     }
     public void updatePlayerVisibility() {
         List<Player> inGame = getPlayers();
@@ -246,8 +277,12 @@ public class SkyWarsGame implements Listener {
 
             giveSpectatorItem(p);
             	
-            Player p2 = Bukkit.getPlayer(playersInPvp.get(0)); {
-            	
+            {
+            	if (playersInPvp.isEmpty()) {
+            	    p.chat("/sw leave");
+            	    return;
+            	}
+            Player p2 = Bukkit.getPlayer(playersInPvp.get(0));
             if (p2 != null) {
             p.teleport(p2.getLocation().add(0, 2, 0));
             p.sendMessage("§7Você agora é um §fESPECTADOR§7.");
@@ -338,8 +373,10 @@ public class SkyWarsGame implements Listener {
     @EventHandler
     public void onSpectatorCommand(PlayerCommandPreprocessEvent e) {
         if (spectators.contains(e.getPlayer().getUniqueId())) {
-            if (!e.getMessage().toLowerCase().startsWith("/sw") || !e.getMessage().toLowerCase().startsWith("/lobby")) {
-                e.setCancelled(true);
+
+            String msg = e.getMessage().toLowerCase();
+        	if (!msg.startsWith("/sw") && !msg.startsWith("/lobby")) {
+        	e.setCancelled(true);
                 e.getPlayer().sendMessage("§cEspectadores não podem usar comandos.");
             }
         }
@@ -375,22 +412,27 @@ public class SkyWarsGame implements Listener {
         }
     }
     public void startCompassUpdater() {
-        Bukkit.getScheduler().runTaskTimer(Main.plugin, () -> {
-            for (UUID u : specTarget.keySet()) {
-                Player spec = Bukkit.getPlayer(u);
-                if (spec == null || !spec.isOnline()) continue;
+        if (compassTask != -1) return;
 
-                UUID targetUUID = specTarget.get(u);
-                Player target = Bukkit.getPlayer(targetUUID);
-
-                if (target == null || !target.isOnline()) {
-                    spec.sendMessage("§cO alvo saiu do jogo!");
-                    continue;
+        compassTask = Bukkit.getScheduler().runTaskTimer(
+            Main.plugin,
+            () -> {
+                for (UUID u : specTarget.keySet()) {
+                    Player spec = Bukkit.getPlayer(u);
+                    Player target = Bukkit.getPlayer(specTarget.get(u));
+                    if (spec != null && target != null) {
+                        spec.setCompassTarget(target.getLocation());
+                    }
                 }
-
-                spec.setCompassTarget(target.getLocation());
-            }
-        }, 0L, 10L);
+            },
+            0L, 10L
+        ).getTaskId();
+    }
+    public void stopCompassUpdater() {
+        if (compassTask != -1) {
+            Bukkit.getScheduler().cancelTask(compassTask);
+            compassTask = -1;
+        }
     }
     @EventHandler
     public void onSpecGUIDrag(org.bukkit.event.inventory.InventoryDragEvent e) {
@@ -439,6 +481,7 @@ if (msg.startsWith("/lobby") && started) {
 
     // ================== GAME FLOW ==================
     public void startCountdown() {
+        if (state != GameState.WAITING) return;
         state = GameState.STARTING;
         countdown = 30;
     }
@@ -507,28 +550,38 @@ if (msg.startsWith("/lobby") && started) {
         }
     }
     public void startSpectatorGUITask() {
-        Bukkit.getScheduler().runTaskTimer(Main.plugin, () -> {
+        if (spectatorGUITask != -1) return;
 
-            if (spectatorsWithGUI.isEmpty()) return;
+        spectatorGUITask = Bukkit.getScheduler().runTaskTimer(
+            Main.plugin,
+            () -> {
+                if (spectatorsWithGUI.isEmpty()) return;
 
-            for (UUID u : new ArrayList<>(spectatorsWithGUI)) {
-                Player spec = Bukkit.getPlayer(u);
+                for (UUID u : new ArrayList<>(spectatorsWithGUI)) {
+                    Player spec = Bukkit.getPlayer(u);
 
-                if (spec == null || !spec.isOnline()) {
-                    spectatorsWithGUI.remove(u);
-                    continue;
+                    if (spec == null || !spec.isOnline()) {
+                        spectatorsWithGUI.remove(u);
+                        continue;
+                    }
+
+                    if (!spectators.contains(u)) {
+                        spec.closeInventory();
+                        spectatorsWithGUI.remove(u);
+                        continue;
+                    }
+
+                    updateSpectatorGUI(spec);
                 }
-
-                if (!spectators.contains(u)) {
-                    spec.closeInventory();
-                    spectatorsWithGUI.remove(u);
-                    continue;
-                }
-
-                updateSpectatorGUI(spec);
-            }
-
-        }, 0L, 20L); // atualiza a cada 1 segundo
+            },
+            0L, 20L
+        ).getTaskId();
+    }
+    public void stopSpectatorGUITask() {
+        if (spectatorGUITask != -1) {
+            Bukkit.getScheduler().cancelTask(spectatorGUITask);
+            spectatorGUITask = -1;
+        }
     }
     public void updateSpectatorGUI(Player spectator) {
         if (!spectator.getOpenInventory().getTitle().equals("§8Espectadores")) {
@@ -584,10 +637,11 @@ if (players.size() < 2) {
             startGame();
             return;
         }
-        if (countdown % 5 == 0 || countdown <= 25) {
+        if (countdown % 5 == 0) {
             announceStarting();
+            broadcast("§eIniciando em §6" + countdown + "s");
         }
-        broadcast("§eIniciando em §6" + countdown + "s");
+        
         countdown--;
     }
     private void announceStarting() {
@@ -610,25 +664,7 @@ txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "sw joingame " +
             p.playSound(p.getLocation(), Sound.valueOf("ARROW_HIT"), 10f, 1f);
         }
     }
-    @EventHandler
-    public void onSpectatorFall(PlayerMoveEvent e) {
-        Player p = e.getPlayer();
-
-        // Só tratar se for espectador nesta sala
-        if (!spectators.contains(p.getUniqueId())) return;
-
-        // Se cair no void
-        if (p.getLocation().getY() <= 0) {
-            
-            // Teleporta para um local seguro
-            Location safe = getSpectatorSafeLocation(p);
-            
-            if (safe != null) {
-                p.teleport(safe);
-                p.sendMessage("§eVocê caiu no void! Teleportado para segurança.");
-            }
-        }
-    }
+  
     public Location getSpectatorSafeLocation(Player spec) {
         // prioridade: alvo espectador
         UUID targetUUID = specTarget.get(spec.getUniqueId());
@@ -675,6 +711,9 @@ Cage.removeCage(u2.getLocation(), Material.GLASS);
             broadcast("§aA partida começou!");
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
 started = true;
+
+startCompassUpdater();
+startSpectatorGUITask();
             }, 20L * 18);
 
         }, 20L * 15);
@@ -806,25 +845,27 @@ started = true;
 
     public void playVictoryAnimation(Player winner) {
         if (winner == null) return;
+        victoryTask = Bukkit.getScheduler().runTaskTimer(
+        	    Main.plugin,
+        	    new Runnable() {
+        	        int ticks = 0;
 
-        Bukkit.getScheduler().runTaskTimer(Main.getInstace(), new Runnable() {
-            int ticks = 0;
+        	        @Override
+        	        public void run() {
+        	            if (ticks++ >= 80) {
+        	                Bukkit.getScheduler().cancelTask(victoryTask);
+        	                victoryTask = -1;
+        	                return;
+        	            }
+        	            throwRandomFirework(winner);
+        	            winner.getWorld().playSound(winner.getLocation(), Sound.valueOf("NOTE_PLING"), 1.0f, 1.0f);
 
-            @Override
-            public void run() {
-                if (ticks > 80) { // dura 2 segundos (40 ticks)
-                    return;
-                }
-
-                // Spawn de partículas coloridas ao redor do jogador
-                throwRandomFirework(winner);
-                // Som de comemoração
-                winner.getWorld().playSound(winner.getLocation(), Sound.valueOf("NOTE_PLING"), 1.0f, 1.0f);
-
-                ticks++;
-            }
-        }, 0L, 10L); // executa a cada 2 ticks
+        	        }
+        	    },
+        	    0L, 10L
+        	).getTaskId();
     }
+    
     // ================== UTILS ==================
     public void broadcast(String msg) {
         for (Player p : getPlayers()) {
@@ -882,6 +923,11 @@ started = true;
         state = GameState.WAITING;
         specTarget.clear();
         playersInPvp.clear();
+        stopGameTask();
+        if (victoryTask != -1) {
+            Bukkit.getScheduler().cancelTask(victoryTask);
+            victoryTask = -1;
+        }
         spectatorsWithGUI.clear();
         // Limpa players
         for (UUID u : new ArrayList<>(players)) {
@@ -897,6 +943,9 @@ started = true;
             p.setFlying(false);
             p.setAllowFlight(false);
             p.setFireTicks(0);
+            stopCompassUpdater();
+            stopSpectatorGUITask();
+            stopGameTask();
             p.setGameMode(GameMode.SURVIVAL);
             for (UUID u2 : new ArrayList<>(spectators)) {
             	Player arr = Bukkit.getPlayer(u2);
@@ -1009,9 +1058,9 @@ started = true;
                 }
 
                 this.spawn = new Location(world, 0.5, 100, 0.5);
-
+                stopCompassUpdater();
                 resetGame();
-                startTask(); // reinicia o tick
+                startTask();
             }, 40L);
         });
     }

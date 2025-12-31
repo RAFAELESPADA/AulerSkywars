@@ -63,6 +63,16 @@ public class SkywarsManager {
                 .findFirst()
                 .orElse(null);
     }
+    public SkyWarsGame findAvailableGame2() {
+        return games.values().stream()
+                .filter(game ->
+                        (game.getState() == GameState.WAITING
+                        || game.getState() == GameState.STARTING)
+                        && game.getPlayers().size() < maxPlayersPerGame
+                )
+                .findFirst()
+                .orElse(null);
+    }
 
     // ================== PLAYER MANAGEMENT ==================
 

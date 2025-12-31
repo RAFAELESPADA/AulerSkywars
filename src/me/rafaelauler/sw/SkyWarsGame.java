@@ -245,14 +245,16 @@ public class SkyWarsGame implements Listener {
             p.setFlying(true);
 
             giveSpectatorItem(p);
-            p.teleport(p.getLocation().add(0, 2, 0));
+            	
+            Player p2 = Bukkit.getPlayer(playersInPvp.get(0)); {
+            	
+            if (p2 != null) {
+            p.teleport(p2.getLocation().add(0, 2, 0));
             p.sendMessage("§7Você agora é um §fESPECTADOR§7.");
-        }, 2L);
-        Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
-        	p.getInventory().clear();
-        	ItemJoinAPI ij = new ItemJoinAPI();
-           ij.getItems(p);
-        }, 20L * 2);
+            } else {
+            p.chat("/sw leave");	
+            }
+            }}, 2L);
         checkWin();
         }
     @EventHandler
@@ -548,8 +550,6 @@ if (msg.startsWith("/lobby") && started) {
             meta.setLore(Collections.singletonList(
                     "§7Vida: §c" + Math.ceil(p.getHealth()) + " ❤"
             ));
-            spectator.playSound(spectator.getLocation(),
-                    Sound.valueOf("LEVEL_UP"), 1.0f, 1.0f);
             head.setItemMeta(meta);
             inv.addItem(head);
         }
@@ -653,12 +653,12 @@ Cage.removeCage(u2.getLocation(), Material.GLASS);
             	 u2.playSound(u2.getLocation(), Sound.valueOf("CLICK"), 10f, 10f);
                  
             }
-            
+
+            broadcast("§aA partida começou!");
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
 started = true;
             }, 20L * 18);
 
-            broadcast("§aA partida começou!");
         }, 20L * 15);
     }
     @EventHandler
@@ -707,7 +707,7 @@ started = true;
             if (winner != null) {
                 Bukkit.broadcastMessage(ChatColor.GOLD + winner.getName() + " venceu a partida da Sala #" + id);
                 playVictoryAnimation(winner);
-                TitleAPI.sendTitle(winner, 80, 80, 80, ChatColor.GOLD + " VITÓRIA!");
+                TitleAPI.sendTitle(winner, 120, 120, 120, ChatColor.GOLD + " VITÓRIA!");
                 // chama a animação de vitória
             }
  int wins = Main.getInstace().getConfig().getInt("players." + winner.getUniqueId() + ".wins");
@@ -716,7 +716,7 @@ started = true;
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
             	Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
             	    resetWorldAndRestart();
-            	}, 20L * 6);
+            	}, 20L * 15);
              }, 20L * 7);
          }
         }
@@ -845,7 +845,7 @@ started = true;
             Player p = Bukkit.getPlayer(u);
             if (p == null) continue;
                     for (Player all : Bukkit.getOnlinePlayers()) {
-                        p.showPlayer(Main.plugin, all);
+                        p.showPlayer(all);
                     }
             p.getInventory().clear();
             p.getInventory().setArmorContents(null);
@@ -855,8 +855,20 @@ started = true;
             p.setAllowFlight(false);
             p.setFireTicks(0);
             p.setGameMode(GameMode.SURVIVAL);
-            spectators.clear();
-            p.teleport(spawn);
+            spectators.clear();  
+            SkywarsManager manager = new SkywarsManager();
+          SkyWarsGame r = manager.findAvailableGame2();
+          if (r != null) {
+          r.join(p);
+          }
+          else {
+        	  Bukkit.dispatchCommand(p, "sw leave");
+        	  ItemJoinAPI ij = new ItemJoinAPI();
+        	  p.getInventory().clear();
+        	  p.getInventory().setArmorContents(null);
+        	  ij.getItems(p);
+        	  players.clear();
+          }
         }
         }
     public boolean handleSpecCommand(Player sender, String[] args) {
@@ -905,24 +917,24 @@ started = true;
         // vivos NÃO veem espectadores
         for (Player vivo : vivos) {
             for (Player spec : specs) {
-                vivo.hidePlayer(Main.plugin, spec);
+                vivo.hidePlayer(spec);
             }
         }
 
         // espectadores veem todo mundo
         for (Player spec : specs) {
             for (Player vivo : vivos) {
-                spec.showPlayer(Main.plugin, vivo);
+                spec.showPlayer(vivo);
             }
             for (Player otherSpec : specs) {
-                spec.showPlayer(Main.plugin, otherSpec);
+                spec.showPlayer(otherSpec);
             }
         }
 
         // vivos veem vivos
         for (Player p1 : vivos) {
             for (Player p2 : vivos) {
-                p1.showPlayer(Main.plugin, p2);
+                p1.showPlayer(p2);
             }
         }
     }

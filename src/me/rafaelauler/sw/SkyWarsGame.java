@@ -592,7 +592,39 @@ txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "sw joingame " +
             p.playSound(p.getLocation(), Sound.valueOf("ARROW_HIT"), 10f, 1f);
         }
     }
+    @EventHandler
+    public void onSpectatorFall(PlayerMoveEvent e) {
+        Player p = e.getPlayer();
 
+        // Só tratar se for espectador nesta sala
+        if (!spectators.contains(p.getUniqueId())) return;
+
+        // Se cair no void
+        if (p.getLocation().getY() <= 0) {
+            
+            // Teleporta para um local seguro
+            Location safe = getSpectatorSafeLocation(p);
+            
+            if (safe != null) {
+                p.teleport(safe);
+                p.sendMessage("§eVocê caiu no void! Teleportado para segurança.");
+            }
+        }
+    }
+    public Location getSpectatorSafeLocation(Player spec) {
+        // prioridade: alvo espectador
+        UUID targetUUID = specTarget.get(spec.getUniqueId());
+        if (targetUUID != null) {
+            Player alvo = Bukkit.getPlayer(targetUUID);
+            if (alvo != null && alvo.isOnline()) {
+                // teleporta pra cima dele
+                return alvo.getLocation().add(0, 2, 0);
+            }
+        }
+        
+        // fallback: respawn da arena
+            return new Location(world, 10, 82, 10);
+}
     private void startGame() {
         state = GameState.RUNNING;
         cagesClosed = true;
@@ -819,6 +851,8 @@ started = true;
             p.getInventory().setArmorContents(null);
             p.setHealth(20.0);
             p.setFoodLevel(20);
+            p.setFlying(false);
+            p.setAllowFlight(false);
             p.setFireTicks(0);
             p.setGameMode(GameMode.SURVIVAL);
             spectators.clear();

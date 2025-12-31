@@ -129,21 +129,25 @@ return;
         
 
         if (available == null) {
-            	 for (SkyWarsMap jaula : SkyWarsMap.values()) {
-            	        try {
-            	            SkyWarsGame game2 = manager.createGame(jaula);
-            	            game2.setSpawnLocation(Configs.LOBBY_SPAWN);
-            	            Bukkit.getLogger().info("Sala criada para o mapa " + jaula.name());
-            	            player.sendMessage(ChatColor.RED + "Criando salas...");
-            	            player.sendMessage(ChatColor.RED +"Tente novamente!");
-return;
-            	        } catch (IllegalStateException e) {
-            	            Bukkit.getLogger().warning("Não foi possível criar sala para " + jaula.name() + ": " + e.getMessage());
-            	        }
+        	for (SkyWarsMap jaula : SkyWarsMap.values()) {
+        	    try {
+        	    	player.sendMessage("§aCriando salas...");
+        	        SkyWarsGame game2 = manager.createGame(jaula);
+        	        game2.setSpawnLocation(Configs.LOBBY_SPAWN);
+
+        	        Bukkit.getLogger().info("Sala criada para o mapa " + jaula.name());
+        	    } catch (Exception e) {
+        	        Bukkit.getLogger().severe("Erro ao criar sala para " + jaula.name());
+        	        player.sendMessage(ChatColor.RED + "Erro ao criar a sala! Contate um staff!");
+        	        e.printStackTrace();
+        	    }
+        	}
+
+        	player.sendMessage(ChatColor.GREEN + "Todas as salas foram criadas com sucesso! Tente entrar novamente");
             	        available = manager.findAvailableGame();           	        
             	 }
             
-        }
+        
 
         // 🔥 PRIMEIRO entra na sala
         available.join(player);

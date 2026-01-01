@@ -17,6 +17,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.EntityType;
@@ -24,6 +25,7 @@ import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -32,6 +34,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
@@ -807,7 +810,7 @@ startSpectatorGUITask();
                 ? "§8[ESPECTADOR] §7"
                 : "§a[JOGO] §f";
 
-        String msg = prefix + sender.getName() + "§7: §f" + e.getMessage();
+        String msg = prefix + sender.getDisplayName() + "§7: §f" + e.getMessage();
 
         if (isSpectator) {
             // espectador fala só com espectador
@@ -939,6 +942,17 @@ startSpectatorGUITask();
         if (victoryTask != -1) {
             Bukkit.getScheduler().cancelTask(victoryTask);
             victoryTask = -1;
+        }
+    }
+    @EventHandler
+    public void onInteract(PlayerInteractEvent event){
+        if(event.getAction() == Action.RIGHT_CLICK_BLOCK){
+            Block block = event.getClickedBlock();
+            if (spectators.contains(event.getPlayer().getUniqueId())) {
+            if(block.getType().equals(Material.CHEST))  {
+                event.setCancelled(true);
+            }
+        }
         }
     }
     public void resetGame() {

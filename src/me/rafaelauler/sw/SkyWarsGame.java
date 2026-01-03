@@ -64,6 +64,8 @@ public class SkyWarsGame implements Listener {
     private GameState state = GameState.WAITING;
     private int countdown = 30;
     boolean started = (state == GameState.RUNNING);
+
+    boolean started2 = false;
     private boolean cagesClosed = false;
     private final List<UUID> spectatorsWithGUI = new ArrayList<>();
     private boolean guiBlink = false;
@@ -252,7 +254,7 @@ public class SkyWarsGame implements Listener {
     public void onBreak(BlockBreakEvent e) {
         Player p = e.getPlayer();
         if (!isInGame(p)) return;
-        if (state != GameState.RUNNING) e.setCancelled(true);
+        if (state != GameState.RUNNING && !started2) e.setCancelled(true);
     }
 
 
@@ -262,7 +264,7 @@ public class SkyWarsGame implements Listener {
         Player p = (Player) e.getEntity();
         if (!isInGame(p)) return;
 
-        if (state != GameState.RUNNING && e.getCause() == DamageCause.FALL) {
+        if (state != GameState.RUNNING && e.getCause() == DamageCause.FALL && !started2) {
             e.setCancelled(true);
         }
     }
@@ -277,7 +279,7 @@ public class SkyWarsGame implements Listener {
 
         if (!isInGame(damager) || !isInGame(victim)) return;
 
-        if (state != GameState.RUNNING || !playersInPvp.contains(damager.getUniqueId())) {
+        if (state != GameState.RUNNING || !playersInPvp.contains(damager.getUniqueId()) && !started2) {
             e.setCancelled(true);
         }
     }
@@ -851,6 +853,7 @@ txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sw joingame " 
         // Usa Cage + Jaulas
         
 
+state = GameState.RUNNING;
         List<Player> vivos = new ArrayList<>(getPlayers());
         Collections.shuffle(vivos);
         if (world == null) {
@@ -892,8 +895,8 @@ Cage.removeCage(u2);
             broadcast("§aA partida começou!");
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
 started = true;
+started2 = true;
 
-state = GameState.RUNNING;
 startCompassUpdater();
 startSpectatorGUITask();
             }, 20L * 18);

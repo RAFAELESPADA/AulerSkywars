@@ -115,7 +115,7 @@ private final SkywarsManager manager = new SkywarsManager();
 
         // 🔹 Agora podemos entrar no jogo com segurança
         targetGame.join(player);
-        targetGame.updatePlayerVisibility();
+        targetGame.updateVisibility();
         player.getInventory().clear();
     }
         
@@ -157,7 +157,6 @@ private final SkywarsManager manager = new SkywarsManager();
         }
 
         available.join(player);
-        available.updatePlayerVisibility();
 
         player.getInventory().clear();
         player.sendMessage("§aVocê entrou na sala #" + available.getId());
@@ -191,7 +190,6 @@ private final SkywarsManager manager = new SkywarsManager();
             player.teleport(quitLocation);
         }
         }
-        game.updatePlayerVisibility();
 
         new BukkitRunnable() {
             @Override

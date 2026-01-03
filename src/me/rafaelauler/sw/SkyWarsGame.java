@@ -63,7 +63,7 @@ public class SkyWarsGame implements Listener {
     private final List<UUID> spectators = new ArrayList<>();
     private GameState state = GameState.WAITING;
     private int countdown = 30;
-    private boolean started = false;
+    boolean started = (state == GameState.RUNNING);
     private boolean cagesClosed = false;
     private final List<UUID> spectatorsWithGUI = new ArrayList<>();
     private boolean guiBlink = false;
@@ -71,6 +71,8 @@ public class SkyWarsGame implements Listener {
     private int spectatorGUITask = -1;
     private int compassTask = -1;
     private int victoryTask = -1;
+    private boolean worldLoading = false;
+    private int startRetries = 0;
 
 
     public SkyWarsGame(int id, SkyWarsMap map) {
@@ -93,7 +95,8 @@ public class SkyWarsGame implements Listener {
 
         gameTask = Bukkit.getScheduler().runTaskTimer(
             Main.plugin,
-            this::tick,
+            this::tickRunning,
+
             20L,
             20L
         ).getTaskId();
@@ -137,6 +140,10 @@ public class SkyWarsGame implements Listener {
     		 }
     		 return;
     	 }
+    	 if (worldLoading) {
+    		    player.sendMessage("§cA arena está reiniciando...");
+    		    return;
+    		}
     	    players.add(player.getUniqueId());
     	    if (players.size() == 1) {
     	        setState(GameState.WAITING);
@@ -145,8 +152,7 @@ public class SkyWarsGame implements Listener {
            player.setAllowFlight(false);
            player.setFlying(false);
            player.setGameMode(GameMode.SURVIVAL);
-        if (players.size() >= 2 && state == GameState.WAITING) {
-            startCountdown();
+        if (players.size() >= 2 && state == GameState.WAITING && !worldLoading) {
             startTask();
         }
         Bukkit.getLogger().info("[SkyWars] Player entrou. Sala " + id + " | Players=" + players.size());
@@ -186,6 +192,7 @@ public class SkyWarsGame implements Listener {
 
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
+        if (!players.contains(uuid) && !spectators.contains(uuid)) return;
 
         boolean isPlayer = players.contains(uuid);
         boolean isSpectator = spectators.contains(uuid);
@@ -193,7 +200,7 @@ public class SkyWarsGame implements Listener {
         if (!isPlayer && !isSpectator) return;
 
         // 🚫 Trava jogador antes do início (jaulas)
-        if (isPlayer && !started && cagesClosed) {
+        if (isPlayer && state != GameState.RUNNING && cagesClosed) {
             e.setTo(e.getFrom());
             return;
         }
@@ -206,25 +213,7 @@ public class SkyWarsGame implements Listener {
             }
         }
     }
-    public void updatePlayerVisibility() {
-        List<Player> inGame = getPlayers();
-        List<Player> allPlayers = new ArrayList<>(Bukkit.getOnlinePlayers());
 
-        for (Player p : allPlayers) {
-            for (Player target : allPlayers) {
-                if (inGame.contains(p) && !inGame.contains(target)) {
-                    // jogador na partida não vê quem não está
-                    p.hidePlayer(target);
-                } else if (inGame.contains(p) && inGame.contains(target)) {
-                    // jogadores da partida se veem
-                    p.showPlayer(target);
-                } else if (!inGame.contains(p) && !p.getWorld().equals(Bukkit.getWorld("1v1"))) {
-                    // jogadores fora da partida veem todos normalmente
-                    p.showPlayer(target);
-                }
-            }
-        }
-    }
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent e) {
 
@@ -247,57 +236,52 @@ public class SkyWarsGame implements Listener {
         }
     }
     @EventHandler
-    public void onChunkLoad(InventoryOpenEvent e) {
+    public void onChestOpen(InventoryOpenEvent e) {
+        if (!(e.getInventory().getHolder() instanceof Chest)) return;
 
-        World world = e.getPlayer().getWorld();
+        Chest chest = (Chest) e.getInventory().getHolder();
+        World world = chest.getWorld();
 
         if (!world.getName().startsWith("sw")) return;
+        if (chest.hasMetadata("SW")) return;
 
-for (Chunk c : world.getLoadedChunks()) {
-        for (BlockState state : c.getTileEntities()) {
-
-            if (!(state instanceof Chest)) continue;
-
-            Chest chest = (Chest) state;
-  
-                if (!(state instanceof Chest)) continue;
-
-                 if (abriu.containsKey(chest)) continue;
-                // Evita resetar baú já configurado
-                if (chest.hasMetadata("SW")) continue;
-                if (abriu.containsKey(chest)) {
-                abriu.put(chest, true);
-                }
-            // Evita resetar baú já configurado
-            if (chest.hasMetadata("SW")) continue;
-            Main.getInstace().setarLoot(chest);
-        }
-}
-}
+        Main.getInstace().setarLoot(chest);
+    }
     
     @EventHandler
     public void onBreak(BlockBreakEvent e) {
         Player p = e.getPlayer();
         if (!isInGame(p)) return;
-        if (!started) e.setCancelled(true);
+        if (state != GameState.RUNNING) e.setCancelled(true);
     }
+
 
     @EventHandler
     public void onDamage(EntityDamageEvent e) {
         if (!(e.getEntity() instanceof Player)) return;
         Player p = (Player) e.getEntity();
         if (!isInGame(p)) return;
-        if (!started && e.getCause() == DamageCause.FALL) e.setCancelled(true);
+
+        if (state != GameState.RUNNING && e.getCause() == DamageCause.FALL) {
+            e.setCancelled(true);
+        }
     }
+
 
     @EventHandler
     public void onPvP(EntityDamageByEntityEvent e) {
         if (!(e.getDamager() instanceof Player) || !(e.getEntity() instanceof Player)) return;
+
         Player damager = (Player) e.getDamager();
         Player victim = (Player) e.getEntity();
+
         if (!isInGame(damager) || !isInGame(victim)) return;
-        if (!started || !playersInPvp.contains(damager.getUniqueId())) e.setCancelled(true);
+
+        if (state != GameState.RUNNING || !playersInPvp.contains(damager.getUniqueId())) {
+            e.setCancelled(true);
+        }
     }
+
 
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
@@ -335,9 +319,12 @@ for (Chunk c : world.getLoadedChunks()) {
 
             giveSpectatorItem(p);
             	
-
-            Player p2 = Bukkit.getPlayer(playersInPvp.get(0));
-            p.teleport(p2.getLocation().add(0, 2, 0));
+            if (!playersInPvp.isEmpty()) {
+                Player p2 = Bukkit.getPlayer(playersInPvp.get(0));
+                if (p2 != null) {
+                    p.teleport(p2.getLocation().add(0, 2, 0));
+                }
+            }
             p.sendMessage("§7Você agora é um §fESPECTADOR§7.");
             
             }, 2L);
@@ -512,12 +499,15 @@ for (Chunk c : world.getLoadedChunks()) {
             openSpectatorGUI(p);
             return;
         }
-        if (!started && !msg.startsWith("/sw") && !msg.startsWith("/lobby")) {
-            e.setCancelled(true);
-            p.sendMessage("§cComando bloqueado durante a partida");
-            return;
-        }
-if (msg.startsWith("/lobby") && started) {
+        if (state != GameState.RUNNING && 
+        	    !msg.startsWith("/sw") && 
+        	    !msg.startsWith("/lobby")) {
+
+        	    e.setCancelled(true);
+        	    p.sendMessage("§cComando bloqueado durante a partida");
+        	}
+        if (msg.startsWith("/lobby") && state == GameState.RUNNING) {
+
         leave(p);
         p.teleport(Configs.MAIN_SPAWN);
         ItemJoinAPI ij = new ItemJoinAPI();
@@ -533,8 +523,11 @@ if (msg.startsWith("/lobby") && started) {
     // ================== GAME FLOW ==================
     public void startCountdown() {
         if (state != GameState.WAITING) return;
+
         state = GameState.STARTING;
         countdown = 30;
+
+        broadcast("§eA partida vai começar!");
     }
     @EventHandler
     public void onSpecTeleport(org.bukkit.event.player.PlayerTeleportEvent e) {
@@ -678,11 +671,48 @@ if (msg.startsWith("/lobby") && started) {
 
         spectator.updateInventory();
     }
-    public void tick() {
-        if (state != GameState.STARTING) return;
+    private void tickRunning() {
+
+        // Segurança: não roda nada enquanto o mundo está reiniciando
+        if (worldLoading) return;
+
+        switch (state) {
+
+        case WAITING:
+            if (!worldLoading && players.size() >= 2 && state == GameState.WAITING) {
+                startCountdown();
+            }
+            break;
+
+            case STARTING:
+                tickStarting();
+                break;
+
+            case RUNNING:
+                checkWin();
+                break;
+
+            case ENDING:
+                stopGameTask();
+                break;
+            case STOPPED:
+            default:
+                // Não faz nada
+                break;
+        }
+    }
+
+
+    private void tickStarting() {
 if (players.size() < 2) {
 	 countdown = 30;
+	 state = GameState.WAITING;
 	return;
+}
+if (worldLoading) {
+    countdown = 30;
+
+    return;
 }
         if (countdown <= 0) {
             startGame();
@@ -730,27 +760,89 @@ txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sw joingame " 
         // fallback: respawn da arena
             return new Location(world, 10, 82, 10);
 }
+    private boolean teleportPlayersToCagesSafe() {
+        World w = Bukkit.getWorld(map.getWorldName());
+        if (w == null) return false;
+
+        List<Location> cages = map.getCages(w); // 🔥 aqui
+        if (cages.isEmpty()) return false;
+
+        for (Location loc : cages) {
+            loc.getChunk().load(true);
+        }
+        return true;
+    }
     public void teleportPlayersToCages() {
-        List<Location> cages = map.getCages();
+        if (world == null) return;
+
+        List<Location> cages = map.getCages(world);
+        if (cages.isEmpty()) return;
+
         List<Player> vivos = new ArrayList<>(getPlayers());
         Collections.shuffle(vivos);
+
+        // ⚠️ LOGA UMA ÚNICA VEZ
         if (vivos.size() > cages.size()) {
-            Bukkit.getLogger().warning("[SkyWars] Jogadores demais para o mapa " + map.name());
-            return;
+            Bukkit.getLogger().warning(
+                "[SkyWars] Jogadores (" + vivos.size() +
+                ") > Jaulas (" + cages.size() +
+                ") no mapa " + map.getWorldName()
+            );
         }
 
         for (int i = 0; i < vivos.size(); i++) {
             Player p = vivos.get(i);
-            Location cage = cages.get(i);
 
+            // 🟢 Jogadores extras viram espectador
+            if (i >= cages.size()) {
+                spectators.add(p.getUniqueId());
+                playersInPvp.remove(p.getUniqueId());
+
+                p.setGameMode(GameMode.SURVIVAL);
+                p.setAllowFlight(true);
+                p.setFlying(true);
+                giveSpectatorItem(p);
+                p.sendMessage("§cVocê virou espectador: não havia jaulas suficientes.");
+                continue;
+            }
+
+            Location cage = cages.get(i);
             p.teleport(cage);
             p.setGameMode(GameMode.SURVIVAL);
             p.setAllowFlight(false);
             p.setFlying(false);
         }
     }
+
+
     private void startGame() {
-        state = GameState.RUNNING;
+
+	    if (state != GameState.STARTING) return;
+    	  if (worldLoading) {
+    	        Bukkit.getLogger().warning(
+    	            "[SkyWars] Tentativa de start com mundo carregando"
+    	        );
+    	        return;
+    	    }
+    	  World w = Bukkit.getWorld(map.getWorldName());
+
+    	    if (w == null) {
+    	        Bukkit.getLogger().warning(
+    	            "[SkyWars] Mundo ainda não pronto, adiando start..."
+    	        );
+    	        if (++startRetries > 5) {
+    	            Bukkit.getLogger().severe("[SkyWars] Falha crítica ao iniciar sala " + id);
+    	            return;
+    	        }
+    	        Bukkit.getScheduler().runTaskLater(
+    	            Main.plugin,
+    	            this::startGame,
+    	            20L // tenta de novo em 1 segundo
+    	        );
+    	        return;
+    	    }
+
+    	    this.world = w;
         cagesClosed = true;
 
         List<UUID> ordered = new ArrayList<>(players);
@@ -761,26 +853,41 @@ txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sw joingame " 
 
         List<Player> vivos = new ArrayList<>(getPlayers());
         Collections.shuffle(vivos);
+        if (world == null) {
+            Bukkit.getLogger().warning("[SkyWars] Mundo ainda não disponível");
+            return;
+        }
+        if (!teleportPlayersToCagesSafe()) {
+            Bukkit.getLogger().warning("[SkyWars] Start abortado: jaulas indisponíveis");
+            return;
+        }
+
+        state = GameState.RUNNING;
+        playersInPvp.clear();
+        playersInPvp.addAll(players);
         teleportPlayersToCages();
-       for (UUID u : ordered) {
-    	   Player p = Bukkit.getPlayer(u);
-    	      Cage.createCage(p, Material.GLASS);
-    		
+        playersInPvp.removeIf(uuid -> spectators.contains(uuid));
+        for (UUID u : ordered) {
+            Player p = Bukkit.getPlayer(u);
+            if (p != null) {
+                Cage.createCage(p, Material.GLASS);
+                p.playSound(p.getLocation(), Sound.valueOf("CLICK"), 10f, 10f);
+            }
+        }
+
         broadcast("§aA partida vai começar em 15 segundos!");
-        p.playSound(p.getLocation(), Sound.valueOf("CLICK"), 10f, 10f);
-       
-       }
+
         Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
             cagesClosed = false;
             
             for (UUID u : ordered) {
             	Player u2 = Bukkit.getPlayer(u);
-            	updateVisibility();
-Cage.removeCage(u2.getLocation(), Material.GLASS);
-            	 playersInPvp.add(u2.getUniqueId());
+            	
+Cage.removeCage(u2);
             	 u2.playSound(u2.getLocation(), Sound.valueOf("CLICK"), 10f, 10f);
                  
             }
+            updateVisibility();
 
             Main.getInstance().CarregarTodos();
             broadcast("§aA partida começou!");
@@ -847,7 +954,7 @@ startSpectatorGUITask();
         updateVisibility();
         Bukkit.getScheduler().runTaskLater(
             Main.getInstace(),
-            () -> Main.getInstace().getManager().endGame(this) , 
+            () -> Main.getInstace().getManager().endGame(this) ,  
             20L * 8
         );
     }
@@ -942,7 +1049,6 @@ startSpectatorGUITask();
         stopCompassUpdater();
         stopSpectatorGUITask();
         stopGameTask();
-        resetWorldAndRestart();
         if (victoryTask != -1) {
             Bukkit.getScheduler().cancelTask(victoryTask);
             victoryTask = -1;
@@ -961,11 +1067,14 @@ startSpectatorGUITask();
     }
     public void resetGame() {
         started = false;
+       
+        playersInPvp.clear();
+        specTarget.clear();
         cagesClosed = false;
         countdown = 30;
         state = GameState.WAITING;
-        specTarget.clear();
-        playersInPvp.clear();
+        stopCompassUpdater();
+        stopSpectatorGUITask();
         stopGameTask();
         if (victoryTask != -1) {
             Bukkit.getScheduler().cancelTask(victoryTask);
@@ -986,25 +1095,25 @@ startSpectatorGUITask();
             p.setFlying(false);
             p.setAllowFlight(false);
             p.setFireTicks(0);
-            stopCompassUpdater();
-            stopSpectatorGUITask();
-            stopGameTask();
             p.setGameMode(GameMode.SURVIVAL);
-            for (UUID u2 : new ArrayList<>(spectators)) {
-            	Player arr = Bukkit.getPlayer(u2);
-           	  ItemJoinAPI ij = new ItemJoinAPI();
-           	  arr.getInventory().clear();
-           	  arr.getInventory().setArmorContents(null);
-           	  ij.getItems(arr);
-            }
-            spectators.clear();  
+           
+        
         	  ItemJoinAPI ij = new ItemJoinAPI();
         	  p.getInventory().clear();
         	  p.getInventory().setArmorContents(null);
         	  ij.getItems(p);
-        	  players.clear();
+        	  
           }
-        
+        for (UUID u2 : new ArrayList<>(spectators)) {
+        	Player arr = Bukkit.getPlayer(u2);
+        	if (arr == null) continue;
+       	  ItemJoinAPI ij = new ItemJoinAPI();
+       	  arr.getInventory().clear();
+       	  arr.getInventory().setArmorContents(null);
+       	  ij.getItems(arr);
+        }
+        players.clear();
+        spectators.clear();  
         }
     public boolean handleSpecCommand(Player sender, String[] args) {
         if (!spectators.contains(sender.getUniqueId())) {
@@ -1074,53 +1183,45 @@ startSpectatorGUITask();
         }
     }
     public void resetWorldAndRestart() {
+        worldLoading = true;
 
-        World oldWorld = this.world;
         String worldName = map.getWorldName();
         String backupWorld = worldName + "copy";
+        World oldWorld = this.world;
 
         Bukkit.getScheduler().runTask(Main.plugin, () -> {
 
-            // Remove players com segurança
             if (oldWorld != null) {
-                oldWorld.getPlayers().forEach(p -> {
+                for (Player p : oldWorld.getPlayers()) {
                     p.teleport(Configs.LOBBY_SPAWN);
-                });
+                }
+                Bukkit.unloadWorld(oldWorld, false);
             }
 
             abriu.clear();
 
-            Bukkit.unloadWorld(oldWorld, false);
-
-            // Apaga mundo
             Main.getMVWorldManager().deleteWorld(worldName);
-
-            // Clona (já carrega o mundo automaticamente)
-            Main.getMVWorldManager().cloneWorld(
-                backupWorld,
-                worldName,
-                "VoidGen"
-            );
+            Main.getMVWorldManager().cloneWorld(backupWorld, worldName, "VoidGen");
 
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
 
-                this.world = Bukkit.getWorld(worldName);
-
-                if (this.world == null) {
-                    Bukkit.getLogger().severe(
-                        "[SkyWars] Falha ao recarregar mundo " + worldName
-                    );
+                World w = Bukkit.getWorld(worldName);
+                if (w == null) {
+                    Bukkit.getLogger().severe("[SkyWars] Falha ao recarregar mundo " + worldName);
                     return;
                 }
 
+                w.getChunkAt(0, 0).load(true);
+                this.world = w;
                 this.spawn = Configs.LOBBY_SPAWN;
 
-                stopCompassUpdater();
-                resetGame();
-                startTask();
+                worldLoading = false;
 
-            }, 80L); // Delay maior é ESSENCIAL no MV antigo
+                resetGame();
+
+            }, 100L); // ESSENCIAL no MV antigo
         });
     }
+
 }
 

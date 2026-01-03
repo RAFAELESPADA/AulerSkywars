@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 public class Cage {
@@ -44,43 +43,67 @@ public class Cage {
     }
 
     // =================== JAULAS ===================
-    public static void createCage(Player player, Material cageMaterial) {
-        Location loc = player.getLocation();
-        World world = loc.getWorld();
-        int x = loc.getBlockX();
-        int y = loc.getBlockY();
-        int z = loc.getBlockZ();
+ 
+    public static void createCage(Player player, Material material) {
 
-        // Create a 3x3x3 cage
+        // BASE DA JAULA (PISO)
+        Location base = player.getLocation().getBlock().getLocation();
+        World world = base.getWorld();
+
+        int x = base.getBlockX();
+        int y = base.getBlockY();
+        int z = base.getBlockZ();
+
+        // TELEPORTA PLAYER 1 BLOCO ACIMA DO PISO
+        Location center = base.clone().add(0.5, 1, 0.5);
+        player.teleport(center);
+
         for (int dx = -1; dx <= 1; dx++) {
-            for (int dy = 0; dy <= 2; dy++) { // Cage height of 3
+            for (int dy = 0; dy <= 3; dy++) {
                 for (int dz = -1; dz <= 1; dz++) {
-                    if (dx == 0 && dz == 0 && dy > 0) continue; // Keep center air
-                    Block block = world.getBlockAt(x + dx, y + dy, z + dz);
-                    block.setType(cageMaterial);
-                }
-            }}
-            
-        }
 
-        // Method to remove the cage
-        public static void removeCage(Location loc, Material cageMaterial) {
-            int x = loc.getBlockX();
-            int y = loc.getBlockY();
-            int z = loc.getBlockZ();
+                    boolean isCenter = dx == 0 && dz == 0;
 
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dy = 0; dy <= 2; dy++) {
-                    for (int dz = -1; dz <= 1; dz++) {
-                        Block block = loc.getWorld().getBlockAt(x + dx, y + dy, z + dz);
-                        if (block.getType() == cageMaterial) {
-                            block.setType(Material.AIR);
-                        }
+                    // espaço interno
+                    if (isCenter && dy >= 1 && dy <= 2) continue;
+
+                    // piso e teto
+                    if (dy == 0 || dy == 3) {
+                        world.getBlockAt(x + dx, y + dy, z + dz)
+                             .setType(material);
+                        continue;
+                    }
+
+                    // paredes
+                    if (dx == -1 || dx == 1 || dz == -1 || dz == 1) {
+                        world.getBlockAt(x + dx, y + dy, z + dz)
+                             .setType(material);
                     }
                 }
             }
         }
     }
+
+
+
+        // Method to remove the cage
+    public static void removeCage(Player player) {
+        Location loc = player.getLocation().getBlock().getLocation();
+        World w = loc.getWorld();
+
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = 0; dy <= 3; dy++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    w.getBlockAt(
+                        loc.getBlockX() + dx,
+                        loc.getBlockY() + dy,
+                        loc.getBlockZ() + dz
+                    ).setType(Material.AIR);
+                }
+            }
+        }
+    }}
+
     
         
     

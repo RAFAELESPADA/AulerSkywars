@@ -1,6 +1,7 @@
 package me.rafaelauler.sw;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -95,10 +96,12 @@ public enum SkyWarsMap {
     public String getWorldName() {
         return worldName;
     }
-    public List<Location> getCages() {
-        World world = Bukkit.getWorld(worldName);
+    public List<Location> getCages(World world) {
         if (world == null) {
-            throw new IllegalStateException("Mundo não carregado: " + worldName);
+            Bukkit.getLogger().warning(
+                "[SkyWars] Tentativa de pegar jaulas com mundo não carregado: " + worldName
+            );
+            return Collections.emptyList();
         }
 
         List<Location> list = new ArrayList<>();

@@ -669,7 +669,7 @@ new BukkitRunnable() {
  	Bukkit.getConsoleSender().sendMessage("AULERSKYWARS HAS BEEN ENABLED!");
 	 Bukkit.getScheduler().runTaskTimer(this, () -> {
          for (SkyWarsGame game : manager.getGames()) {
-             game.tick();
+            
              game.checkWin();
          }
      }, 20, 20);

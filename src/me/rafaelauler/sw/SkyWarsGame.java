@@ -254,7 +254,7 @@ public class SkyWarsGame implements Listener {
     public void onBreak(BlockBreakEvent e) {
         Player p = e.getPlayer();
         if (!isInGame(p)) return;
-        if (state != GameState.RUNNING && !started2) e.setCancelled(true);
+        if (state == GameState.RUNNING && !started2) e.setCancelled(true);
     }
 
 
@@ -264,7 +264,7 @@ public class SkyWarsGame implements Listener {
         Player p = (Player) e.getEntity();
         if (!isInGame(p)) return;
 
-        if (state != GameState.RUNNING && e.getCause() == DamageCause.FALL && !started2) {
+        if (state == GameState.RUNNING && e.getCause() == DamageCause.FALL && !started2) {
             e.setCancelled(true);
         }
     }
@@ -279,7 +279,7 @@ public class SkyWarsGame implements Listener {
 
         if (!isInGame(damager) || !isInGame(victim)) return;
 
-        if (state != GameState.RUNNING || !playersInPvp.contains(damager.getUniqueId()) && !started2) {
+        if (state == GameState.RUNNING || !playersInPvp.contains(damager.getUniqueId()) && !started2) {
             e.setCancelled(true);
         }
     }

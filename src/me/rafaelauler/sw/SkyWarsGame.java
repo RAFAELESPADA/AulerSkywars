@@ -214,7 +214,7 @@ public class SkyWarsGame implements Listener {
                 } else if (inGame.contains(p) && inGame.contains(target)) {
                     // jogadores da partida se veem
                     p.showPlayer(target);
-                } else if (!inGame.contains(p)) {
+                } else if (!inGame.contains(p) && !p.getWorld().equals(Bukkit.getWorld("1v1"))) {
                     // jogadores fora da partida veem todos normalmente
                     p.showPlayer(target);
                 }
@@ -840,10 +840,10 @@ startSpectatorGUITask();
 
         Bukkit.broadcastMessage("§6" + winner.getName() + " venceu a Sala #" + id);
         playVictoryAnimation(winner);
-
+        updateVisibility();
         Bukkit.getScheduler().runTaskLater(
             Main.getInstace(),
-            () -> Main.getInstace().getManager().endGame(this),
+            () -> Main.getInstace().getManager().endGame(this) , 
             20L * 8
         );
     }

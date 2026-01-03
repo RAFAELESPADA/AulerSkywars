@@ -69,7 +69,7 @@ public class SkywarsManager {
 
             if ((game.getState() == GameState.WAITING
                 || game.getState() == GameState.STARTING)
-                && game.getPlayers().size() < maxPlayersPerGame) {
+                && game.getPlayers().size() < maxPlayersPerGame  && game.getPlayers().size() >= 1) {
                 return game;
             }
         }

@@ -942,7 +942,7 @@ startSpectatorGUITask();
         stopCompassUpdater();
         stopSpectatorGUITask();
         stopGameTask();
-
+        resetWorldAndRestart();
         if (victoryTask != -1) {
             Bukkit.getScheduler().cancelTask(victoryTask);
             victoryTask = -1;

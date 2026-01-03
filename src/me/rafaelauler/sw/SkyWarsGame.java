@@ -1070,12 +1070,16 @@ startSpectatorGUITask();
     }
     public void resetGame() {
         started = false;
-       
-        playersInPvp.clear();
-        specTarget.clear();
         cagesClosed = false;
         countdown = 30;
         state = GameState.WAITING;
+
+        // Limpa apenas o estado da partida, não a lista de players
+        playersInPvp.clear();
+        spectators.clear();
+        specTarget.clear();
+        spectatorsWithGUI.clear();
+
         stopCompassUpdater();
         stopSpectatorGUITask();
         stopGameTask();
@@ -1083,41 +1087,86 @@ startSpectatorGUITask();
             Bukkit.getScheduler().cancelTask(victoryTask);
             victoryTask = -1;
         }
-        spectatorsWithGUI.clear();
-        // Limpa players
-        for (UUID u : new ArrayList<>(players)) {
-            Player p = Bukkit.getPlayer(u);
+
+        // Resetar inventário e status dos jogadores
+        for (UUID uuid : new ArrayList<>(players)) {
+            Player p = Bukkit.getPlayer(uuid);
             if (p == null) continue;
-                    for (Player all : Bukkit.getOnlinePlayers()) {
-                        p.showPlayer(all);
-                    }
+
+            // Limpa inventário, armadura e status
             p.getInventory().clear();
             p.getInventory().setArmorContents(null);
-            p.setHealth(20.0);
+            p.setHealth(20);
             p.setFoodLevel(20);
             p.setFlying(false);
             p.setAllowFlight(false);
-            p.setFireTicks(0);
             p.setGameMode(GameMode.SURVIVAL);
-           
-        
-        	  ItemJoinAPI ij = new ItemJoinAPI();
-        	  p.getInventory().clear();
-        	  p.getInventory().setArmorContents(null);
-        	  ij.getItems(p);
-        	  
-          }
-        for (UUID u2 : new ArrayList<>(spectators)) {
-        	Player arr = Bukkit.getPlayer(u2);
-        	if (arr == null) continue;
-       	  ItemJoinAPI ij = new ItemJoinAPI();
-       	  arr.getInventory().clear();
-       	  arr.getInventory().setArmorContents(null);
-       	  ij.getItems(arr);
+            p.setFireTicks(0);
+
+            // Reaplica itens de lobby
+            ItemJoinAPI ij = new ItemJoinAPI();
+            ij.getItems(p);
+
+            // Teleporta de volta para o spawn da sala
+            p.teleport(Configs.LOBBY_SPAWN);
         }
-        players.clear();
-        spectators.clear();  
-        }
+    }
+
+    public void resetWorldAndRestart() {
+        worldLoading = true;
+
+        String worldName = map.getWorldName();
+        String backupWorld = worldName + "copy";
+        World oldWorld = this.world;
+
+        Bukkit.getScheduler().runTask(Main.plugin, () -> {
+
+            // Teleporta players para o lobby, mas mantém na lista
+            if (oldWorld != null) {
+                for (Player p : oldWorld.getPlayers()) {
+                    p.teleport(Configs.LOBBY_SPAWN);
+                }
+            }
+
+            abriu.clear();
+
+            // Deleta e clona o mundo
+            Main.getMVWorldManager().deleteWorld(worldName);
+            Main.getMVWorldManager().cloneWorld(backupWorld, worldName, "VoidGen");
+
+            // Espera o mundo carregar totalmente
+            Bukkit.getScheduler().runTaskTimer(Main.plugin, new Runnable() {
+                int taskId = -1;
+
+                @Override
+                public void run() {
+                    World w = Bukkit.getWorld(worldName);
+                    if (w == null) return; // Ainda não carregou
+
+                    // Cancela o loop
+                    Bukkit.getScheduler().cancelTask(this.hashCode());
+
+                    // Mundo pronto
+                    w.getChunkAt(0, 0).load(true);
+                    world = w;
+                    spawn = Configs.LOBBY_SPAWN;
+                    worldLoading = false;
+
+                    // Reseta apenas estado da partida, não remove players
+                    resetGame();
+
+                    // Opcional: teleporta jogadores ainda na lista para spawn da sala
+                    for (UUID uuid : new ArrayList<>(players)) {
+                        Player p = Bukkit.getPlayer(uuid);
+                        if (p != null && p.isOnline()) {
+                            p.teleport(spawn);
+                        }
+                    }
+                }
+            }, 0L, 20L); // Checa a cada segundo
+        });
+    }
+
     public boolean handleSpecCommand(Player sender, String[] args) {
         if (!spectators.contains(sender.getUniqueId())) {
             sender.sendMessage("§cApenas espectadores podem usar este comando.");
@@ -1185,52 +1234,4 @@ startSpectatorGUITask();
             }
         }
     }
-    public void resetWorldAndRestart() {
-        worldLoading = true;
-
-        String worldName = map.getWorldName();
-        String backupWorld = worldName + "copy";
-        World oldWorld = this.world;
-
-        Bukkit.getScheduler().runTask(Main.plugin, () -> {
-
-            // Teleporta players para lobby e unload
-            if (oldWorld != null) {
-                for (Player p : oldWorld.getPlayers()) {
-                    p.teleport(Configs.LOBBY_SPAWN);
-                }
-                Bukkit.unloadWorld(oldWorld, false);
-            }
-
-            abriu.clear();
-
-            // Deleta e clona o mundo
-            Main.getMVWorldManager().deleteWorld(worldName);
-            Main.getMVWorldManager().cloneWorld(backupWorld, worldName, "VoidGen");
-
-            // Espera o mundo carregar totalmente (loop check)
-            Bukkit.getScheduler().runTaskTimer(Main.plugin, new Runnable() {
-                @Override
-                public void run() {
-                    World w = Bukkit.getWorld(worldName);
-                    if (w == null) return; // ainda não carregou
-
-                    // mundo pronto, cancela loop
-                    Bukkit.getScheduler().cancelTask(this.hashCode());
-
-                    // Carrega chunk principal
-                    w.getChunkAt(0, 0).load(true);
-                    world = w;
-                    spawn = Configs.LOBBY_SPAWN;
-
-                    worldLoading = false;
-
-                    // Reseta jogo agora que o mundo está 100% pronto
-                    resetGame();
-
-                }
-            }, 0L, 20L); // check a cada segundo
-        });
-    }
 }
-

@@ -41,6 +41,7 @@ import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import me.RockinChaos.itemjoin.api.ItemJoinAPI;
 import net.md_5.bungee.api.ChatColor;
@@ -1119,7 +1120,6 @@ startSpectatorGUITask();
         String backupWorld = worldName + "copy";
         World oldWorld = this.world;
 
-        Bukkit.getScheduler().runTask(Main.plugin, () -> {
 
             // Teleporta players para o lobby, mas mantém na lista
             if (oldWorld != null) {
@@ -1135,8 +1135,8 @@ startSpectatorGUITask();
             Main.getMVWorldManager().cloneWorld(backupWorld, worldName, "VoidGen");
 
             // Espera o mundo carregar totalmente
-            Bukkit.getScheduler().runTaskTimer(Main.plugin, new Runnable() {
-                int taskId = -1;
+            new BukkitRunnable() {
+                int contador = 10;
 
                 @Override
                 public void run() {
@@ -1144,7 +1144,7 @@ startSpectatorGUITask();
                     if (w == null) return; // Ainda não carregou
 
                     // Cancela o loop
-                    Bukkit.getScheduler().cancelTask(this.hashCode());
+                   
 
                     // Mundo pronto
                     w.getChunkAt(0, 0).load(true);
@@ -1161,10 +1161,12 @@ startSpectatorGUITask();
                         if (p != null && p.isOnline()) {
                             p.teleport(spawn);
                         }
+                       
                     }
+                    cancel(); 
                 }
-            }, 0L, 20L); // Checa a cada segundo
-        });
+            }.runTaskTimer(Main.getInstance(), 0L, 20L); // Checa a cada segundo
+        
     }
 
     public boolean handleSpecCommand(Player sender, String[] args) {

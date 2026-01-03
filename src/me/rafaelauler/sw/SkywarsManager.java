@@ -44,6 +44,8 @@ public class SkywarsManager {
     }
         else {
         SkyWarsGame game2 = getDefaultGame();
+
+        Bukkit.getLogger().info("Criado sala 5 (default)");
         return game2;
     }
     }

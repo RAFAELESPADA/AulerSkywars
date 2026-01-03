@@ -121,46 +121,48 @@ private final SkywarsManager manager = new SkywarsManager();
         
     private void joinGame(Player player) {
 
-        SkyWarsGame game = manager.getGame(player);
-        if (game != null) {
+        if (manager.getGame(player) != null) {
             player.sendMessage(ChatColor.RED + "Você já está em uma sala de SkyWars!");
             return;
         }
 
         SkyWarsGame available = manager.findAvailableGame();
 
-        
-
         if (available == null) {
-        	for (SkyWarsMap jaula : SkyWarsMap.values()) {
-        	    try {
-        	    	player.sendMessage("§aCriando salas...");
-        	        SkyWarsGame game2 = manager.createGame(jaula);
-        	        game2.setSpawnLocation(Configs.LOBBY_SPAWN);
+            player.sendMessage("§aCriando salas...");
 
-        	        Bukkit.getLogger().info("Sala criada para o mapa " + jaula.name());
-        	    } catch (Exception e) {
-        	        Bukkit.getLogger().severe("Erro ao criar sala para " + jaula.name());
-        	        player.sendMessage(ChatColor.RED + "Erro ao criar a sala! Contate um staff!");
-        	        e.printStackTrace();
-        	    }
-        	}
+            SkyWarsGame created = null;
 
-        	player.sendMessage(ChatColor.GREEN + "Todas as salas foram criadas com sucesso! Tente entrar novamente");
-            	        available = manager.findAvailableGame();           	        
-            	 }
-            
-        
+            for (SkyWarsMap map : SkyWarsMap.values()) {
+                try {
+                    SkyWarsGame game = manager.createGame(map);
+                    game.setSpawnLocation(Configs.LOBBY_SPAWN);
 
-        // 🔥 PRIMEIRO entra na sala
+                    if (created == null) {
+                        created = game;
+                    }
+
+                    Bukkit.getLogger().info("Sala criada: " + map.name());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (created == null) {
+                player.sendMessage(ChatColor.RED + "Não foi possível criar salas.");
+                return;
+            }
+
+            available = created;
+        }
+
         available.join(player);
-
-        // 🔥 DEPOIS atualiza visibilidade
         available.updatePlayerVisibility();
 
         player.getInventory().clear();
         player.sendMessage("§aVocê entrou na sala #" + available.getId());
     }
+
 
     private void leaveGame(Player player) {
         SkyWarsGame game = manager.getGame(player);

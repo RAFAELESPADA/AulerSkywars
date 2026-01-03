@@ -1074,19 +1074,33 @@ startSpectatorGUITask();
         }
     }
     public void resetWorldAndRestart() {
+
         World oldWorld = this.world;
+        String worldName = map.getWorldName();
+        String backupWorld = worldName + "copy";
 
         Bukkit.getScheduler().runTask(Main.plugin, () -> {
 
-            // Descarrega o mundo atual
-            Bukkit.unloadWorld(oldWorld, false);
- abriu.clear();
-            String worldName = map.getWorldName();
-            String backupWorld = worldName + "copy";
+            // Remove players com segurança
+            if (oldWorld != null) {
+                oldWorld.getPlayers().forEach(p -> {
+                    p.teleport(Configs.LOBBY_SPAWN);
+                });
+            }
 
-            // Multiverse reset
+            abriu.clear();
+
+            Bukkit.unloadWorld(oldWorld, false);
+
+            // Apaga mundo
             Main.getMVWorldManager().deleteWorld(worldName);
-            Main.getMVWorldManager().cloneWorld(backupWorld, worldName, "VoidGen");
+
+            // Clona (já carrega o mundo automaticamente)
+            Main.getMVWorldManager().cloneWorld(
+                backupWorld,
+                worldName,
+                "VoidGen"
+            );
 
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
 
@@ -1099,15 +1113,14 @@ startSpectatorGUITask();
                     return;
                 }
 
-                this.spawn = new Location(world, 0.5, 100, 0.5);
+                this.spawn = Configs.LOBBY_SPAWN;
 
                 stopCompassUpdater();
                 resetGame();
                 startTask();
 
-            }, 40L);
+            }, 80L); // Delay maior é ESSENCIAL no MV antigo
         });
     }
-
 }
 

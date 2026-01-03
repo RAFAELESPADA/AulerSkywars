@@ -862,7 +862,6 @@ txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sw joingame " 
             return;
         }
 
-        state = GameState.RUNNING;
         playersInPvp.clear();
         playersInPvp.addAll(players);
         teleportPlayersToCages();
@@ -894,6 +893,7 @@ Cage.removeCage(u2);
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
 started = true;
 
+state = GameState.RUNNING;
 startCompassUpdater();
 startSpectatorGUITask();
             }, 20L * 18);
@@ -1191,6 +1191,7 @@ startSpectatorGUITask();
 
         Bukkit.getScheduler().runTask(Main.plugin, () -> {
 
+            // Teleporta players para lobby e unload
             if (oldWorld != null) {
                 for (Player p : oldWorld.getPlayers()) {
                     p.teleport(Configs.LOBBY_SPAWN);
@@ -1200,28 +1201,33 @@ startSpectatorGUITask();
 
             abriu.clear();
 
+            // Deleta e clona o mundo
             Main.getMVWorldManager().deleteWorld(worldName);
             Main.getMVWorldManager().cloneWorld(backupWorld, worldName, "VoidGen");
 
-            Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
+            // Espera o mundo carregar totalmente (loop check)
+            Bukkit.getScheduler().runTaskTimer(Main.plugin, new Runnable() {
+                @Override
+                public void run() {
+                    World w = Bukkit.getWorld(worldName);
+                    if (w == null) return; // ainda não carregou
 
-                World w = Bukkit.getWorld(worldName);
-                if (w == null) {
-                    Bukkit.getLogger().severe("[SkyWars] Falha ao recarregar mundo " + worldName);
-                    return;
+                    // mundo pronto, cancela loop
+                    Bukkit.getScheduler().cancelTask(this.hashCode());
+
+                    // Carrega chunk principal
+                    w.getChunkAt(0, 0).load(true);
+                    world = w;
+                    spawn = Configs.LOBBY_SPAWN;
+
+                    worldLoading = false;
+
+                    // Reseta jogo agora que o mundo está 100% pronto
+                    resetGame();
+
                 }
-
-                w.getChunkAt(0, 0).load(true);
-                this.world = w;
-                this.spawn = Configs.LOBBY_SPAWN;
-
-                worldLoading = false;
-
-                resetGame();
-
-            }, 100L); // ESSENCIAL no MV antigo
+            }, 0L, 20L); // check a cada segundo
         });
     }
-
 }
 

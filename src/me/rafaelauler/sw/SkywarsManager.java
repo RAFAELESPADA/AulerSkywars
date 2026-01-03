@@ -26,28 +26,26 @@ public class SkywarsManager {
      * Cria uma nova partida com ID automático e um mapa específico
      */
     public SkyWarsGame createGame(SkyWarsMap map) {
+
+        if (games.size() >= 5) {
+            return null;
+        }
+
         int id = nextId++;
         SkyWarsGame game = new SkyWarsGame(id, map);
 
-        if (nextId <= 5) {
-        // Coloca o jogo no mapa imediatamente
+        game.setState(GameState.WAITING);
+
         games.put(id, game);
 
-        // Log claro
-        Bukkit.getLogger().info("Sala " + id + " criada para o mundo: " + map);
+        Bukkit.getLogger().info("Sala " + id + " criada para o mapa " + map.name());
 
-        // Registra eventos e inicia task
-        Bukkit.getPluginManager().registerEvents(game, Main.getInstace());
+        Bukkit.getPluginManager().registerEvents(game, Main.getInstance());
         game.startTask();
-        Main.getInstance().CarregarTodos();
-        return game;
-    }
-        else {
-        SkyWarsGame game2 = getDefaultGame();
 
-        Bukkit.getLogger().info("Criado sala 5 (default)");
-        return game2;
-    }
+        Main.getInstance().CarregarTodos();
+
+        return game;
     }
 
     /** Retorna todas as partidas ativas */
@@ -70,20 +68,17 @@ public class SkywarsManager {
     }
 
     public SkyWarsGame findAvailableGame() {
-        List<SkyWarsGame> list = new ArrayList<>(games.values());
-        if (list.isEmpty()) return null;
-
-        for (int i = 0; i < list.size(); i++) {
-            SkyWarsGame game = list.get(lastIndex % list.size());
-            lastIndex++;
-
-            if ((game.getState() == GameState.WAITING
-                || game.getState() == GameState.STARTING)
-                && game.getPlayers().size() < maxPlayersPerGame  && game.getPlayers().size() >= 1) {
-                return game;
-            }
-        }
-        return null;
+        return games.values().stream()
+            .filter(game ->
+                (game.getState() == GameState.WAITING
+              || game.getState() == GameState.STARTING)
+              && game.getPlayers().size() < maxPlayersPerGame
+            )
+            .max((a, b) -> Integer.compare(
+                a.getPlayers().size(),
+                b.getPlayers().size()
+            ))
+            .orElse(null);
     }
     public void endGame(SkyWarsGame game) {
         for (Player p : new ArrayList<>(game.getPlayers())) {

@@ -129,8 +129,8 @@ public class SkyWarsGame implements Listener {
     // ================== PLAYER ACTIONS ==================
     public void join(Player player) {
     	 if (players.contains(player.getUniqueId())) return;
-    	 if (getState() != GameState.WAITING && getState() != GameState.COUNTDOWN && getState() != GameState.STARTING) {
-    		 player.sendMessage(ChatColor.RED + "Essa partida está em andamento. Escolha outra!");
+    	 if (state == GameState.RUNNING || state == GameState.ENDING) {
+    		    player.sendMessage("§cEssa partida já começou.");
     		 ItemJoinAPI api = new ItemJoinAPI();
     		 if (player.getInventory().getContents() == null) {
     			 api.getItems(player);
@@ -138,6 +138,10 @@ public class SkyWarsGame implements Listener {
     		 return;
     	 }
     	    players.add(player.getUniqueId());
+    	    if (players.size() == 1) {
+    	        setState(GameState.WAITING);
+    	        // espera mais players
+    	    }
            player.setAllowFlight(false);
            player.setFlying(false);
            player.setGameMode(GameMode.SURVIVAL);

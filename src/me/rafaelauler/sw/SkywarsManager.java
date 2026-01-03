@@ -29,7 +29,7 @@ public class SkywarsManager {
         int id = nextId++;
         SkyWarsGame game = new SkyWarsGame(id, map);
 
-        
+        if (nextId <= 5) {
         // Coloca o jogo no mapa imediatamente
         games.put(id, game);
 
@@ -42,10 +42,18 @@ public class SkywarsManager {
         Main.getInstance().CarregarTodos();
         return game;
     }
+        else {
+        SkyWarsGame game2 = getDefaultGame();
+        return game2;
+    }
+    }
 
     /** Retorna todas as partidas ativas */
     public List<SkyWarsGame> getGames() {
         return new ArrayList<>(games.values());
+    }
+    public SkyWarsGame getDefaultGame() {
+        return new SkyWarsGame(1, SkyWarsMap.MAP_1);
     }
     public SkyWarsGame getGames(int id) {
         return games.get(id);

@@ -38,6 +38,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -280,10 +281,106 @@ public class SkyWarsGame implements Listener {
 
         if (!isInGame(damager) || !isInGame(victim)) return;
 
-        if (state == GameState.RUNNING || !playersInPvp.contains(damager.getUniqueId()) && !started2) {
-            e.setCancelled(true);
-        }
+        if (state != GameState.RUNNING || !playersInPvp.contains(damager.getUniqueId()) || !started2) {
+    e.setCancelled(true);
+}
     }
+    public static ItemStack createRoomItem(SkyWarsGame game) {
+        Material glass;
+        short data;
+        String status;
+
+        switch (game.getState()) {
+            case WAITING:
+                glass = Material.STAINED_GLASS_PANE;
+                data = 5; // verde
+                status = "§aDisponível";
+                break;
+
+            case STARTING:
+                glass = Material.STAINED_GLASS_PANE;
+                data = 4; // amarelo
+                status = "§eIniciando";
+                break;
+
+            case RUNNING:
+                glass = Material.STAINED_GLASS_PANE;
+                data = 14; // vermelho
+                status = "§cEm andamento";
+                break;
+
+            case ENDING:
+                glass = Material.STAINED_GLASS_PANE;
+                data = 10; // roxo
+                status = "§5Finalizando";
+                break;
+
+            default:
+                glass = Material.STAINED_GLASS_PANE;
+                data = 15; // preto
+                status = "§7Indisponível";
+                break;
+        }
+
+        ItemStack item = new ItemStack(glass, 1, data);
+        ItemMeta meta = item.getItemMeta();
+
+        meta.setDisplayName("§eSala #" + game.getId());
+
+        List<String> lore = new ArrayList<>();
+        lore.add("");
+        lore.add("§7Estado: " + status);
+        lore.add("§7Jogadores: §f" + game.getPlayerCount());
+        lore.add("");
+        lore.add("§eClique para entrar");
+
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+
+        return item;
+    }
+    public static void openRoomSelector(Player p) {
+        List<SkyWarsGame> games = Main.getInstace().getManager().getGames();
+
+        int size = ((games.size() - 1) / 9 + 1) * 9;
+        Inventory inv = Bukkit.createInventory(null, size, "§8Selecionar Sala");
+
+        for (SkyWarsGame game : games) {
+            inv.addItem(createRoomItem(game));
+        }
+        p.openInventory(inv);
+    }
+    @EventHandler
+    public void onRoomClick(InventoryClickEvent e) {
+        if (!e.getView().getTitle().equals("§8Selecionar Sala")) return;
+
+        e.setCancelled(true);
+
+        if (!(e.getWhoClicked() instanceof Player)) return;
+        Player p = (Player) e.getWhoClicked();
+
+        ItemStack item = e.getCurrentItem();
+        if (item == null || !item.hasItemMeta()) return;
+
+        String name = ChatColor.stripColor(item.getItemMeta().getDisplayName());
+        if (!name.startsWith("Sala #")) return;
+
+        int id = Integer.parseInt(name.replace("Sala #", ""));
+        SkyWarsGame game = Main.getInstace().getManager().getGames(id);
+
+        if (game == null) {
+            p.sendMessage("§cSala não encontrada.");
+            return;
+        }
+
+        if (game.getState() != GameState.WAITING) {
+            p.sendMessage("§cEssa sala já começou.");
+            return;
+        }
+        Bukkit.dispatchCommand(p, "sw joingame " + id);
+        p.closeInventory();
+    }
+
 
 
     @EventHandler

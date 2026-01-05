@@ -27,7 +27,7 @@ private final SkywarsManager manager = new SkywarsManager();
         }
         
         if (args.length == 0) {
-            player.sendMessage(ChatColor.AQUA + "Use /sw join | joingame | listgames | leave | list | info");
+            player.sendMessage(ChatColor.AQUA + "Use /sw join | joingame | selector | listgames | leave | list | info");
             return true;
         }
 
@@ -37,6 +37,8 @@ private final SkywarsManager manager = new SkywarsManager();
 
             case "leave" -> leaveGame(player);
             
+
+            case "selector" -> selector(player);
 
             case "joinspawn" -> joinSpawn(player);
             case "joingame" -> joinSpecificGame(player, args);
@@ -75,10 +77,7 @@ private final SkywarsManager manager = new SkywarsManager();
     private void joinSpecificGame(Player player, String[] args) {
 
         SkyWarsGame game = manager.getGame(player);
-        if (game != null) {
-            player.sendMessage(ChatColor.RED + "Você já está em uma sala de SkyWars!");
-            return;
-        }
+        
 
         if (args.length != 2) {
             player.sendMessage(ChatColor.RED + "Utilize: /sw joingame <ID>");
@@ -89,7 +88,9 @@ private final SkywarsManager manager = new SkywarsManager();
             player.sendMessage(ChatColor.RED + "O argumento número dois deve ser um número de 1 ao 5!");
             return;
         }
-
+        if (game != null) {
+            return;
+        }
         int gameId = Integer.parseInt(args[1]);
         SkyWarsGame targetGame = manager.getGames(gameId);
 
@@ -118,7 +119,9 @@ private final SkywarsManager manager = new SkywarsManager();
         targetGame.updateVisibility();
         player.getInventory().clear();
     }
-        
+    private void selector(Player player) {
+    	SkyWarsGame.openRoomSelector(player);
+    }        
     private void joinGame(Player player) {
 
         if (manager.getGame(player) != null) {

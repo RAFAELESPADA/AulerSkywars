@@ -1,6 +1,7 @@
 package me.rafaelauler.sw;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,6 +21,7 @@ public class SkywarsManager {
     private BukkitTask victoryTask;
     private final int maxPlayersPerGame = 16;
     private int lastIndex = 0;
+
     // ================== CREATE / GET ==================
 
     /**
@@ -49,11 +51,11 @@ public class SkywarsManager {
     }
 
     /** Retorna todas as partidas ativas */
-    public List<SkyWarsGame> getGames() {
-        return new ArrayList<>(games.values());
+    public Collection<SkyWarsGame> getGames() {
+        return Collections.unmodifiableCollection(games.values());
     }
     public SkyWarsGame getDefaultGame() {
-        return new SkyWarsGame(1, SkyWarsMap.MAP_1);
+        return games.values().stream().findFirst().orElse(null);
     }
     public SkyWarsGame getGames(int id) {
         return games.get(id);
@@ -84,8 +86,6 @@ public class SkywarsManager {
         for (Player p : new ArrayList<>(game.getPlayers())) {
             sendToLobby(p);
         }
-        game.resetInternal();
-
         game.resetWorldAndRestart();
     }
     private void sendToLobby(Player p) {

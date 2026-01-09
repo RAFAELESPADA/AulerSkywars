@@ -1,6 +1,7 @@
 package me.rafaelauler.sw;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +54,7 @@ import net.wavemc.core.bukkit.api.HelixActionBar;
 public class SkyWarsGame implements Listener {
 
     private final int id;
-    private final List<UUID> players = new ArrayList<>();
+    private List<UUID> players = new ArrayList<>();
     private final List<UUID> playersInPvp = new ArrayList<>();
     private final Map<UUID, UUID> specTarget = new HashMap<>();
 
@@ -144,6 +145,9 @@ public class SkyWarsGame implements Listener {
     		 }
     		 return;
     	 }
+    	 if (players.size() == 1) {
+    		    startTask();
+    		}
     	 if (worldLoading) {
     		    player.sendMessage("§cA arena está reiniciando...");
     		    return;
@@ -157,18 +161,28 @@ public class SkyWarsGame implements Listener {
            player.setFlying(false);
            player.setGameMode(GameMode.SURVIVAL);
         if (players.size() >= 2 && state == GameState.WAITING && !worldLoading) {
-            startTask();
+          
         }
         Bukkit.getLogger().info("[SkyWars] Player entrou. Sala " + id + " | Players=" + players.size());
         player.teleport(spawn);
     }
 
     public void leave(Player player) {
+    	 if (state == GameState.ENDING || worldLoading) {
+    	        // Apenas limpa status do jogador
+    	        playersInPvp.remove(player.getUniqueId());
+    	        spectators.remove(player.getUniqueId());
+    	        return;
+    	    }
         players.remove(player.getUniqueId());
         playersInPvp.remove(player.getUniqueId());
         specTarget.remove(player.getUniqueId());
         spectators.remove(player.getUniqueId());
         player.setGameMode(GameMode.SURVIVAL);
+        if (players.isEmpty()) {
+            stopGameTask();
+            state = GameState.WAITING;
+        }
         player.sendMessage("§cVocê saiu da sala " + id);
     }
 
@@ -340,7 +354,7 @@ public class SkyWarsGame implements Listener {
         return item;
     }
     public static void openRoomSelector(Player p) {
-        List<SkyWarsGame> games = Main.getInstace().getManager().getGames();
+        Collection<SkyWarsGame> games = Main.getInstace().getManager().getGames();
 
         int size = ((games.size() - 1) / 9 + 1) * 9;
         Inventory inv = Bukkit.createInventory(null, size, "§8Selecionar Sala");
@@ -952,7 +966,7 @@ txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sw joingame " 
         
 
 state = GameState.RUNNING;
-        List<Player> vivos = new ArrayList<>(getPlayers());
+List<Player> vivos = new ArrayList<>(getPlayers());
         Collections.shuffle(vivos);
         if (world == null) {
             Bukkit.getLogger().warning("[SkyWars] Mundo ainda não disponível");
@@ -1043,9 +1057,10 @@ startSpectatorGUITask();
 
     public void checkWin() {
         if (state != GameState.RUNNING) return;
-        if (playersInPvp.size() != 1) return;
+        List<UUID> alive = getAliveUUIDs();
+        if (alive.size() != 1) return;
 
-        Player winner = Bukkit.getPlayer(playersInPvp.get(0));
+        Player winner = Bukkit.getPlayer(alive.get(0));
         if (winner == null) return;
 
         state = GameState.ENDING;
@@ -1062,6 +1077,20 @@ startSpectatorGUITask();
     /** Contagem de jogadores em uma partida */
     public int getPlayerCount() {
         return players.size();
+    }
+    public void resetAfterWorldRestart() {
+        playersInPvp.clear();
+        spectators.clear();
+        specTarget.clear();
+        spectatorsWithGUI.clear();
+
+        cagesClosed = false;
+        countdown = 30;
+        state = GameState.WAITING;
+
+        stopCompassUpdater();
+        stopSpectatorGUITask();
+        stopGameTask();
     }
     public static void throwRandomFirework(Player p) {
         Firework fw = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
@@ -1135,26 +1164,6 @@ startSpectatorGUITask();
 
     
 
-    public void resetInternal() {
-        players.clear();
-        playersInPvp.clear();
-        spectators.clear();
-        specTarget.clear();
-        spectatorsWithGUI.clear();
-
-        started = false;
-        cagesClosed = false;
-        countdown = 30;
-        state = GameState.WAITING;
-
-        stopCompassUpdater();
-        stopSpectatorGUITask();
-        stopGameTask();
-        if (victoryTask != -1) {
-            Bukkit.getScheduler().cancelTask(victoryTask);
-            victoryTask = -1;
-        }
-    }
     @EventHandler
     public void onInteract(PlayerInteractEvent event){
         if(event.getAction() == Action.RIGHT_CLICK_BLOCK){
@@ -1250,7 +1259,8 @@ startSpectatorGUITask();
                     worldLoading = false;
 
                     // Reseta apenas estado da partida, não remove players
-                    resetGame();
+                    
+
 
                     // Opcional: teleporta jogadores ainda na lista para spawn da sala
                     for (UUID uuid : new ArrayList<>(players)) {
@@ -1260,12 +1270,22 @@ startSpectatorGUITask();
                         }
                        
                     }
+                    resetAfterWorldRestart();
                     cancel(); 
                 }
             }.runTaskTimer(Main.getInstance(), 0L, 20L); // Checa a cada segundo
         
     }
-
+    public List<UUID> getAliveUUIDs() {
+        List<UUID> alive = new ArrayList<>();
+        for (UUID u : players) {
+            Player p = Bukkit.getPlayer(u);
+            if (p != null && p.isOnline() && !spectators.contains(u)) {
+                alive.add(u);
+            }
+        }
+        return alive;
+    }
     public boolean handleSpecCommand(Player sender, String[] args) {
         if (!spectators.contains(sender.getUniqueId())) {
             sender.sendMessage("§cApenas espectadores podem usar este comando.");

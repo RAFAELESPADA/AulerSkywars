@@ -86,7 +86,9 @@ public class SkywarsManager {
         for (Player p : new ArrayList<>(game.getPlayers())) {
             sendToLobby(p);
         }
+        
         game.resetWorldAndRestart();
+        game.updateVisibility();
     }
     private void sendToLobby(Player p) {
       p.getInventory().clear();

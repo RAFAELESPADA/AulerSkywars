@@ -306,7 +306,7 @@ public class SkyWarsGame implements Listener {
         Player p = (Player) e.getEntity();
         if (!isInGame(p)) return;
 
-        if (state != GameState.RUNNING) {
+        if (state == GameState.RUNNING) {
         	if (e.getCause() == DamageCause.FALL) {
         		if (!damage) {
             e.setCancelled(true);
@@ -997,7 +997,6 @@ txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sw joingame " 
     	    state = GameState.RUNNING;
     	    this.world = w;
         cagesClosed = true;
-damage = true;
         List<UUID> ordered = new ArrayList<>(players);
         Collections.shuffle(ordered);
 
@@ -1044,10 +1043,10 @@ Cage.removeCage(u2);
             broadcast("§aA partida começou!");
             
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
-
+            	damage = true;
 startCompassUpdater();
 startSpectatorGUITask();
-            }, 20L * 18);
+            }, 20L * 19);
 
         }, 20L * 15);
     }
@@ -1365,7 +1364,6 @@ startSpectatorGUITask();
 
         List<Player> vivos = new ArrayList<>();
         List<Player> specs = new ArrayList<>();
-
         for (UUID u : players) {
             Player p = Bukkit.getPlayer(u);
             if (p == null) continue;
@@ -1380,7 +1378,9 @@ startSpectatorGUITask();
         // Jogadores vivos
         for (Player vivo : vivos) {
             for (Player target : Bukkit.getOnlinePlayers()) {
-
+            	if (!isInGame(vivo)) {
+            		vivo.showPlayer(target);
+            	}
                 // vivo vê apenas jogadores vivos da partida
                 if (vivos.contains(target)) {
                     vivo.showPlayer(target);

@@ -77,11 +77,9 @@ public class PvPRounds extends PlaceholderExpansion {
 
             return String.valueOf(total);
         }
-
         if (player == null) {
             return "0";
         }
-
         String basePath = "players." + player.getUniqueId() + ".";
 
         /*

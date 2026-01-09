@@ -30,10 +30,10 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -43,6 +43,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import me.RockinChaos.itemjoin.api.ItemJoinAPI;
@@ -66,9 +67,6 @@ public class SkyWarsGame implements Listener {
     private final List<UUID> spectators = new ArrayList<>();
     private GameState state = GameState.WAITING;
     private int countdown = 30;
-    boolean started = (state == GameState.RUNNING);
-
-    boolean started2 = false;
     private boolean cagesClosed = false;
     private final List<UUID> spectatorsWithGUI = new ArrayList<>();
     private boolean guiBlink = false;
@@ -170,8 +168,12 @@ public class SkyWarsGame implements Listener {
     public void leave(Player player) {
     	 if (state == GameState.ENDING || worldLoading) {
     	        // Apenas limpa status do jogador
-    	        playersInPvp.remove(player.getUniqueId());
-    	        spectators.remove(player.getUniqueId());
+    		 UUID uuid = player.getUniqueId();
+    		 players.remove(uuid);
+    		 playersInPvp.remove(uuid);
+    		 spectators.remove(uuid);
+    		 specTarget.remove(uuid);
+    		 spectatorsWithGUI.remove(uuid);
     	        return;
     	    }
         players.remove(player.getUniqueId());
@@ -185,7 +187,13 @@ public class SkyWarsGame implements Listener {
         }
         player.sendMessage("§cVocê saiu da sala " + id);
     }
-
+    public void clearPlayers() {
+        players.clear();
+        playersInPvp.clear();
+        spectators.clear();
+        specTarget.clear();
+        spectatorsWithGUI.clear();
+    }
     // ================== EVENTOS ==================
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
@@ -251,6 +259,7 @@ public class SkyWarsGame implements Listener {
             if (chest.hasMetadata("SW")) continue;
 
             Main.getInstace().setarLoot(chest);
+            chest.setMetadata("SW", new FixedMetadataValue(Main.getInstance(), true));
         }
     }
     @EventHandler
@@ -264,13 +273,16 @@ public class SkyWarsGame implements Listener {
         if (chest.hasMetadata("SW")) return;
 
         Main.getInstace().setarLoot(chest);
+        chest.setMetadata("SW", new FixedMetadataValue(Main.getInstance(), true));
     }
     
     @EventHandler
     public void onBreak(BlockBreakEvent e) {
         Player p = e.getPlayer();
         if (!isInGame(p)) return;
-        if (state == GameState.RUNNING && !started2) e.setCancelled(true);
+        if (state != GameState.RUNNING) {
+            e.setCancelled(true);
+        } 
     }
 
 
@@ -280,9 +292,10 @@ public class SkyWarsGame implements Listener {
         Player p = (Player) e.getEntity();
         if (!isInGame(p)) return;
 
-        if (state == GameState.RUNNING && e.getCause() == DamageCause.FALL && !started2) {
+        if (state != GameState.RUNNING) {
             e.setCancelled(true);
         }
+        
     }
 
 
@@ -295,8 +308,13 @@ public class SkyWarsGame implements Listener {
 
         if (!isInGame(damager) || !isInGame(victim)) return;
 
-        if (state != GameState.RUNNING || !playersInPvp.contains(damager.getUniqueId()) || !started2) {
-    e.setCancelled(true);
+        if (state != GameState.RUNNING) {
+            e.setCancelled(true);
+            return;
+        }
+        if (!isAlive(damager.getUniqueId()) || !isAlive(victim.getUniqueId())) {
+            e.setCancelled(true);
+        
 }
     }
     public static ItemStack createRoomItem(SkyWarsGame game) {
@@ -344,7 +362,7 @@ public class SkyWarsGame implements Listener {
         List<String> lore = new ArrayList<>();
         lore.add("");
         lore.add("§7Estado: " + status);
-        lore.add("§7Jogadores: §f" + game.getPlayerCount());
+        lore.add("§7Jogadores: §f" + game.getPlayerCountReal());
         lore.add("");
         lore.add("§eClique para entrar");
 
@@ -358,7 +376,10 @@ public class SkyWarsGame implements Listener {
 
         int size = ((games.size() - 1) / 9 + 1) * 9;
         Inventory inv = Bukkit.createInventory(null, size, "§8Selecionar Sala");
-
+        if (games.isEmpty()) {
+            p.sendMessage("§cNenhuma sala disponível.");
+            return;
+        }
         for (SkyWarsGame game : games) {
             inv.addItem(createRoomItem(game));
         }
@@ -411,7 +432,8 @@ public class SkyWarsGame implements Listener {
         
 
         int kills = Main.getInstace().getConfig().getInt("players." + k.getUniqueId() + ".kills");
-        int deaths = Main.getInstace().getConfig().getInt("players." + p.getUniqueId() + ".kills");
+        int deaths = Main.getInstace().getConfig().getInt("players." + p.getUniqueId() + ".deaths");
+
         
             Main.getInstace().getConfig().set(path2 + ".kills", kills + 1);
 
@@ -1006,8 +1028,6 @@ Cage.removeCage(u2);
             Main.getInstance().CarregarTodos();
             broadcast("§aA partida começou!");
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
-started = true;
-started2 = true;
 
 startCompassUpdater();
 startSpectatorGUITask();
@@ -1016,19 +1036,24 @@ startSpectatorGUITask();
         }, 20L * 15);
     }
     @EventHandler
-    public void onChat(org.bukkit.event.player.AsyncPlayerChatEvent e) {
+    public void onChat(AsyncPlayerChatEvent e) {
         Player sender = e.getPlayer();
+
+        Bukkit.getScheduler().runTask(Main.plugin, () -> {
+            handleGameChat(sender, e.getMessage());
+        });
+
+        e.setCancelled(true);
+    }
+    
+    
+    public void handleGameChat(Player sender, String message) {
 
         // Não está nessa partida
         if (!isInGame(sender) && !spectators.contains(sender.getUniqueId())) {
             return;
         }
-        if (e.getMessage().startsWith("!")) {
-            e.setCancelled(false); // deixa o Bukkit tratar
-            e.setMessage(e.getMessage().substring(1));
-            return;
-        }
-        e.setCancelled(true); // cancelamos o chat padrão
+ // cancelamos o chat padrão
 
         boolean isSpectator = spectators.contains(sender.getUniqueId());
 
@@ -1036,7 +1061,7 @@ startSpectatorGUITask();
                 ? "§8[ESPECTADOR] §7"
                 : "§a[JOGO] §f";
 
-        String msg = prefix + sender.getDisplayName() + "§7: §f" + e.getMessage();
+        String msg = prefix + sender.getDisplayName() + "§7: §f" + message;
 
         if (isSpectator) {
             // espectador fala só com espectador
@@ -1076,9 +1101,13 @@ startSpectatorGUITask();
     }
     /** Contagem de jogadores em uma partida */
     public int getPlayerCount() {
-        return players.size();
+    	return getAliveUUIDs().size();
+    }
+    public int getPlayerCountReal() {
+    	return players.size();
     }
     public void resetAfterWorldRestart() {
+    	players.clear();
         playersInPvp.clear();
         spectators.clear();
         specTarget.clear();
@@ -1176,7 +1205,6 @@ startSpectatorGUITask();
         }
     }
     public void resetGame() {
-        started = false;
         cagesClosed = false;
         countdown = 30;
         state = GameState.WAITING;
@@ -1258,22 +1286,22 @@ startSpectatorGUITask();
                     spawn = Configs.LOBBY_SPAWN;
                     worldLoading = false;
 
-                    // Reseta apenas estado da partida, não remove players
                     
-
-
-                    // Opcional: teleporta jogadores ainda na lista para spawn da sala
-                    for (UUID uuid : new ArrayList<>(players)) {
-                        Player p = Bukkit.getPlayer(uuid);
-                        if (p != null && p.isOnline()) {
-                            p.teleport(spawn);
-                        }
-                       
-                    }
+                    
+                    List<UUID> snapshot = new ArrayList<>(players);
                     resetAfterWorldRestart();
+
+                    for (UUID uuid : snapshot) {
+                        Player p = Bukkit.getPlayer(uuid);
+                        if (p != null) {
+                            p.teleport(Configs.LOBBY_SPAWN);
+                        }
+                    }
+                  
+                    
                     cancel(); 
-                }
-            }.runTaskTimer(Main.getInstance(), 0L, 20L); // Checa a cada segundo
+                
+                } }.runTaskTimer(Main.getInstance(), 0L, 20L); // Checa a cada segundo
         
     }
     public List<UUID> getAliveUUIDs() {
@@ -1315,10 +1343,11 @@ startSpectatorGUITask();
         return true;
     }
     public void updateVisibility() {
+
         List<Player> vivos = new ArrayList<>();
         List<Player> specs = new ArrayList<>();
 
-        for (UUID u : new ArrayList<>(players)) {
+        for (UUID u : players) {
             Player p = Bukkit.getPlayer(u);
             if (p == null) continue;
 
@@ -1329,28 +1358,27 @@ startSpectatorGUITask();
             }
         }
 
-        // vivos NÃO veem espectadores
+        // Jogadores vivos
         for (Player vivo : vivos) {
-            for (Player spec : specs) {
-                vivo.hidePlayer(spec);
+            for (Player target : Bukkit.getOnlinePlayers()) {
+
+                // vivo vê apenas jogadores vivos da partida
+                if (vivos.contains(target)) {
+                    vivo.showPlayer(target);
+                } else {
+                    vivo.hidePlayer(target);
+                }
             }
         }
 
-        // espectadores veem todo mundo
+        // Espectadores veem todo mundo
         for (Player spec : specs) {
-            for (Player vivo : vivos) {
-                spec.showPlayer(vivo);
-            }
-            for (Player otherSpec : specs) {
-                spec.showPlayer(otherSpec);
-            }
-        }
-
-        // vivos veem vivos
-        for (Player p1 : vivos) {
-            for (Player p2 : vivos) {
-                p1.showPlayer(p2);
+            for (Player target : Bukkit.getOnlinePlayers()) {
+                spec.showPlayer(target);
             }
         }
     }
+boolean isAlive(UUID u) {
+    return players.contains(u) && !spectators.contains(u);
+}
 }

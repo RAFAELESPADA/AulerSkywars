@@ -1,22 +1,26 @@
 package me.rafaelauler.sw;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 public class Cage {
 
+    private static final Map<UUID, List<Block>> cages = new HashMap<>();
+
     // =================== TELEPORT ===================
+
     public static void teleportByQueueOrder(List<UUID> players, Jaulas map) {
         if (players == null || players.isEmpty() || map == null) return;
-
-        World world = Bukkit.getWorld(map.name());
-        if (world == null) return;
 
         List<Location> shuffledLocations = map.getShuffledLocations();
 
@@ -29,24 +33,25 @@ public class Cage {
                     : map.getRandomLocation();
 
             p.teleport(target);
-
             createCage(p, Material.GLASS);
         }
     }
 
-    /** Teleporta um único jogador para uma jaula aleatória do mapa */
     public static void randomTeleport(Player player, Jaulas map) {
         if (player == null || map == null) return;
-        Location loc = map.getRandomLocation();
-        player.teleport(loc);
+
+        player.teleport(map.getRandomLocation());
         createCage(player, Material.GLASS);
     }
 
     // =================== JAULAS ===================
- 
-    public static void createCage(Player player, Material material) {
 
-        // BASE DA JAULA (PISO)
+    public static void createCage(Player player, Material material) {
+        UUID uuid = player.getUniqueId();
+
+        // remove jaula antiga, se existir
+        removeCage(player);
+
         Location base = player.getLocation().getBlock().getLocation();
         World world = base.getWorld();
 
@@ -54,56 +59,51 @@ public class Cage {
         int y = base.getBlockY();
         int z = base.getBlockZ();
 
-        // TELEPORTA PLAYER 1 BLOCO ACIMA DO PISO
-        Location center = base.clone().add(0.5, 1, 0.5);
-        player.teleport(center);
+        player.teleport(base.clone().add(0.5, 1, 0.5));
+
+        List<Block> blocks = new ArrayList<>();
 
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = 0; dy <= 3; dy++) {
                 for (int dz = -1; dz <= 1; dz++) {
 
                     boolean isCenter = dx == 0 && dz == 0;
-
-                    // espaço interno
                     if (isCenter && dy >= 1 && dy <= 2) continue;
 
-                    // piso e teto
-                    if (dy == 0 || dy == 3) {
-                        world.getBlockAt(x + dx, y + dy, z + dz)
-                             .setType(material);
-                        continue;
-                    }
+                    if (dy == 0 || dy == 3 ||
+                        dx == -1 || dx == 1 ||
+                        dz == -1 || dz == 1) {
 
-                    // paredes
-                    if (dx == -1 || dx == 1 || dz == -1 || dz == 1) {
-                        world.getBlockAt(x + dx, y + dy, z + dz)
-                             .setType(material);
+                        Block block = world.getBlockAt(x + dx, y + dy, z + dz);
+                        block.setType(material);
+                        blocks.add(block);
                     }
                 }
             }
+        }
+
+        cages.put(uuid, blocks);
+    }
+
+    // =================== REMOVE ===================
+
+    public static void removeCage(Player player) {
+        if (player == null) return;
+
+        List<Block> blocks = cages.remove(player.getUniqueId());
+        if (blocks == null) return;
+
+        for (Block b : blocks) {
+            b.setType(Material.AIR);
         }
     }
 
-
-
-        // Method to remove the cage
-    public static void removeCage(Player player) {
-        Location loc = player.getLocation().getBlock().getLocation();
-        World w = loc.getWorld();
-
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dy = 0; dy <= 3; dy++) {
-                for (int dz = -1; dz <= 1; dz++) {
-                    w.getBlockAt(
-                        loc.getBlockX() + dx,
-                        loc.getBlockY() + dy,
-                        loc.getBlockZ() + dz
-                    ).setType(Material.AIR);
-                }
+    public static void removeAllCages() {
+        for (List<Block> blocks : cages.values()) {
+            for (Block b : blocks) {
+                b.setType(Material.AIR);
             }
         }
-    }}
-
-    
-        
-    
+        cages.clear();
+    }
+}

@@ -280,7 +280,7 @@ public class SkyWarsGame implements Listener {
     public void onBreak(BlockBreakEvent e) {
         Player p = e.getPlayer();
         if (!isInGame(p)) return;
-        if (state != GameState.RUNNING) {
+        if (state != GameState.RUNNING || cagesClosed) {
             e.setCancelled(true);
         } 
     }
@@ -977,7 +977,7 @@ txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sw joingame " 
     	        );
     	        return;
     	    }
-
+    	    state = GameState.RUNNING;
     	    this.world = w;
         cagesClosed = true;
 
@@ -986,8 +986,6 @@ txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sw joingame " 
 
         // Usa Cage + Jaulas
         
-
-state = GameState.RUNNING;
 List<Player> vivos = new ArrayList<>(getPlayers());
         Collections.shuffle(vivos);
         if (world == null) {
@@ -1027,6 +1025,7 @@ Cage.removeCage(u2);
 
             Main.getInstance().CarregarTodos();
             broadcast("§aA partida começou!");
+            
             Bukkit.getScheduler().runTaskLater(Main.plugin, () -> {
 
 startCompassUpdater();
@@ -1243,7 +1242,7 @@ startSpectatorGUITask();
             ij.getItems(p);
 
             // Teleporta de volta para o spawn da sala
-            p.teleport(Configs.LOBBY_SPAWN);
+            p.teleport(Configs.MAIN_SPAWN);
         }
     }
 
@@ -1258,7 +1257,7 @@ startSpectatorGUITask();
             // Teleporta players para o lobby, mas mantém na lista
             if (oldWorld != null) {
                 for (Player p : oldWorld.getPlayers()) {
-                    p.teleport(Configs.LOBBY_SPAWN);
+                    p.teleport(Configs.MAIN_SPAWN);
                 }
             }
 
@@ -1294,7 +1293,9 @@ startSpectatorGUITask();
                     for (UUID uuid : snapshot) {
                         Player p = Bukkit.getPlayer(uuid);
                         if (p != null) {
-                            p.teleport(Configs.LOBBY_SPAWN);
+                            p.teleport(Configs.MAIN_SPAWN);
+                            p.setFlying(false);
+                            p.setAllowFlight(false);
                         }
                     }
                   

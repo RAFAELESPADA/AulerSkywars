@@ -30,6 +30,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
@@ -68,6 +69,8 @@ public class SkyWarsGame implements Listener {
     private GameState state = GameState.WAITING;
     private int countdown = 30;
     private boolean cagesClosed = false;
+
+    private boolean damage = false;
     private final List<UUID> spectatorsWithGUI = new ArrayList<>();
     private boolean guiBlink = false;
     private int gameTask = -1;
@@ -296,6 +299,20 @@ public class SkyWarsGame implements Listener {
             e.setCancelled(true);
         }
         
+    }
+    @EventHandler
+    public void onDamage2(EntityDamageEvent e) {
+        if (!(e.getEntity() instanceof Player)) return;
+        Player p = (Player) e.getEntity();
+        if (!isInGame(p)) return;
+
+        if (state != GameState.RUNNING) {
+        	if (e.getCause() == DamageCause.FALL) {
+        		if (!damage) {
+            e.setCancelled(true);
+        }
+        	}
+        }
     }
 
 
@@ -980,7 +997,7 @@ txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sw joingame " 
     	    state = GameState.RUNNING;
     	    this.world = w;
         cagesClosed = true;
-
+damage = true;
         List<UUID> ordered = new ArrayList<>(players);
         Collections.shuffle(ordered);
 
@@ -1113,6 +1130,7 @@ startSpectatorGUITask();
         spectatorsWithGUI.clear();
 
         cagesClosed = false;
+        damage = false;
         countdown = 30;
         state = GameState.WAITING;
 
@@ -1299,7 +1317,7 @@ startSpectatorGUITask();
                         }
                     }
                   
-                    
+                    updateVisibility();
                     cancel(); 
                 
                 } }.runTaskTimer(Main.getInstance(), 0L, 20L); // Checa a cada segundo

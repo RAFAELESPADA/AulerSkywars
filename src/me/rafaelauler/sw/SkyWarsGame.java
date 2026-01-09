@@ -1053,12 +1053,13 @@ startSpectatorGUITask();
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
         Player sender = e.getPlayer();
-
+        if (isInGame(sender)) {
         Bukkit.getScheduler().runTask(Main.plugin, () -> {
             handleGameChat(sender, e.getMessage());
         });
 
         e.setCancelled(true);
+    }
     }
     
     

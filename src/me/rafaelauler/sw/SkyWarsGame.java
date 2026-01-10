@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -56,12 +58,11 @@ import net.wavemc.core.bukkit.api.HelixActionBar;
 public class SkyWarsGame implements Listener {
 
     private final int id;
-    private List<UUID> players = new ArrayList<>();
+    private final Set<UUID> players = new HashSet<>();
     private final List<UUID> playersInPvp = new ArrayList<>();
     private final Map<UUID, UUID> specTarget = new HashMap<>();
 
     private final Map<Chest, Boolean> abriu = new HashMap<>();
-
     private World world;
     private Location spawn;
     private SkyWarsMap map;
@@ -138,6 +139,10 @@ public class SkyWarsGame implements Listener {
     // ================== PLAYER ACTIONS ==================
     public void join(Player player) {
     	 if (players.contains(player.getUniqueId())) return;
+    	 if (worldLoading) {
+    		    player.sendMessage("§cA arena está reiniciando.");
+    		    return;
+    		}
     	 if (state == GameState.RUNNING || state == GameState.ENDING) {
     		    player.sendMessage("§cEssa partida já começou.");
     		 ItemJoinAPI api = new ItemJoinAPI();
@@ -146,24 +151,15 @@ public class SkyWarsGame implements Listener {
     		 }
     		 return;
     	 }
-    	 if (players.size() == 1) {
-    		    startTask();
-    		}
-    	 if (worldLoading) {
-    		    player.sendMessage("§cA arena está reiniciando...");
-    		    return;
-    		}
-    	    players.add(player.getUniqueId());
-    	    if (players.size() == 1) {
-    	        setState(GameState.WAITING);
-    	        // espera mais players
-    	    }
+    	 players.add(player.getUniqueId());
+
+    	 if (players.size() == 2 && state == GameState.WAITING) {
+    	     startTask();
+    	 }
+    	    
            player.setAllowFlight(false);
            player.setFlying(false);
            player.setGameMode(GameMode.SURVIVAL);
-        if (players.size() >= 2 && state == GameState.WAITING && !worldLoading) {
-          
-        }
         Bukkit.getLogger().info("[SkyWars] Player entrou. Sala " + id + " | Players=" + players.size());
         player.teleport(spawn);
     }
@@ -186,8 +182,8 @@ public class SkyWarsGame implements Listener {
         player.setGameMode(GameMode.SURVIVAL);
         if (players.isEmpty()) {
             stopGameTask();
-            state = GameState.WAITING;
         }
+        updateVisibility();
         player.sendMessage("§cVocê saiu da sala " + id);
     }
     public void clearPlayers() {
@@ -218,7 +214,7 @@ public class SkyWarsGame implements Listener {
          && e.getFrom().getBlockZ() == e.getTo().getBlockZ()) {
             return;
         }
-
+        if (!isInGame(e.getPlayer())) return;
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
         if (!players.contains(uuid) && !spectators.contains(uuid)) return;
@@ -271,9 +267,9 @@ public class SkyWarsGame implements Listener {
 
         Chest chest = (Chest) e.getInventory().getHolder();
         World world = chest.getWorld();
-
         if (!world.getName().startsWith("sw")) return;
         if (chest.hasMetadata("SW")) return;
+        if (!isInGame((Player) e.getPlayer())) return;
 
         Main.getInstace().setarLoot(chest);
         chest.setMetadata("SW", new FixedMetadataValue(Main.getInstance(), true));
@@ -379,7 +375,12 @@ public class SkyWarsGame implements Listener {
         List<String> lore = new ArrayList<>();
         lore.add("");
         lore.add("§7Estado: " + status);
-        lore.add("§7Jogadores: §f" + game.getPlayerCountReal());
+        if (game.state == GameState.RUNNING) {
+            lore.add("§7Em jogo: §f" + game.getPlayingCount());
+        }
+        else {
+        lore.add("§7Jogadores: §f" + game.getLobbyCount());
+        }
         lore.add("");
         lore.add("§eClique para entrar");
 
@@ -387,6 +388,24 @@ public class SkyWarsGame implements Listener {
         item.setItemMeta(meta);
 
         return item;
+    }
+    public int getLobbyCount() {
+        if (state == GameState.WAITING || state == GameState.STARTING) {
+            return players.size();
+        }
+        return 0;
+    }
+    public int getPlayingCount() {
+        return (int) players.stream()
+            .filter(u -> !spectators.contains(u))
+            .count();
+    }
+    public void showEveryoneToEveryone() {
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            for (Player target : Bukkit.getOnlinePlayers()) {
+                p.showPlayer(target);
+            }
+        }
     }
     public static void openRoomSelector(Player p) {
         Collection<SkyWarsGame> games = Main.getInstace().getManager().getGames();
@@ -838,6 +857,11 @@ public class SkyWarsGame implements Listener {
             break;
 
             case STARTING:
+            	if (players.size() < 2) {
+            	    countdown = 30;
+            	    state = GameState.WAITING;
+            	    return; // NÃO muda state aqui
+            	}
                 tickStarting();
                 break;
 
@@ -859,7 +883,6 @@ public class SkyWarsGame implements Listener {
     private void tickStarting() {
 if (players.size() < 2) {
 	 countdown = 30;
-	 state = GameState.WAITING;
 	return;
 }
 if (worldLoading) {
@@ -1095,40 +1118,54 @@ startSpectatorGUITask();
             }
         }
     }
-
+    public int getAliveCount() {
+        if (state != GameState.RUNNING) {
+            return players.size(); // antes de começar
+        }
+        return (int) players.stream()
+                .filter(u -> !spectators.contains(u))
+                .count();
+    }
     public void checkWin() {
         if (state != GameState.RUNNING) return;
-        List<UUID> alive = getAliveUUIDs();
-        if (alive.size() != 1) return;
 
-        Player winner = Bukkit.getPlayer(alive.get(0));
-        if (winner == null) return;
+        List<UUID> alive = getAliveUUIDs();
+
+        // Ainda tem mais de um vivo → continua o jogo
+        if (alive.size() > 1) return;
 
         state = GameState.ENDING;
 
-        Bukkit.broadcastMessage("§6" + winner.getName() + " venceu a Sala #" + id);
-        playVictoryAnimation(winner);
-        updateVisibility();
+        if (alive.size() == 1) {
+            Player winner = Bukkit.getPlayer(alive.get(0));
+            if (winner != null) {
+                Bukkit.broadcastMessage("§6" + winner.getName() + " venceu a Sala #" + id);
+                playVictoryAnimation(winner);
+            }
+        } else {
+            // 0 vivos (empate, void kill, bug, etc)
+            Bukkit.broadcastMessage("§cA partida terminou sem vencedor.");
+        }
+
+        showEveryoneToEveryone();
+
         Bukkit.getScheduler().runTaskLater(
             Main.getInstace(),
-            () -> Main.getInstace().getManager().endGame(this) ,  
+            () -> Main.getInstace().getManager().endGame(this),
             20L * 8
         );
     }
-    /** Contagem de jogadores em uma partida */
-    public int getPlayerCount() {
-    	return getAliveUUIDs().size();
-    }
+
+
     public int getPlayerCountReal() {
     	return players.size();
     }
     public void resetAfterWorldRestart() {
-    	players.clear();
         playersInPvp.clear();
         spectators.clear();
         specTarget.clear();
         spectatorsWithGUI.clear();
-
+        players.clear();
         cagesClosed = false;
         damage = false;
         countdown = 30;
@@ -1262,6 +1299,7 @@ startSpectatorGUITask();
             // Teleporta de volta para o spawn da sala
             p.teleport(Configs.MAIN_SPAWN);
         }
+        showEveryoneToEveryone();
     }
 
     public void resetWorldAndRestart() {
@@ -1280,7 +1318,6 @@ startSpectatorGUITask();
             }
 
             abriu.clear();
-
             // Deleta e clona o mundo
             Main.getMVWorldManager().deleteWorld(worldName);
             Main.getMVWorldManager().cloneWorld(backupWorld, worldName, "VoidGen");
@@ -1288,10 +1325,17 @@ startSpectatorGUITask();
             // Espera o mundo carregar totalmente
             new BukkitRunnable() {
                 int contador = 10;
-
+                int attempts = 0;
                 @Override
                 public void run() {
                     World w = Bukkit.getWorld(worldName);
+        
+
+                    if (++attempts >= 15) {
+                        Bukkit.getLogger().severe("[SkyWars] Mundo não carregou: " + worldName);
+                        cancel();
+                        worldLoading = false;
+                    }
                     if (w == null) return; // Ainda não carregou
 
                     // Cancela o loop
@@ -1306,7 +1350,7 @@ startSpectatorGUITask();
                     
                     
                     List<UUID> snapshot = new ArrayList<>(players);
-                    resetAfterWorldRestart();
+                    
 
                     for (UUID uuid : snapshot) {
                         Player p = Bukkit.getPlayer(uuid);
@@ -1316,8 +1360,8 @@ startSpectatorGUITask();
                             p.setAllowFlight(false);
                         }
                     }
-                  
-                    updateVisibility();
+                    resetAfterWorldRestart();
+                    showEveryoneToEveryone();
                     cancel(); 
                 
                 } }.runTaskTimer(Main.getInstance(), 0L, 20L); // Checa a cada segundo
@@ -1363,8 +1407,15 @@ startSpectatorGUITask();
     }
     public void updateVisibility() {
 
+        // 🔥 FORA DE PARTIDA: TODO MUNDO VÊ TODO MUNDO
+        if (state != GameState.RUNNING) {
+            showEveryoneToEveryone();
+            return;
+        }
+
         List<Player> vivos = new ArrayList<>();
         List<Player> specs = new ArrayList<>();
+
         for (UUID u : players) {
             Player p = Bukkit.getPlayer(u);
             if (p == null) continue;
@@ -1376,13 +1427,9 @@ startSpectatorGUITask();
             }
         }
 
-        // Jogadores vivos
+        // Jogadores vivos veem apenas vivos
         for (Player vivo : vivos) {
             for (Player target : Bukkit.getOnlinePlayers()) {
-            	if (!isInGame(vivo)) {
-            		vivo.showPlayer(target);
-            	}
-                // vivo vê apenas jogadores vivos da partida
                 if (vivos.contains(target)) {
                     vivo.showPlayer(target);
                 } else {
@@ -1398,6 +1445,7 @@ startSpectatorGUITask();
             }
         }
     }
+
 boolean isAlive(UUID u) {
     return players.contains(u) && !spectators.contains(u);
 }

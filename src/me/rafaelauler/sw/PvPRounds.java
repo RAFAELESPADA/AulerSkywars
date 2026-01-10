@@ -56,7 +56,7 @@ public class PvPRounds extends PlaceholderExpansion {
 
                 for (SkyWarsGame game : manager.getGames()) {
                     if (game.getId() == id) {
-                        return String.valueOf(game.getPlayerCount());
+                        return String.valueOf(game.getLobbyCount());
                     }
                 }
             } catch (NumberFormatException ignored) {
@@ -72,7 +72,7 @@ public class PvPRounds extends PlaceholderExpansion {
 
             for (SkyWarsGame game : manager.getGames()) {
             	
-                total += game.getPlayerCount();
+                total += game.getLobbyCount();
             }
 
             return String.valueOf(total);

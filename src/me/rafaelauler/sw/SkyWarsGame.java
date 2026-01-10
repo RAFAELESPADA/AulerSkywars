@@ -490,7 +490,17 @@ public class SkyWarsGame implements Listener {
             p.setFlying(true);
 
             giveSpectatorItem(p);
-            	
+            for (UUID u : spectators) {
+            	Player p2 = Bukkit.getPlayer(u);
+            	if (p2 != null) {
+            		for (UUID u2 : players) {
+
+                    	Player p3 = Bukkit.getPlayer(u2);
+                    	p3.hidePlayer(p2);
+                    	
+            		}
+            	}
+            }
             if (!playersInPvp.isEmpty()) {
                 Player p2 = Bukkit.getPlayer(playersInPvp.get(0));
                 if (p2 != null) {
@@ -1142,6 +1152,8 @@ startSpectatorGUITask();
                 Bukkit.broadcastMessage("§6" + winner.getName() + " venceu a Sala #" + id);
                 playVictoryAnimation(winner);
             }
+
+            
         } else {
             // 0 vivos (empate, void kill, bug, etc)
             Bukkit.broadcastMessage("§cA partida terminou sem vencedor.");
@@ -1151,12 +1163,30 @@ startSpectatorGUITask();
 
         Bukkit.getScheduler().runTaskLater(
             Main.getInstace(),
-            () -> Main.getInstace().getManager().endGame(this),
+            () -> Main.getInstace().getManager().endGame(this) ,
             20L * 8
         );
+        Bukkit.getScheduler().runTaskLater(
+                Main.getInstace(),
+                () -> hidan() ,
+                20L * 10
+            );
+        
     }
 
+    public void hidan() {
+    	 for (UUID u : spectators) {
+         	Player p2 = Bukkit.getPlayer(u);
+         	if (p2 != null) {
+         		for (UUID u2 : players) {
 
+                 	Player p3 = Bukkit.getPlayer(u2);
+                 	p3.showPlayer(p2);
+                 	
+         		}
+         	}
+    	 }
+    }
     public int getPlayerCountReal() {
     	return players.size();
     }

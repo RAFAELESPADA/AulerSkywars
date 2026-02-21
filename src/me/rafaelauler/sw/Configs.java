@@ -14,9 +14,9 @@ public class Configs {
         LOBBY_SPAWN = new Location(world, -16.629, 97.1347, -11.604);
     }
     public static void loadMainSpawn() {
-    	Location l = new Location(Bukkit.getWorld("spawn"), 147.175, 68.000, -121.495);
-		l.setPitch((float)5.6);
-		l.setYaw((float)90.0);
+    	Location l = new Location(Bukkit.getWorld("spawn"), 1000.385, 112.00000, 1000.004);
+		l.setPitch((float)3.8);
+		l.setYaw((float)178.1);
 		MAIN_SPAWN = l;
     }
 }

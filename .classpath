@@ -11,15 +11,16 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry exported="true" kind="lib" path="C:/Users/Home/Downloads/spigot-1.12.2.jar">
-		<attributes>
-			<attribute name="module" value="true"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry exported="true" kind="lib" path="C:/Users/Home/Downloads/lombok.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Users/Home/Desktop/SKYZERMC BACKUP GERAL/LOBBY/plugins/KP-CORE-v4.0.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Users/Home/Desktop/SKYZERMC BACKUP GERAL/LOBBY/plugins/ItemJoin.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Users/Home/Desktop/SKYZERMC BACKUP GERAL/LOBBY/plugins/Multiverse-Core-2.5.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Users/Home/Desktop/SKYZERMC BACKUP GERAL/LOBBY/plugins/PlaceholderAPI-2.11.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Home/Desktop/SKYZERMC BACKUP GERAL/LOBBY/plugins/ArcadeLegacy.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Home/Downloads/spigot-1.8.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

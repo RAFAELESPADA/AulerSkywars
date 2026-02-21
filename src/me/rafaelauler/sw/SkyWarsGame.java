@@ -1,5 +1,6 @@
 package me.rafaelauler.sw;
 
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,12 +49,16 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import me.RockinChaos.itemjoin.api.ItemJoinAPI;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.wavemc.core.bukkit.api.HelixActionBar;
+import ro.fr33styler.arcade.api.event.ArcadeJoinEvent;
+import ro.fr33styler.arcade.api.event.ArcadeStartEvent;
+import ro.fr33styler.arcade.api.game.GameStatus;
 
 public class SkyWarsGame implements Listener {
 
@@ -69,8 +74,9 @@ public class SkyWarsGame implements Listener {
     private final List<UUID> spectators = new ArrayList<>();
     private GameState state = GameState.WAITING;
     private int countdown = 30;
+    private int countdown2 = 60;
     private boolean cagesClosed = false;
-
+    private BukkitTask task;
     private boolean damage = false;
     private final List<UUID> spectatorsWithGUI = new ArrayList<>();
     private boolean guiBlink = false;
@@ -80,7 +86,7 @@ public class SkyWarsGame implements Listener {
     private int victoryTask = -1;
     private boolean worldLoading = false;
     private int startRetries = 0;
-
+  private final Map<GameStatus, String> gamesave = new HashMap<>();
 
     public SkyWarsGame(int id, SkyWarsMap map) {
         this.id = id;
@@ -238,7 +244,60 @@ public class SkyWarsGame implements Listener {
             }
         }
     }
+    @EventHandler
+    public void onDeatht(ArcadeJoinEvent event)
+    {
+    	  if (event.getStatus().getPlayerSize() >= event.getStatus().getMin()) {
+        {
+        	  for (World lobbyWorld : Bukkit.getWorlds()) {
+              if (lobbyWorld.equals(Bukkit.getWorld("spawn"))) {
+            	  int i = 6;
+            	  if (i < 6) {
+            		  gamesave.put(event.getStatus(), event.getStatus().getDisplayName());
+            		  Bukkit.getScheduler().runTaskTimer(
+            		            Main.getInstance(),
+            		            () -> {
+            		            	   String msg = "§eUma partida de " + event.getStatus().getMinigame() + " está precisando de mais jogadores! Clique aqui para entrar nela! Jogadores esperando: §b" + event.getStatus().getPlayerSize();
+            		               	TextComponent txt = new TextComponent(msg);
+            		               	txt.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/"  + event.getStatus().getMinigame().toLowerCase() + " join " + event.getStatus().getID()));
+            		               	    for (Player p1 : lobbyWorld.getPlayers()) {
+            		               	        p1.spigot().sendMessage(txt);
+            		               	        HelixActionBar.send(p1, msg);
+            		               	        p1.playSound(p1.getLocation(), Sound.valueOf("CLICK"), 10f, 1f);
+            		               	     
+            		               	    }
+            		               	    
+            		            },
+            		            0L, 120L
+            		        );
+            		    }i++;
 
+              }
+            	 countdown2--;}
+        	 }
+    	  }
+        	 
+        	  
+    } 
+    @EventHandler
+    public void onDeattht(ArcadeStartEvent event) {
+    	if (gamesave.get(event.getStatus()) == event.getStatus().getDisplayName()) {
+    		countdown2 = 0;
+    		 for (World lobbyWorld : Bukkit.getWorlds()) {
+    	          if (lobbyWorld.equals(Bukkit.getWorld("spawn"))) {
+    	        	   String startmsg = "§eUma partida de " + event.getStatus().getMinigame() + " foi iniciada com: §b" + event.getStatus().getPlayerSize() + " Jogadores!";
+		               TextComponent txt = new TextComponent(startmsg);
+    	               	    for (Player p1 : lobbyWorld.getPlayers()) {
+    	               	        p1.spigot().sendMessage(txt);
+    	               	        HelixActionBar.send(p1, startmsg);
+    	               	        p1.playSound(p1.getLocation(), Sound.valueOf("CLICK"), 10f, 1f);
+    	               	    }     
+    	          }
+    	}
+    	}
+    	
+    }
+    
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent e) {
 
